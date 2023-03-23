@@ -1,6 +1,6 @@
 from MyDataset import MyDataset
 from SNN import SimpleSNN
-from SpikeEncoder import encoder
+from SpikeEncoder import rate_encoder
 import torch
 import snntorch.functional as SF
 from torch.utils.data import DataLoader
@@ -25,7 +25,7 @@ for epoch in range(num_epochs):
     i = 0
     for label, data in train_data_loader:
         i += 1
-        data = encoder(data)
+        data = rate_encoder(data)
         label, data = label.to(device), data.to(device)
 
         net.train()
