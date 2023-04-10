@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.utils &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Note: need NumPy 1.17 or later for RNG functions</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+
+
+<div class="viewcode-block" id="data_subset"><a class="viewcode-back" href="../../snntorch.utils.html#snntorch.utils.data_subset">[docs]</a><span class="k">def</span> <span class="nf">data_subset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">subset</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Partition the dataset by a factor of ``1/subset``</span>
+<span class="sd">    without removing access to data and target attributes.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        from snntorch import utils</span>
+<span class="sd">        from torchvision import datasets</span>
+
+<span class="sd">        data_path = &quot;path/to/data&quot;</span>
+<span class="sd">        subset = 10</span>
+
+<span class="sd">        #  Download MNIST training set</span>
+<span class="sd">        mnist_train = datasets.MNIST(data_path, train=True, download=True)</span>
+<span class="sd">        print(len(mnist_train))</span>
+<span class="sd">        &gt;&gt;&gt; 60000</span>
+
+<span class="sd">        #  Reduce size of MNIST training set</span>
+<span class="sd">        utils.data_subset(mnist_train, subset)</span>
+<span class="sd">        print(len(mnist_train))</span>
+<span class="sd">        &gt;&gt;&gt; 6000</span>
+
+<span class="sd">    :param dataset: Dataset</span>
+<span class="sd">    :type dataset: torchvision dataset</span>
+
+<span class="sd">    :param subset: Factor to reduce dataset by</span>
+<span class="sd">    :type subset: int</span>
+
+<span class="sd">    :param idx: Which subset of the train and test sets to index into,</span>
+<span class="sd">        defaults to ``0``</span>
+<span class="sd">    :type idx: int, optional</span>
+
+<span class="sd">    :return: Partitioned dataset</span>
+<span class="sd">    :rtype: list of torch.utils.data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">subset</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="n">idx_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">)</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">N</span> <span class="o">//</span> <span class="n">subset</span>
+        <span class="n">idx_range</span> <span class="o">=</span> <span class="n">idx_range</span><span class="p">[</span><span class="n">step</span> <span class="o">*</span> <span class="n">idx</span> <span class="p">:</span> <span class="n">step</span> <span class="o">*</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">idx_range</span><span class="p">]</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">idx_range</span><span class="p">]</span>
+
+        <span class="n">dataset</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span>
+
+    <span class="k">return</span> <span class="n">dataset</span></div>
+
+
+<div class="viewcode-block" id="valid_split"><a class="viewcode-back" href="../../snntorch.utils.html#snntorch.utils.valid_split">[docs]</a><span class="k">def</span> <span class="nf">valid_split</span><span class="p">(</span><span class="n">ds_train</span><span class="p">,</span> <span class="n">ds_val</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Randomly split a dataset into non-overlapping</span>
+<span class="sd">    new datasets of given lengths.</span>
+<span class="sd">    Optionally fix the generator for reproducible results.</span>
+<span class="sd">    Operates similarly to ``random_split`` from</span>
+<span class="sd">    ``torch.utils.data.dataset`` but retains data and target attributes.</span>
+
+<span class="sd">    Example ::</span>
+
+<span class="sd">        from snntorch import utils</span>
+<span class="sd">        from torchvision import datasets</span>
+
+<span class="sd">        data_path = &quot;path/to/data&quot;</span>
+<span class="sd">        val_split = 0.1</span>
+
+<span class="sd">        #  Download MNIST training set into mnist_val and mnist_train</span>
+<span class="sd">        mnist_train = datasets.MNIST(data_path, train=True, download=True)</span>
+<span class="sd">        mnist_val = datasets.MNIST(data_path, train=True, download=True)</span>
+
+<span class="sd">        print(len(mnist_train))</span>
+<span class="sd">        &gt;&gt;&gt; 60000</span>
+
+<span class="sd">        print(len(mnist_val))</span>
+<span class="sd">        &gt;&gt;&gt; 60000</span>
+
+<span class="sd">        #  Validation split</span>
+<span class="sd">        mnist_train, mnist_val = utils.valid_split(mnist_train,</span>
+<span class="sd">        mnist_val, val_split)</span>
+
+<span class="sd">        print(len(mnist_train))</span>
+<span class="sd">        &gt;&gt;&gt; 54000</span>
+
+<span class="sd">        print(len(mnist_val))</span>
+<span class="sd">        &gt;&gt;&gt; 6000</span>
+
+<span class="sd">    :param ds_train: Training set</span>
+<span class="sd">    :type ds_train: torchvision dataset</span>
+
+<span class="sd">    :param ds_val: Validation set</span>
+<span class="sd">    :type ds_val: torchvision dataset</span>
+
+<span class="sd">    :param split: Proportion of samples assigned to the validation set</span>
+<span class="sd">        from the training set</span>
+<span class="sd">    :type split: Float</span>
+
+<span class="sd">    :param seed: Fix to generate reproducible results, defaults to ``0``</span>
+<span class="sd">    :type seed: int, optional</span>
+
+<span class="sd">    :return: Randomly split train and validation sets</span>
+<span class="sd">    :rtype: list of torch.utils.data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds_train</span><span class="p">)</span>
+    <span class="n">n_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">split</span><span class="p">)</span>
+    <span class="n">n_train</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">n_val</span>
+
+    <span class="c1"># Create an index list of length n_train, containing non-repeating</span>
+    <span class="c1"># values from 0 to n-1</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">train_idx</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n_train</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># create inverted index for validation from train</span>
+    <span class="n">val_idx</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">train_idx</span><span class="p">:</span>
+            <span class="n">val_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="c1"># Generate ds_val by indexing into ds_train</span>
+    <span class="n">vd</span> <span class="o">=</span> <span class="n">ds_train</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">val_idx</span><span class="p">]</span>
+    <span class="n">vt</span> <span class="o">=</span> <span class="n">ds_train</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">val_idx</span><span class="p">]</span>
+    <span class="n">ds_val</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">vd</span>
+    <span class="n">ds_val</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">vt</span>
+
+    <span class="c1"># Recreate ds_train by indexing into the previous ds_train</span>
+    <span class="n">td</span> <span class="o">=</span> <span class="n">ds_train</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span>
+    <span class="n">tt</span> <span class="o">=</span> <span class="n">ds_train</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span>
+    <span class="n">ds_train</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">td</span>
+    <span class="n">ds_train</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">tt</span>
+
+    <span class="k">return</span> <span class="n">ds_train</span><span class="p">,</span> <span class="n">ds_val</span></div>
+
+
+<div class="viewcode-block" id="reset"><a class="viewcode-back" href="../../snntorch.utils.html#snntorch.utils.reset">[docs]</a><span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check for the types of LIF neurons contained in net.</span>
+<span class="sd">    Reset their hidden parameters to zero and detach them</span>
+<span class="sd">    from the current computation graph.&quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">is_alpha</span>
+    <span class="k">global</span> <span class="n">is_leaky</span>
+    <span class="k">global</span> <span class="n">is_lapicque</span>
+    <span class="k">global</span> <span class="n">is_rleaky</span>
+    <span class="k">global</span> <span class="n">is_synaptic</span>
+    <span class="k">global</span> <span class="n">is_rsynaptic</span>
+    <span class="k">global</span> <span class="n">is_sconv2dlstm</span>
+    <span class="k">global</span> <span class="n">is_slstm</span>
+
+    <span class="n">is_alpha</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_leaky</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_rleaky</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_synaptic</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_rsynaptic</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_lapicque</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_sconv2dlstm</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">is_slstm</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">_layer_check</span><span class="p">(</span><span class="n">net</span><span class="o">=</span><span class="n">net</span><span class="p">)</span>
+
+    <span class="n">_layer_reset</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">_layer_check</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check for the types of LIF neurons contained in net.&quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">is_leaky</span>
+    <span class="k">global</span> <span class="n">is_lapicque</span>
+    <span class="k">global</span> <span class="n">is_synaptic</span>
+    <span class="k">global</span> <span class="n">is_alpha</span>
+    <span class="k">global</span> <span class="n">is_rleaky</span>
+    <span class="k">global</span> <span class="n">is_rsynaptic</span>
+    <span class="k">global</span> <span class="n">is_sconv2dlstm</span>
+    <span class="k">global</span> <span class="n">is_slstm</span>
+
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">()))):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Lapicque</span><span class="p">):</span>
+            <span class="n">is_lapicque</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Synaptic</span><span class="p">):</span>
+            <span class="n">is_synaptic</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">):</span>
+            <span class="n">is_leaky</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Alpha</span><span class="p">):</span>
+            <span class="n">is_alpha</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">RLeaky</span><span class="p">):</span>
+            <span class="n">is_rleaky</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">RSynaptic</span><span class="p">):</span>
+            <span class="n">is_rsynaptic</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">SConv2dLSTM</span><span class="p">):</span>
+            <span class="n">is_sconv2dlstm</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">idx</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">SLSTM</span><span class="p">):</span>
+            <span class="n">is_slstm</span> <span class="o">=</span> <span class="kc">True</span>
+
+
+<span class="k">def</span> <span class="nf">_layer_reset</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Reset hidden parameters to zero and detach them from</span>
+<span class="sd">    the current computation graph.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">is_lapicque</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Lapicque</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Lapicque</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_synaptic</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Synaptic</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Synaptic</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_leaky</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_alpha</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Alpha</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">Alpha</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_rleaky</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">RLeaky</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">RLeaky</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_rsynaptic</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">RSynaptic</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">RSynaptic</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_sconv2dlstm</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">SConv2dLSTM</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">SConv2dLSTM</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">is_slstm</span><span class="p">:</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">SLSTM</span><span class="o">.</span><span class="n">reset_hidden</span><span class="p">()</span>  <span class="c1"># reset hidden state to 0&#39;s</span>
+        <span class="n">snn</span><span class="o">.</span><span class="n">SLSTM</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_final_layer_check</span><span class="p">(</span><span class="n">net</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check class of final layer and return the number of outputs.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Lapicque</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Synaptic</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">3</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">RSynaptic</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">3</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">RLeaky</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">SConv2dLSTM</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">3</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">SLSTM</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">3</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">_modules</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">snn</span><span class="o">.</span><span class="n">Alpha</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">4</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># if not from snn, assume from nn with 1 return</span>
+        <span class="k">return</span> <span class="mi">1</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

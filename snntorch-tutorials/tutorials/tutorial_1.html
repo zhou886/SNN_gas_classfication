@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial 1 - Spike Encoding &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial 2 - The Leaky Integrate-and-Fire Neuron" href="tutorial_2.html" />
+    <link rel="prev" title="Tutorials" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            snntorch
+              <img src="../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial 1 - Spike Encoding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-mnist-dataset">1. Setting up the MNIST Dataset</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#import-packages-and-setup-environment">1.1. Import packages and setup environment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#download-dataset">1.2 Download Dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-dataloaders">1.3 Create DataLoaders</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#spike-encoding">2. Spike Encoding</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#rate-coding-of-mnist">2.1 Rate coding of MNIST</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#visualization">2.2 Visualization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#latency-coding-of-mnist">2.3 Latency Coding of MNIST</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#delta-modulation">2.4 Delta Modulation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#spike-generation-optional">3. Spike Generation (Optional)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">3.1 Animation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#raster">3.2 Raster</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_2.html">Tutorial 2 - The Leaky Integrate-and-Fire Neuron</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_3.html">Tutorial 3 - A Feedforward Spiking Neural Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_4.html">Tutorial 4 - 2nd Order Spiking Neuron Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_5.html">Tutorial 5 - Training Spiking Neural Networks with snntorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_6.html">Tutorial 6 - Surrogate Gradient Descent in a Convolutional SNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_7.html">Tutorial 7 - Neuromorphic Datasets with Tonic + snnTorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_ipu_1.html">Accelerating snnTorch on IPUs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_pop.html">Population Coding in Spiking Neural Nets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_regression_1.html">Regression with SNNs: Part I</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_regression_2.html">Regression with SNNs: Part II</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Tutorial 1 - Spike Encoding</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/tutorial_1.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-1-spike-encoding">
+<h1>Tutorial 1 - Spike Encoding<a class="headerlink" href="#tutorial-1-spike-encoding" title="Permalink to this headline"></a></h1>
+<p>Tutorial written by Jason K. Eshraghian (<a class="reference external" href="https://www.ncg.ucsc.edu">www.ncg.ucsc.edu</a>)</p>
+<a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_1_spikegen.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+<p>The snnTorch tutorial series is based on the following paper. If you find these resources or code useful in your work, please consider citing the following source:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/2109.12894">Jason K. Eshraghian, Max Ward, Emre Neftci, Xinxin Wang, Gregor Lenz, Girish
+Dwivedi, Mohammed Bennamoun, Doo Seok Jeong, and Wei D. Lu. “Training
+Spiking Neural Networks Using Lessons From Deep Learning”. arXiv preprint arXiv:2109.12894,
+September 2021.</a></p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>This tutorial is a static non-editable version. Interactive, editable versions are available via the following links:</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_1_spikegen.ipynb">Google Colab</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jeshraghian/snntorch/tree/master/examples">Local Notebook (download via GitHub)</a></p></li>
+</ul>
+</dd>
+</dl>
+</div>
+<p>In this tutorial, you will learn how to use snnTorch to:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>convert datasets into spiking datasets,</p></li>
+<li><p>how to visualise them,</p></li>
+<li><p>and how to generate random spike trains.</p></li>
+</ul>
+</div></blockquote>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
+<p>Light is what we see when the retina converts photons into spikes. Odors
+are what we smell when volatilised molecules are converted into spikes.
+Touch is what we feel when nerve endings turn tactile pressure into
+spikes. The brain trades in the global currency of the <em>spike</em>.</p>
+<p>If our end goal is to build a spiking neural network (SNN), it makes
+sense to use spikes at the input too. Although it is quite common to use
+non-spiking inputs (as will be seen in Tutorial 3), part of the appeal
+of encoding data come from the <em>three S’s</em>: spikes, sparsity, and static
+suppression.</p>
+<ol class="arabic">
+<li><p><strong>Spikes</strong>: (a-b) Biological neurons process and communicate via
+spikes, which are electrical impulses of approximately 100 mV in
+amplitude. (c) Many computational models of neurons simplify this
+voltage burst to a discrete, single-bit event: a ‘1’ or a ‘0’. This
+is far simpler to represent in hardware than a high precision value.</p></li>
+<li><p><strong>Sparsity</strong>: (c) Neurons spend most of their time at rest, silencing
+most activations to <em>zero</em> at any given time. Not only are sparse
+vectors/tensors (with loads of zeros) cheap to store, but say we need
+to multiply sparse activations with synaptic weights. If most values
+are multiplied by ‘0’, then we don’t need to read many of the network
+parameters from memory. This means neuromorphic hardware can be
+extremely efficient.</p></li>
+<li><p><strong>Static-Suppression (a.k.a, event-driven processing</strong>: (d-e) The
+sensory periphery only processes information when there is new
+information to process. Each pixel in (e) responds to <em>changes</em> in
+illuminance, so most of the image is blocked out. Conventional signal
+processing requires all channels/pixels to adhere to a global
+sampling/shutter rate, which slows down how frequently sensing can
+take place. Event-driven processing now only contributes to sparsity
+and power-efficiency by blocking unchanging input, but it often
+allows for much faster processing speeds.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/3s.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/3s.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/3s.png?raw=true" style="width: 800px;" /></a>
+</li>
+</ol>
+<p>In this tutorial, we will assume we have some non-spiking input data
+(i.e., the MNIST dataset) and that we want to encode it into spikes
+using a few different techniques. So let’s get started!</p>
+<p>Install the latest PyPi distribution of snnTorch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install snntorch
+</pre></div>
+</div>
+</section>
+<section id="setting-up-the-mnist-dataset">
+<h2>1. Setting up the MNIST Dataset<a class="headerlink" href="#setting-up-the-mnist-dataset" title="Permalink to this headline"></a></h2>
+<section id="import-packages-and-setup-environment">
+<h3>1.1. Import packages and setup environment<a class="headerlink" href="#import-packages-and-setup-environment" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training Parameters</span>
+<span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span>
+<span class="n">data_path</span><span class="o">=</span><span class="s1">&#39;/data/mnist&#39;</span>
+<span class="n">num_classes</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># MNIST has 10 output classes</span>
+
+<span class="c1"># Torch Variables</span>
+<span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float</span>
+</pre></div>
+</div>
+</section>
+<section id="download-dataset">
+<h3>1.2 Download Dataset<a class="headerlink" href="#download-dataset" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
+
+<span class="c1"># Define a transform</span>
+<span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">((</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">)),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Grayscale</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))])</span>
+
+<span class="n">mnist_train</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the above code block throws an error, e.g. the MNIST servers are
+down, then uncomment the following code instead.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># # temporary dataloader if MNIST service is unavailable</span>
+<span class="c1"># !wget www.di.ens.fr/~lelarge/MNIST.tar.gz</span>
+<span class="c1"># !tar -zxvf MNIST.tar.gz</span>
+
+<span class="c1"># mnist_train = datasets.MNIST(root = &#39;./&#39;, train=True, download=True, transform=transform)</span>
+</pre></div>
+</div>
+<p>Until we actually start training a network, we won’t need large
+datasets. <code class="docutils literal notranslate"><span class="pre">snntorch.utils</span></code> contains a few useful functions for
+modifying datasets. Apply <code class="docutils literal notranslate"><span class="pre">data_subset</span></code> to reduce the dataset
+by the factor defined in <code class="docutils literal notranslate"><span class="pre">subset</span></code>. E.g., for <code class="docutils literal notranslate"><span class="pre">subset=10</span></code>, a
+training set of 60,000 will be reduced to 6,000.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+
+<span class="n">subset</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="n">mnist_train</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">data_subset</span><span class="p">(</span><span class="n">mnist_train</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The size of mnist_train is </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mnist_train</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">The size of mnist_train is 6000</span>
+</pre></div>
+</div>
+</section>
+<section id="create-dataloaders">
+<h3>1.3 Create DataLoaders<a class="headerlink" href="#create-dataloaders" title="Permalink to this headline"></a></h3>
+<p>The Dataset objects created above load data into memory, and the
+DataLoader will serve it up in batches. DataLoaders in PyTorch are a
+handy interface for passing data into a network. They return an iterator
+divided up into mini-batches of size <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+
+<span class="n">train_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">mnist_train</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="spike-encoding">
+<h2>2. Spike Encoding<a class="headerlink" href="#spike-encoding" title="Permalink to this headline"></a></h2>
+<p>Spiking Neural Networks (SNNs) are made to exploit time-varying data.
+And yet, MNIST is not a time-varying dataset. There are two options for using MNIST with an SNN:</p>
+<ol class="arabic">
+<li><p>Repeatedly pass the same training sample
+<span class="math notranslate nohighlight">\(\mathbf{X}\in\mathbb{R}^{m\times n}\)</span> to the network at each
+time step. This is like converting MNIST into a static, unchanging video.
+Each element of <span class="math notranslate nohighlight">\(\mathbf{X}\)</span> can take a high
+precision value normalized between 0 and 1: <span class="math notranslate nohighlight">\(X_{ij}\in [0, 1]\)</span>.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_1_static.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_1_static.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_1_static.png?raw=true" style="width: 800px;" /></a>
+</li>
+<li><p>Convert the input into a spike train of sequence length
+<code class="docutils literal notranslate"><span class="pre">num_steps</span></code>, where each feature/pixel takes on a discrete value
+<span class="math notranslate nohighlight">\(X_{i,j} \in \{0, 1\}\)</span>. In this case, MNIST is converted into a time-varying sequence of spikes that features a relation to the original image.</p>
+<blockquote>
+<div><a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_2_spikeinput.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_2_spikeinput.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_2_spikeinput.png?raw=true" style="width: 800px;" /></a>
+</div></blockquote>
+</li>
+</ol>
+<p>The first method is quite straightforward, and does not fully exploit
+the temporal dynamics of SNNs. So let’s consider data-to-spike conversion (encoding) from (2) in more detail.</p>
+<p>The module <code class="docutils literal notranslate"><span class="pre">snntorch.spikegen</span></code> (i.e., spike generation) contains a
+series of functions that simplify the conversion of data into spikes.
+There are currently three options available for spike encoding in
+<code class="docutils literal notranslate"><span class="pre">snntorch</span></code>:</p>
+<ol class="arabic simple">
+<li><p>Rate coding:
+<a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html#snntorch.spikegen.rate">spikegen.rate</a></p></li>
+<li><p>Latency coding:
+<a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html#snntorch.spikegen.latency">spikegen.latency</a></p></li>
+<li><p>Delta modulation:
+<a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html#snntorch.spikegen.delta">spikegen.delta</a></p></li>
+</ol>
+<p>How do these differ?</p>
+<ol class="arabic simple">
+<li><p><em>Rate coding</em> uses input features to determine spiking <strong>frequency</strong></p></li>
+<li><p><em>Latency coding</em> uses input features to determine spike <strong>timing</strong></p></li>
+<li><p><em>Delta modulation</em> uses the temporal <strong>change</strong> of input features to
+generate spikes</p></li>
+</ol>
+<section id="rate-coding-of-mnist">
+<h3>2.1 Rate coding of MNIST<a class="headerlink" href="#rate-coding-of-mnist" title="Permalink to this headline"></a></h3>
+<p>One example of converting input data into a rate code is as follows.
+Each normalised input feature <span class="math notranslate nohighlight">\(X_{ij}\)</span> is used as the probability
+an event (spike) occurs at any given time step, returning a rate-coded
+value <span class="math notranslate nohighlight">\(R_{ij}\)</span>. This can be treated as a Bernoulli trial:
+<span class="math notranslate nohighlight">\(R_{ij}\sim B(n,p)\)</span>, where the number of trials is <span class="math notranslate nohighlight">\(n=1\)</span>,
+and the probability of success (spiking) is <span class="math notranslate nohighlight">\(p=X_{ij}\)</span>.
+Explicitly, the probability a spike occurs is:</p>
+<div class="math notranslate nohighlight">
+\[{\rm P}(R_{ij}=1) = X_{ij} = 1 - {\rm P}(R_{ij} = 0)\]</div>
+<p>Create a vector filled with the value ‘0.5’ and encode it using
+the above technique:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporal Dynamics</span>
+<span class="n">num_steps</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="c1"># create vector filled with 0.5</span>
+<span class="n">raw_vector</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_steps</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+
+<span class="c1"># pass each sample through a Bernoulli trial</span>
+<span class="n">rate_coded_vector</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bernoulli</span><span class="p">(</span><span class="n">raw_vector</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl>
+<dt>::</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Converted vector: </span><span class="si">{</span><span class="n">rate_coded_vector</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">Converted vector: tensor([1., 1., 1., 0., 0., 1., 1., 0., 1., 0.])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The output is spiking </span><span class="si">{</span><span class="n">rate_coded_vector</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">rate_coded_vector</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% of the time.&quot;</span><span class="p">)</span>
+<span class="go">The output is spiking 60.00% of the time.</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Now try again, but increasing the length of <code class="docutils literal notranslate"><span class="pre">raw_vector</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">num_steps</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="c1"># create vector filled with 0.5</span>
+<span class="n">raw_vector</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">num_steps</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span>
+
+<span class="c1"># pass each sample through a Bernoulli trial</span>
+<span class="n">rate_coded_vector</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bernoulli</span><span class="p">(</span><span class="n">raw_vector</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The output is spiking </span><span class="si">{</span><span class="n">rate_coded_vector</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">rate_coded_vector</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">% of the time.&quot;</span><span class="p">)</span>
+<span class="n">The</span> <span class="n">output</span> <span class="ow">is</span> <span class="n">spiking</span> <span class="mf">48.00</span><span class="o">%</span> <span class="n">of</span> <span class="n">the</span> <span class="n">time</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>As <code class="docutils literal notranslate"><span class="pre">num_steps</span></code><span class="math notranslate nohighlight">\(\rightarrow\infty\)</span>, the proportion of spikes
+approaches the original raw value.</p>
+<p>For an MNIST image, this probability of spiking corresponds to the pixel
+value. A white pixel corresponds to a 100% probability of spiking, and a
+black pixel will never generate a spike. Take a look at the ‘Rate
+Coding’ column below for further intuition.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_3_spikeconv.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_3_spikeconv.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_3_spikeconv.png?raw=true" style="width: 1000px;" /></a>
+<p>In a similar way, <code class="docutils literal notranslate"><span class="pre">spikegen.rate</span></code> can be used to generate a rate-coded
+sample of data. As each sample of MNIST is just an image, we can use
+<code class="docutils literal notranslate"><span class="pre">num_steps</span></code> to repeat it across time.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">spikegen</span>
+
+<span class="c1"># Iterate through minibatches</span>
+<span class="n">data</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">train_loader</span><span class="p">)</span>
+<span class="n">data_it</span><span class="p">,</span> <span class="n">targets_it</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Spiking Data</span>
+<span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">data_it</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If the input falls outside of <span class="math notranslate nohighlight">\([0,1]\)</span>, this no longer represents a
+probability. Such cases are automatically clipped to ensure the feature
+represents a probability.</p>
+<p>The structure of the input data is
+<code class="docutils literal notranslate"><span class="pre">[num_steps</span> <span class="pre">x</span> <span class="pre">batch_size</span> <span class="pre">x</span> <span class="pre">input</span> <span class="pre">dimensions]</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">spike_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="go">torch.Size([100, 128, 1, 28, 28])</span>
+</pre></div>
+</div>
+</section>
+<section id="visualization">
+<h3>2.2 Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline"></a></h3>
+<section id="animation">
+<h4>2.2.1 Animation<a class="headerlink" href="#animation" title="Permalink to this headline"></a></h4>
+<p>snnTorch contains a module
+<a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikeplot.html">snntorch.spikeplot</a>
+that simplifies the process of visualizing, plotting, and animating
+spiking neurons.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">snntorch.spikeplot</span> <span class="k">as</span> <span class="nn">splt</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
+</pre></div>
+</div>
+<p>To plot one sample of data, index into a single sample from the batch (B) dimension
+of <code class="docutils literal notranslate"><span class="pre">spike_data</span></code>, <code class="docutils literal notranslate"><span class="pre">[T</span> <span class="pre">x</span> <span class="pre">B</span> <span class="pre">x</span> <span class="pre">1</span> <span class="pre">x</span> <span class="pre">28</span> <span class="pre">x</span> <span class="pre">28]</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spike_data_sample</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">])</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">spikeplot.animator</span></code> makes it super simple to animate 2-D data. Note:
+if you are running the notebook locally on your desktop, please
+uncomment the line below and modify the path to your ffmpeg.exe</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">anim</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">animator</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+<span class="c1"># plt.rcParams[&#39;animation.ffmpeg_path&#39;] = &#39;C:\\path\\to\\your\\ffmpeg.exe&#39;</span>
+
+<span class="n">HTML</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+</pre></div>
+</div>
+<center>
+  <video controls src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/splt.animator.mp4?raw=true"></video>
+</center><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># If you&#39;re feeling sentimental, you can save the animation: .gif, .mp4 etc.</span>
+<span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;spike_mnist_test.mp4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The associated target label can be indexed as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The corresponding target is: </span><span class="si">{</span><span class="n">targets_it</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="go">The corresponding target is: 7</span>
+</pre></div>
+</div>
+<p>MNIST features a greyscale image, and the white text guarantees a 100%
+of spiking at every time step. So let’s do that again but reduce the
+spiking frequency. This can be achieved by setting the argument
+<code class="docutils literal notranslate"><span class="pre">gain</span></code>. Here, we will reduce spiking frequency to 25%.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">data_it</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+<span class="n">spike_data_sample2</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">anim</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">animator</span><span class="p">(</span><span class="n">spike_data_sample2</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+</pre></div>
+</div>
+<center>
+  <video controls src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/splt.animator-25.mp4?raw=true"></video>
+</center><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Uncomment for optional save</span>
+<span class="c1"># anim.save(&quot;spike_mnist_test2.mp4&quot;)</span>
+</pre></div>
+</div>
+<p>Now average the spikes out over time and reconstruct the input
+images.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">28</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Gain = 1&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">spike_data_sample2</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">28</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;binary&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Gain = 0.25&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/gain.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/gain.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/gain.png?raw=true" style="width: 300px;" /></a>
+<p>The case where <code class="docutils literal notranslate"><span class="pre">gain=0.25</span></code> is lighter than where <code class="docutils literal notranslate"><span class="pre">gain=1</span></code>, as
+spiking probability has been reduced by a factor of <span class="math notranslate nohighlight">\(\times 4\)</span>.</p>
+</section>
+<section id="raster-plots">
+<h4>2.2.2 Raster Plots<a class="headerlink" href="#raster-plots" title="Permalink to this headline"></a></h4>
+<p>Alternatively, we can generate a raster plot of an input sample. This
+requires reshaping the sample into a 2-D tensor, where ‘time’ is the
+first dimension. Pass this sample into the function
+<code class="docutils literal notranslate"><span class="pre">spikeplot.raster</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Reshape</span>
+<span class="n">spike_data_sample2</span> <span class="o">=</span> <span class="n">spike_data_sample2</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+<span class="c1"># raster plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data_sample2</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Layer&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Neuron Number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster.png?raw=true" style="width: 600px;" /></a>
+<p>The following code snippet shows how to index into one single neuron.
+Depending on the input data, you may need to try
+a few different neurons between 0 &amp; 784 before finding one that
+spikes.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">idx</span> <span class="o">=</span> <span class="mi">210</span>  <span class="c1"># index into 210th neuron</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[:,</span> <span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Neuron&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster1.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster1.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster1.png?raw=true" style="width: 400px;" /></a>
+</section>
+<section id="summary-of-rate-coding">
+<h4>2.2.3 Summary of Rate Coding<a class="headerlink" href="#summary-of-rate-coding" title="Permalink to this headline"></a></h4>
+<p>The idea of rate coding is actually quite controversial. Although we are
+fairly confident rate coding takes place at our sensory periphery, we
+are not convinced that the cortex globally encodes information as spike
+rates. A couple of compelling reasons why include:</p>
+<ul class="simple">
+<li><p><strong>Power Consumption:</strong> Nature optimised for efficiency. Multiple
+spikes are needed to achieve any sort of task, and each spike
+consumes power. In fact, <a class="reference external" href="http://www.rctn.org/bruno/papers/V1-chapter.pdf">Olshausen and Field’s work in “What is the
+other 85% of V1
+doing?”</a>
+demonstrates that rate-coding can only explain, at most, the activity
+of 15% of neurons in the primary visual cortex (V1). It is unlikely
+to be the only mechanism within the brain, which is both
+resource-constrained and highly efficient.</p></li>
+<li><p><strong>Reaction Response Times:</strong> We know that the reaction time of a
+human is roughly around 250ms. If the average firing rate of a neuron
+in the human brain is on the order of 10Hz, then we can only process
+about 2 spikes within our reaction timescale.</p></li>
+</ul>
+<p>So why, then, might we use rate codes if they are not optimal for power
+efficiency or latency? Even if our brain doesn’t process data as a rate,
+we are fairly sure that our biological sensors do. The power/latency
+disadvantages are partially offset by showing huge noise robustness:
+it’s fine if some of the spikes fail to generate, because there will be
+plenty more where they came from.</p>
+<p>Additionally, you may have heard of the <a class="reference external" href="https://doi.org/10.2307/1418888">Hebbian mantra of “neurons that
+fire together, wire together”</a>. If
+there is plenty of spiking, this may suggest there is plenty of
+learning. In some cases where training SNNs proves to be challenging,
+encouraging more firing via a rate code is one possible solution.</p>
+<p>Rate coding is almost certainly working in conjunction with other
+encoding schemes in the brain. We will consider these other encoding
+mechanisms in the following sections. This covers the <code class="docutils literal notranslate"><span class="pre">spikegen.rate</span></code> function.
+Further information <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html">can be
+found in the documentation
+here</a>.</p>
+</section>
+</section>
+<section id="latency-coding-of-mnist">
+<h3>2.3 Latency Coding of MNIST<a class="headerlink" href="#latency-coding-of-mnist" title="Permalink to this headline"></a></h3>
+<p>Temporal codes capture information about the precise firing time of
+neurons; a single spike carries much more meaning than in rate codes
+which rely on firing frequency. While this opens up more susceptibility
+to noise, it can also decrease the power consumed by the hardware
+running SNN algorithms by orders of magnitude.</p>
+<p><code class="docutils literal notranslate"><span class="pre">spikegen.latency</span></code> is a function that allows each input to fire at
+most <strong>once</strong> during the full time sweep. Features closer to <code class="docutils literal notranslate"><span class="pre">1</span></code> will
+fire earlier and features closer to <code class="docutils literal notranslate"><span class="pre">0</span></code> will fire later. I.e., in our
+MNIST case, bright pixels will fire earlier and dark pixels will fire
+later.</p>
+<p>The following block derives how this works. If you’ve forgotten circuit
+theory and/or the math means nothing to you, then don’t worry! All that
+matters is: <strong>big</strong> input means <strong>fast</strong> spike; <strong>small</strong> input means
+<strong>late</strong> spike.</p>
+<hr class="docutils" />
+<section id="optional-derivation-of-latency-code-mechanism">
+<h4><em>Optional: Derivation of Latency Code Mechanism</em><a class="headerlink" href="#optional-derivation-of-latency-code-mechanism" title="Permalink to this headline"></a></h4>
+<p>By default, spike timing is calculated by treating the input feature as the current injection <span class="math notranslate nohighlight">\(I_{in}\)</span> into an RC circuit. This current moves charge onto the capacitor, which increases <span class="math notranslate nohighlight">\(V(t)\)</span>. We assume that there is a trigger voltage, <span class="math notranslate nohighlight">\(V_{thr}\)</span>, which once reached, generates a spike. The question then becomes: <em>for a given input current (and equivalently, input feature), how long does it take for a spike to be generated?</em></p>
+<p>Starting with Kirchhoff’s current law, <span class="math notranslate nohighlight">\(I_{in} = I_R + I_C\)</span>, the rest of the derivation leads us to a logarithmic relationship between time and the input.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_4_latencyrc.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_4_latencyrc.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_4_latencyrc.png?raw=true" style="width: 500px;" /></a>
+<hr class="docutils" />
+<p>The following function uses the above result to convert a feature of intensity
+<span class="math notranslate nohighlight">\(X_{ij}\in [0,1]\)</span> into a latency coded response <span class="math notranslate nohighlight">\(L_{ij}\)</span>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">convert_to_time</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+  <span class="n">spike_time</span> <span class="o">=</span> <span class="n">tau</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">data</span> <span class="o">/</span> <span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="n">threshold</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">spike_time</span>
+</pre></div>
+</div>
+<p>Now, use the above function to visualize the relationship between input feature intensity and its corresponding spike time.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">raw_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span> <span class="c1"># tensor from 0 to 5</span>
+<span class="n">spike_times</span> <span class="o">=</span> <span class="n">convert_to_time</span><span class="p">(</span><span class="n">raw_input</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">raw_input</span><span class="p">,</span> <span class="n">spike_times</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Input Value&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Spike Time (s)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/spike_time.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/spike_time.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/spike_time.png?raw=true" style="width: 400px;" /></a>
+<p>The smaller the value, the later the spike occurs with exponential
+dependence.</p>
+<p>The vector <code class="docutils literal notranslate"><span class="pre">spike_times</span></code> contains the time at which spikes are triggered, rather than a sparse tensor that contains the spikes themselves (1’s and 0’s).
+When running an SNN simulation, we need the 1/0 representation to obtain all of the advantages of using spikes.
+This whole process can be automated using <code class="docutils literal notranslate"><span class="pre">spikegen.latency</span></code>, where we pass a minibatch from the MNIST dataset in <cite>data_it</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">latency</span><span class="p">(</span><span class="n">data_it</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Some of the arguments include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tau</span></code>: the RC time constant of the circuit. By default, the input features are treated as a constant
+current injected into an RC circuit. A higher <code class="docutils literal notranslate"><span class="pre">tau</span></code> will induce slower firing.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code>: the membrane potential firing threshold. Input values below this threshold do not have a closed-form solution, as the input current is insufficient to drive the membrane up to the threshold. All values below the threshold are clipped and assigned to the final time step.</p></li>
+</ul>
+</section>
+<section id="raster-plot">
+<h4>2.3.1 Raster plot<a class="headerlink" href="#raster-plot" title="Permalink to this headline"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Layer&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Neuron Number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># optional save</span>
+<span class="c1"># fig.savefig(&#39;destination_path.png&#39;, format=&#39;png&#39;, dpi=300)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster2.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster2.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster2.png?raw=true" style="width: 600px;" /></a>
+<p>To make sense of the raster plot, note that high intensity
+features fire first, whereas low intensity features fire last:</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_5_latencyraster.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_5_latencyraster.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_5_latencyraster.png?raw=true" style="width: 800px;" /></a>
+<p>The logarithmic code coupled with the lack of diverse input values
+(i.e., the lack of midtone/grayscale features) causes significant
+clustering in two areas of the plot. The bright pixels induce firing at
+the start of the run, and the dark pixels at the end. We can increase <code class="docutils literal notranslate"><span class="pre">tau</span></code> to slow down the spike times, or linearize the spike times by setting the optional argument <code class="docutils literal notranslate"><span class="pre">linear=True</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">latency</span><span class="p">(</span><span class="n">data_it</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">linear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Layer&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Neuron Number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster3.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster3.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster3.png?raw=true" style="width: 600px;" /></a>
+<p>The spread of firing times is much more evenly distributed now. This is
+achieved by linearizing the logarithmic equation according to the
+rules shown below. Unlike the RC model, there is no physical basis for
+the model. It’s just simpler.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_6_latencylinear.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_6_latencylinear.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_6_latencylinear.png?raw=true" style="width: 600px;" /></a>
+<p>But note how all firing occurs within the first ~5 time steps, whereas the
+simulation range is 100 time steps. This indicates there are many
+redundant time steps doing nothing. This can be solved by either
+increasing <code class="docutils literal notranslate"><span class="pre">tau</span></code> to slow down the time constant, or setting the
+optional argument <code class="docutils literal notranslate"><span class="pre">normalize=True</span></code> to span the full range of
+<code class="docutils literal notranslate"><span class="pre">num_steps</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">latency</span><span class="p">(</span><span class="n">data_it</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                              <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Layer&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Neuron Number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster4.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster4.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster4.png?raw=true" style="width: 600px;" /></a>
+<p>One major advantage of latency coding over rate coding is
+sparsity. If neurons are constrained to firing a maximum of
+once over the time course of interest, then this promotes low-power
+operation.</p>
+<p>In the scenario shown above, a majority of the spikes occur at the final
+time step, where the input features fall below the threshold. In a
+sense, the dark background of the MNIST sample holds no useful information.</p>
+<p>We can remove these redundant features by setting <code class="docutils literal notranslate"><span class="pre">clip=True</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">latency</span><span class="p">(</span><span class="n">data_it</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                              <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Layer&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Neuron Number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster5.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster5.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/raster5.png?raw=true" style="width: 600px;" /></a>
+<p>That looks much better!</p>
+</section>
+<section id="id1">
+<h4>2.3.2 Animation<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
+<p>We will run the exact same code block as before to create an animation.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">spike_data_sample</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="go">torch.Size([100, 28, 28])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">anim</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">animator</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+<span class="n">HTML</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+</pre></div>
+</div>
+<center>
+  <video controls src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/splt.animator2.mp4?raw=true"></video>
+</center><p>This animation is obviously much tougher to make out in video form, but
+a keen eye will be able to catch a glimpse of the initial frame where
+most of the spikes occur. Index into the corresponding target
+value to check its value.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save output: .gif, .mp4 etc.</span>
+<span class="c1"># anim.save(&quot;mnist_latency.gif&quot;)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">targets_it</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="go">tensor(4, device=&#39;cuda:0&#39;)</span>
+</pre></div>
+</div>
+<p>That’s it for the <code class="docutils literal notranslate"><span class="pre">spikegen.latency</span></code> function. Further information
+<a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html">can be found in the documentation
+here</a>.</p>
+</section>
+</section>
+<section id="delta-modulation">
+<h3>2.4 Delta Modulation<a class="headerlink" href="#delta-modulation" title="Permalink to this headline"></a></h3>
+<p>There are theories that the retina is adaptive: it will only process
+information when there is something new to process. If there is no
+change in your field of view, then your photoreceptor cells are
+less prone to firing.</p>
+<p>That is to say: <strong>biology is event-driven</strong>. Neurons thrive on
+change.</p>
+<p>As a nifty example, a few researchers have dedicated their lives to
+designing retina-inspired image sensors, for example, the <a class="reference external" href="https://ieeexplore.ieee.org/abstract/document/7128412/">Dynamic
+Vision
+Sensor</a>.
+Although <a class="reference external" href="https://www.youtube.com/watch?v=6eOM15U_t1M&amp;ab_channel=TobiDelbruck">the attached link is from over a decade ago, the work in this
+video</a>
+was ahead of its time.</p>
+<p>Delta modulation is based on event-driven spiking. The
+<code class="docutils literal notranslate"><span class="pre">snntorch.delta</span></code> function accepts a time-series tensor as input. It
+takes the difference between each subsequent feature across all time
+steps. By default, if the difference is both <em>positive</em> and <em>greater
+than the threshold</em> <span class="math notranslate nohighlight">\(V_{thr}\)</span>, a spike is generated:</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_7_delta.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_7_delta.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/1_2_7_delta.png?raw=true" style="width: 600px;" /></a>
+<p>To illustrate, let’s first come up with a contrived example where we
+create our own input tensor.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a tensor with some fake time-series data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Plot the tensor</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Some fake time-series data&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Voltage (mV)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/fake_data.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/fake_data.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/fake_data.png?raw=true" style="width: 300px;" /></a>
+<p>Pass the above tensor into the <code class="docutils literal notranslate"><span class="pre">spikegen.delta</span></code> function, with
+an arbitrarily selected <code class="docutils literal notranslate"><span class="pre">threshold=4</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert data</span>
+<span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="c1"># Create fig, ax</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+<span class="c1"># Raster plot of delta converted data</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Neuron&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/delta.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/delta.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/delta.png?raw=true" style="width: 400px;" /></a>
+<p>There are three time steps where the difference between <span class="math notranslate nohighlight">\(data[T]\)</span>
+and <span class="math notranslate nohighlight">\(data[T+1]\)</span> is greater than or equal to <span class="math notranslate nohighlight">\(V_{thr}=4\)</span>.
+This means there are three <em>on-spikes</em>.</p>
+<p>The large dip to <span class="math notranslate nohighlight">\(-20\)</span> has not been captured in our spikes. It
+might be that we care about negative swings as well, in which case we
+can enable the optional argument <code class="docutils literal notranslate"><span class="pre">off_spike=True</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Convert data</span>
+<span class="n">spike_data</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">off_spike</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create fig, ax</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+<span class="c1"># Raster plot of delta converted data</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Neuron&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/delta2.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/delta2.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/delta2.png?raw=true" style="width: 400px;" /></a>
+<p>We’ve generated additional spikes, but this isn’t actually the full
+picture!</p>
+<p>Printing out the tensor will show the presence of “off-spikes” which take on a value of <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">spike_data</span><span class="p">)</span>
+<span class="go">tensor([ 0.,  0.,  0.,  0.,  1., -1.,  1., -1.,  1.,  0.,  0.])</span>
+</pre></div>
+</div>
+<p>While <code class="docutils literal notranslate"><span class="pre">spikegen.delta</span></code> has only been demonstrated on a fake sample of data,
+its true use is to compress time-series data by only generating spikes for sufficiently large changes/events.</p>
+<p>That wraps up the three main spike conversion functions! There are still
+additional features to each of the three conversion techniques that have
+not been detailed in this tutorial. In particular, we have only looked
+at encoding input data; we have not considered how we might encode
+targets, and when that is necessary. We recommend <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html">referring to the
+documentation for a deeper
+dive</a>.</p>
+</section>
+</section>
+<section id="spike-generation-optional">
+<h2>3. Spike Generation (Optional)<a class="headerlink" href="#spike-generation-optional" title="Permalink to this headline"></a></h2>
+<p>Now what if we don’t actually have any data to start with? Say we just
+want a randomly generated spike train from scratch. Inside of
+<code class="docutils literal notranslate"><span class="pre">spikegen.rate</span></code> is a nested function, <code class="docutils literal notranslate"><span class="pre">rate_conv</span></code>, which actually
+performs the spike conversion step.</p>
+<p>All we have to do is initialize a randomly generated <code class="docutils literal notranslate"><span class="pre">torchTensor</span></code> to
+pass in.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a random spike train</span>
+<span class="n">spike_prob</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">((</span><span class="n">num_steps</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+<span class="n">spike_rand</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">rate_conv</span><span class="p">(</span><span class="n">spike_prob</span><span class="p">)</span>
+</pre></div>
+</div>
+<section id="id2">
+<h3>3.1 Animation<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">anim</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">animator</span><span class="p">(</span><span class="n">spike_rand</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+<span class="n">HTML</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+</pre></div>
+</div>
+<center>
+  <video controls src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/rand_spikes.mp4?raw=true"></video>
+</center><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Save output: .gif, .mp4 etc.</span>
+<span class="c1"># anim.save(&quot;random_spikes.gif&quot;)</span>
+</pre></div>
+</div>
+</section>
+<section id="raster">
+<h3>3.2 Raster<a class="headerlink" href="#raster" title="Permalink to this headline"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_rand</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Layer&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Neuron Number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/rand_raster.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/rand_raster.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial1/_static/rand_raster.png?raw=true" style="width: 600px;" /></a>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline"></a></h2>
+<p>That’s it for spike conversion and generation. This approach generalizes
+beyond images, to single-dimensional and multi-dimensional tensors.</p>
+<p>If you like this project, please consider starring ⭐ the repo on GitHub as it is the easiest and best way to support it.</p>
+<p>For reference, the documentation for <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html">spikegen can be found
+here</a>
+and for <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikeplot.html">spikeplot,
+here</a>.</p>
+<p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/index.html">In the next
+tutorial</a>,
+you will learn the basics of spiking neurons and how to use them.</p>
+</section>
+<section id="additional-resources">
+<h2>Additional Resources<a class="headerlink" href="#additional-resources" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/jeshraghian/snntorch">Check out the snnTorch GitHub project here.</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial_2.html" class="btn btn-neutral float-right" title="Tutorial 2 - The Leaky Integrate-and-Fire Neuron" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

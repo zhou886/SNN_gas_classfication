@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.spikeplot &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch.spikeplot</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch.spikeplot</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.gridspec</span> <span class="kn">import</span> <span class="n">GridSpec</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">matplotlib.artist</span> <span class="kn">import</span> <span class="n">Artist</span>
+<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">ArtistAnimation</span>
+
+
+<div class="viewcode-block" id="animator"><a class="viewcode-back" href="../../snntorch.spikeplot.html#snntorch.spikeplot.animator">[docs]</a><span class="k">def</span> <span class="nf">animator</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;plasma&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate an animation by looping through the first dimension of a</span>
+<span class="sd">    sample of spiking data.</span>
+<span class="sd">    Time must be the first dimension of ``data``.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.spikeplot as splt</span>
+<span class="sd">        import matplotlib.pyplot as plt</span>
+
+<span class="sd">        #  spike_data contains 128 samples, each of 100 time steps in duration</span>
+<span class="sd">        print(spike_data.size())</span>
+<span class="sd">        &gt;&gt;&gt; torch.Size([100, 128, 1, 28, 28])</span>
+
+<span class="sd">        #  Index into a single sample from a minibatch</span>
+<span class="sd">        spike_data_sample = spike_data[:, 0, 0]</span>
+<span class="sd">        print(spike_data_sample.size())</span>
+<span class="sd">        &gt;&gt;&gt; torch.Size([100, 28, 28])</span>
+
+<span class="sd">        #  Plot</span>
+<span class="sd">        fig, ax = plt.subplots()</span>
+<span class="sd">        anim = splt.animator(spike_data_sample, fig, ax)</span>
+<span class="sd">        HTML(anim.to_html5_video())</span>
+
+<span class="sd">        #  Save as a gif</span>
+<span class="sd">        anim.save(&quot;spike_mnist.gif&quot;)</span>
+
+<span class="sd">    :param data: Data tensor for a single sample across time steps of</span>
+<span class="sd">        shape [num_steps x input_size]</span>
+<span class="sd">    :type data: torch.Tensor</span>
+
+<span class="sd">    :param fig: Top level container for all plot elements</span>
+<span class="sd">    :type fig: matplotlib.figure.Figure</span>
+
+<span class="sd">    :param ax: Contains additional figure elements and sets the coordinate</span>
+<span class="sd">        system. E.g.:</span>
+<span class="sd">            fig, ax = plt.subplots(facecolor=&#39;w&#39;, figsize=(12, 7))</span>
+<span class="sd">    :type ax: matplotlib.axes._subplots.AxesSubplot</span>
+
+<span class="sd">    :param num_steps: Number of time steps to plot. If not specified,</span>
+<span class="sd">        the number of entries in the first dimension</span>
+<span class="sd">            of ``data`` will automatically be used, defaults to ``False``</span>
+<span class="sd">    :type num_steps: int, optional</span>
+
+<span class="sd">    :param interval: Delay between frames in milliseconds, defaults to ``40``</span>
+<span class="sd">    :type interval: int, optional</span>
+
+<span class="sd">    :param cmap: color map, defaults to ``plasma``</span>
+<span class="sd">    :type cmap: string, optional</span>
+
+<span class="sd">    :return: animation to be displayed using ``matplotlib.pyplot.show()``</span>
+<span class="sd">    :rtype: FuncAnimation</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">num_steps</span><span class="p">:</span>
+        <span class="n">num_steps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+    <span class="n">camera</span> <span class="o">=</span> <span class="n">Camera</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+
+    <span class="c1"># iterate over time and take a snapshot with celluloid</span>
+    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span>
+        <span class="n">num_steps</span>
+    <span class="p">):</span>  <span class="c1"># im appears unused but is required by camera.snap()</span>
+        <span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">step</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>  <span class="c1"># noqa: F841</span>
+        <span class="n">camera</span><span class="o">.</span><span class="n">snap</span><span class="p">()</span>
+    <span class="n">anim</span> <span class="o">=</span> <span class="n">camera</span><span class="o">.</span><span class="n">animate</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">anim</span></div>
+
+
+<div class="viewcode-block" id="raster"><a class="viewcode-back" href="../../snntorch.spikeplot.html#snntorch.spikeplot.raster">[docs]</a><span class="k">def</span> <span class="nf">raster</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a raster plot using ``matplotlib.pyplot.scatter``.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.spikeplot as splt</span>
+<span class="sd">        import matplotlib.pyplot as plt</span>
+
+<span class="sd">        #  spike_data contains 128 samples, each of 100 time steps in duration</span>
+<span class="sd">        print(spike_data.size())</span>
+<span class="sd">        &gt;&gt;&gt; torch.Size([100, 128, 1, 28, 28])</span>
+
+<span class="sd">        #  Index into a single sample from a minibatch</span>
+<span class="sd">        spike_data_sample = spike_data[:, 0, 0]</span>
+<span class="sd">        print(spike_data_sample.size())</span>
+<span class="sd">        &gt;&gt;&gt; torch.Size([100, 28, 28])</span>
+
+<span class="sd">        fig = plt.figure(facecolor=&quot;w&quot;, figsize=(10, 5))</span>
+<span class="sd">        ax = fig.add_subplot(111)</span>
+
+<span class="sd">        #  s: size of scatter points; c: color of scatter points</span>
+<span class="sd">        splt.raster(spike_data_sample, ax, s=1.5, c=&quot;black&quot;)</span>
+<span class="sd">        plt.title(&quot;Input Layer&quot;)</span>
+<span class="sd">        plt.xlabel(&quot;Time step&quot;)</span>
+<span class="sd">        plt.ylabel(&quot;Neuron Number&quot;)</span>
+<span class="sd">        plt.show()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="o">*</span><span class="n">torch</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">cpu</span><span class="p">()),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="spike_count"><a class="viewcode-back" href="../../snntorch.spikeplot.html#snntorch.spikeplot.spike_count">[docs]</a><span class="k">def</span> <span class="nf">spike_count</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">fig</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">,</span>
+    <span class="n">labels</span><span class="p">,</span>
+    <span class="n">num_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">animate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">interpolate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">gridshader</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">time_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate horizontal bar plot for a single forward pass.</span>
+<span class="sd">    Options to animate also available.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.spikeplot as splt</span>
+<span class="sd">        import matplotlib.pyplot as plt</span>
+<span class="sd">        from IPython.display import HTML</span>
+
+<span class="sd">        num_steps = 25</span>
+
+<span class="sd">        #  Use splt.spike_count to display behavior of output neurons for a</span>
+<span class="sd">        single sample during feedforward</span>
+
+<span class="sd">        #  spk_rec is a recording of output spikes across 25 time steps,</span>
+<span class="sd">        using ``batch_size=128``</span>
+<span class="sd">        print(spk_rec.size())</span>
+<span class="sd">        &gt;&gt;&gt; torch.Size([25, 128, 10])</span>
+
+<span class="sd">        #  We only need a single data sample</span>
+<span class="sd">        spk_results = torch.stack(spk_rec, dim=0)[:, 0, :].to(&#39;cpu&#39;)</span>
+<span class="sd">        print(spk_results.size())</span>
+<span class="sd">        &gt;&gt;&gt; torch.Size([25, 10])</span>
+
+<span class="sd">        fig, ax = plt.subplots(facecolor=&#39;w&#39;, figsize=(12, 7))</span>
+<span class="sd">        labels=[&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;,&#39;9&#39;]</span>
+
+<span class="sd">        #  Plot and save spike count histogram</span>
+<span class="sd">        splt.spike_count(spk_results, fig, ax, labels, num_steps = num_steps,</span>
+<span class="sd">        time_step=1e-3)</span>
+<span class="sd">        plt.show()</span>
+<span class="sd">        plt.savefig(&#39;hist2.png&#39;, dpi=300, bbox_inches=&#39;tight&#39;)</span>
+
+<span class="sd">        # Animate and save spike count histogram</span>
+<span class="sd">        anim = splt.spike_count(spk_results, fig, ax, labels, animate=True,</span>
+<span class="sd">        interpolate=5, num_steps = num_steps, time_step=1e-3)</span>
+<span class="sd">        HTML(anim.to_html5_video())</span>
+<span class="sd">        anim.save(&quot;spike_bar.gif&quot;)</span>
+
+<span class="sd">    :param data: Sample of spiking data across numerous time steps [num_steps</span>
+<span class="sd">        x num_outputs]</span>
+<span class="sd">    :type data: torch.Tensor</span>
+
+<span class="sd">    :param fig: Top level container for all plot elements</span>
+<span class="sd">    :type fig: matplotlib.figure.Figures</span>
+
+<span class="sd">    :param ax: Contains additional figure elements and sets the coordinate</span>
+<span class="sd">        system.</span>
+<span class="sd">            E.g., fig, ax = plt.subplots(facecolor=&#39;w&#39;, figsize=(12, 7))</span>
+<span class="sd">    :type ax: matplotlib.axes._subplots.AxesSubplot</span>
+
+<span class="sd">    :param labels: List of strings of the names of the output labels.</span>
+<span class="sd">         E.g., for MNIST, ``labels = [&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, ... , &#39;9&#39;]``</span>
+<span class="sd">    :type labels: list</span>
+
+<span class="sd">    :param num_steps: Number of time steps to plot. If not specified, the</span>
+<span class="sd">        number of entries in the first dimension</span>
+<span class="sd">            of ``data`` will automatically be used, defaults to ``False``</span>
+<span class="sd">    :type num_steps: int, optional</span>
+
+<span class="sd">    :param animate: If ``True``, return type matplotlib.animation.</span>
+<span class="sd">        ArtistAnimation sequentially scanning across the</span>
+<span class="sd">            range of time steps available in ``data``.</span>
+<span class="sd">            If ``False``, display plot of the final step once all spikes have</span>
+<span class="sd">            been counted, defaults to ``False``</span>
+<span class="sd">    :type animate: Bool, optional</span>
+
+<span class="sd">    :param interpolate: Can be increased to smooth the animation of the</span>
+<span class="sd">        vertical time bar. The value passed is the</span>
+<span class="sd">            interpolation factor:</span>
+<span class="sd">            e.g., ``interpolate=1`` results in no additional interpolation.</span>
+<span class="sd">            e.g., ``interpolate=5`` results in 4 additional frames for each</span>
+<span class="sd">            time step, defaults to ``1``</span>
+<span class="sd">    :type interpolate: int, optional</span>
+
+<span class="sd">    :param gridshader: Applies shading to figure background to distinguish</span>
+<span class="sd">        output classes, defaults to ``True``</span>
+<span class="sd">    :type gridshader: Bool, optional</span>
+
+<span class="sd">    :param interval: Delay between frames in milliseconds, defaults to ``25``</span>
+<span class="sd">    :type interval: int, optional</span>
+
+<span class="sd">    :param time_step: Duration of each time step in seconds.</span>
+<span class="sd">        If ``False``, time-axis will be in terms of ``num_steps``.</span>
+<span class="sd">        Else, time-axis is scaled</span>
+<span class="sd">        by the argument passed, defaults to ``False``</span>
+<span class="sd">    :type time_step: int, optional</span>
+
+<span class="sd">    :return: animation to be displayed using ``matplotlib.pyplot.show()``</span>
+<span class="sd">    :rtype: FuncAnimation (if animate is ``True``)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">num_steps</span><span class="p">:</span>
+        <span class="n">xrange</span> <span class="o">=</span> <span class="n">num_steps</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xrange</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># set the style of the axes and the text color</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.edgecolor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#333F4B&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.linewidth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;xtick.color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#333F4B&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;ytick.color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#333F4B&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;text.color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;#333F4B&quot;</span>
+
+    <span class="c1"># white bg</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;figure.facecolor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;white&quot;</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">xrange</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+        <span class="n">camera</span> <span class="o">=</span> <span class="n">Camera</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xrange</span> <span class="o">*</span> <span class="n">interpolate</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="n">interpolate</span><span class="p">)</span>
+            <span class="n">_plt_style</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">time_step</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">gridshader</span><span class="p">:</span>  <span class="c1"># gs appears unused but is needed by plt</span>
+                <span class="n">gs</span> <span class="o">=</span> <span class="n">_GridShader</span><span class="p">(</span>  <span class="c1"># noqa: F841</span>
+                    <span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;lightgrey&quot;</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span>
+                <span class="p">)</span>
+
+            <span class="c1"># time scanner</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">/</span> <span class="n">interpolate</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tab:orange&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+            <span class="c1"># animate</span>
+            <span class="n">camera</span><span class="o">.</span><span class="n">snap</span><span class="p">()</span>
+
+        <span class="n">anim</span> <span class="o">=</span> <span class="n">camera</span><span class="o">.</span><span class="n">animate</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">anim</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_plt_style</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="n">xrange</span><span class="p">,</span> <span class="n">time_step</span><span class="o">=</span><span class="n">time_step</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">gridshader</span><span class="p">:</span>
+            <span class="n">gs</span> <span class="o">=</span> <span class="n">_GridShader</span><span class="p">(</span>  <span class="c1"># noqa: F841</span>
+                <span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;lightgrey&quot;</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span>
+            <span class="p">)</span></div>
+        <span class="c1"># plt.savefig(&#39;hist2.png&#39;, dpi=300, bbox_inches=&#39;tight&#39;)</span>
+
+
+<div class="viewcode-block" id="traces"><a class="viewcode-back" href="../../snntorch.spikeplot.html#snntorch.spikeplot.traces">[docs]</a><span class="k">def</span> <span class="nf">traces</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">spk</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">spk_height</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">titles</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot an array of neuron traces (e.g., membrane potential or synaptic</span>
+<span class="sd">    current).</span>
+<span class="sd">    Optionally apply spikes to ride on the traces.</span>
+<span class="sd">    `traces` was originally written by Friedemann Zenke.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.spikeplot as splt</span>
+
+<span class="sd">        #  mem_rec contains the traces of 9 neuron membrane potentials across</span>
+<span class="sd">        100 time steps in duration</span>
+<span class="sd">        print(mem_rec.size())</span>
+<span class="sd">        &gt;&gt;&gt; torch.Size([100, 9])</span>
+
+<span class="sd">        #  Plot</span>
+<span class="sd">        traces(mem_rec, dim=(3,3))</span>
+
+
+<span class="sd">    :param data: Data tensor for neuron traces across time steps of shape</span>
+<span class="sd">        [num_steps x num_neurons]</span>
+<span class="sd">    :type data: torch.Tensor</span>
+
+<span class="sd">    :param spk: Data tensor for neuron traces across time steps of shape</span>
+<span class="sd">        [num_steps x num_neurons], defaults to ``None``</span>
+<span class="sd">    :type spk: torch.Tensor, optional</span>
+
+<span class="sd">    :param dim: Dimensions of figure, defaults to ``(3, 3)``</span>
+<span class="sd">    :type dim: tuple, optional</span>
+
+<span class="sd">    :param spk_height: height of spike to plot, defaults to ``5``</span>
+<span class="sd">    :type spk_height: float, optional</span>
+
+<span class="sd">    :param titles: Adds subplot titles, defaults to ``None``</span>
+<span class="sd">    :type titles: list of strings, optional</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gs</span> <span class="o">=</span> <span class="n">GridSpec</span><span class="p">(</span><span class="o">*</span><span class="n">dim</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">spk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span> <span class="o">+</span> <span class="n">spk_height</span> <span class="o">*</span> <span class="n">spk</span><span class="p">)</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">dim</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">a0</span> <span class="o">=</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">titles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">titles</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">sharey</span><span class="o">=</span><span class="n">a0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">titles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">titles</span><span class="p">):</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">titles</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">data</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_plt_style</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">time_step</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Called by spike_count to modify style of plot.&quot;&quot;&quot;</span>
+
+    <span class="c1"># spike data</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">[:</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time</span><span class="p">})</span>
+
+    <span class="c1"># numeric placeholder for the y axis</span>
+    <span class="n">my_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># create horizontal line for each labels that starts at x = 0 with the</span>
+    <span class="c1"># length represented by the spike count</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">my_range</span><span class="p">,</span>
+        <span class="n">xmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">xmax</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#007ACC&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># create dot for each label</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span> <span class="n">my_range</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#007ACC&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span>
+    <span class="p">)</span>
+
+    <span class="c1"># set labels</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
+        <span class="s2">&quot;Time Step&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#333F4B&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Labels&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#333F4B&quot;</span><span class="p">)</span>
+
+    <span class="c1"># set axis</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">my_range</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="c1"># change the style of the axis spines</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+
+    <span class="c1"># set the spines position</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;bottom&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s2">&quot;axes&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.04</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;left&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_position</span><span class="p">((</span><span class="s2">&quot;axes&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">time_step</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
+            <span class="s2">&quot;Time [s]&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">fontweight</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;#333F4B&quot;</span>
+        <span class="p">)</span>
+        <span class="n">locs</span><span class="p">,</span> <span class="n">steps</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">()</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">*</span> <span class="n">time_step</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">locs</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">locs</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_GridShader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Called by spike_count to apply shade to background of plot/animation.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spans</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sf</span> <span class="o">=</span> <span class="n">first</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kw</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">autoscale</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">callbacks</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;xlim_changed&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shade</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shade</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">span</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spans</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">span</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">shade</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">xticks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xticks</span><span class="p">()</span>
+        <span class="n">xlim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+        <span class="n">xticks</span> <span class="o">=</span> <span class="n">xticks</span><span class="p">[(</span><span class="n">xticks</span> <span class="o">&gt;</span> <span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">xticks</span> <span class="o">&lt;</span> <span class="n">xlim</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="n">locs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([[</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">xticks</span><span class="p">,</span> <span class="p">[</span><span class="n">xlim</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]]))</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">locs</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sf</span><span class="p">)</span> <span class="p">::</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">locs</span><span class="p">[</span><span class="mi">2</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sf</span><span class="p">)</span> <span class="p">::</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spans</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kw</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="Camera"><a class="viewcode-back" href="../../snntorch.spikeplot.html#snntorch.spikeplot.Camera">[docs]</a><span class="k">class</span> <span class="nc">Camera</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Make animations easier.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figure</span><span class="p">:</span> <span class="n">Figure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create camera from matplotlib figure.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_figure</span> <span class="o">=</span> <span class="n">figure</span>
+        <span class="c1"># need to keep track off artists for each axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span>
+                <span class="s2">&quot;collections&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;patches&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;lines&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;texts&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;artists&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;images&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_photos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Artist</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="Camera.snap"><a class="viewcode-back" href="../../snntorch.spikeplot.html#snntorch.spikeplot.Camera.snap">[docs]</a>    <span class="k">def</span> <span class="nf">snap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Artist</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Capture current state of the figure.&quot;&quot;&quot;</span>
+        <span class="n">frame_artists</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Artist</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_figure</span><span class="o">.</span><span class="n">axes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">axis</span><span class="o">.</span><span class="n">legend_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">axis</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">legend_</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">:</span>
+                <span class="n">new_artists</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">name</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="p">:]</span>
+                <span class="n">frame_artists</span> <span class="o">+=</span> <span class="n">new_artists</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_offsets</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_artists</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_photos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame_artists</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">frame_artists</span></div>
+
+<div class="viewcode-block" id="Camera.animate"><a class="viewcode-back" href="../../snntorch.spikeplot.html#snntorch.spikeplot.Camera.animate">[docs]</a>    <span class="k">def</span> <span class="nf">animate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ArtistAnimation</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Animate the snapshots taken.</span>
+<span class="sd">        Uses matplotlib.animation.ArtistAnimation</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ArtistAnimation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ArtistAnimation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_figure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_photos</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

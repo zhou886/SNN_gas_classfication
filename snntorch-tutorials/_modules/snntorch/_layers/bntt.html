@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch._layers.bntt &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch._layers.bntt</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch._layers.bntt</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+
+<div class="viewcode-block" id="BatchNormTT1d"><a class="viewcode-back" href="../../../snntorch.html#snntorch._layers.bntt.BatchNormTT1d">[docs]</a><span class="k">def</span> <span class="nf">BatchNormTT1d</span><span class="p">(</span>
+    <span class="n">input_features</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">affine</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a torch.nn.ModuleList of 1D Batch Normalization Layer with</span>
+<span class="sd">    length time_steps.</span>
+<span class="sd">    Input to this layer is the same as the  vanilla torch.nn.BatchNorm1d</span>
+<span class="sd">    layer.</span>
+
+<span class="sd">    Batch Normalisation Through Time (BNTT) as presented in:</span>
+<span class="sd">    &#39;Revisiting Batch Normalization for Training Low-Latency Deep Spiking</span>
+<span class="sd">    Neural Networks From Scratch&#39;</span>
+<span class="sd">    By Youngeun Kim &amp; Priyadarshini Panda</span>
+<span class="sd">    arXiv preprint arXiv:2010.01729</span>
+
+<span class="sd">    Original GitHub repo:</span>
+<span class="sd">    https://github.com/Intelligent-Computing-Lab-Yale/</span>
+<span class="sd">    BNTT-Batch-Normalization-Through-Time</span>
+
+<span class="sd">    Using LIF neuron as the neuron of choice for the math shown below.</span>
+
+<span class="sd">    Typically, for a single post-synaptic neuron i, we can represent its</span>
+<span class="sd">    membrane potential :math:`U_{i}^{t}` at time-step t as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            U_{i}^{t} = λ u_{i}^{t-1} + \\sum_j w_{ij}S_{j}^{t}</span>
+
+<span class="sd">    where:</span>
+
+<span class="sd">    * λ - a leak factor which is less than one</span>
+<span class="sd">    * j - the index of the pre-synaptic neuron</span>
+<span class="sd">    * :math:`S_{j}` - the binary spike activation</span>
+<span class="sd">    * :math:`w_{ij}` - the weight of the connection between the pre &amp; \</span>
+<span class="sd">    post neurons.</span>
+
+<span class="sd">    With Batch Normalization Throught Time, the membrane potential can be</span>
+<span class="sd">    modeled as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            U_{i}^{t} = λu_{i}^{t-1} + BNTT_{γ^{t}}</span>
+
+<span class="sd">                      = λu_{i}^{t-1} + γ _{i}^{t} (\\frac{\\sum_j</span>
+<span class="sd">                      w_{ij}S_{j}^{t} -</span>
+<span class="sd">                      µ_{i}^{t}}{\\sqrt{(σ _{i}^{t})^{2} + ε}})</span>
+
+<span class="sd">    :param input_features: number of features of the input</span>
+<span class="sd">    :type input_features: int</span>
+
+<span class="sd">    :param time_steps: number of time-steps of the SNN</span>
+<span class="sd">    :type time_steps: int</span>
+
+<span class="sd">    :param eps: a value added to the denominator for numerical stability</span>
+<span class="sd">    :type eps: float</span>
+
+<span class="sd">    :param momentum: the value used for the running_mean and running_var \</span>
+<span class="sd">    computation</span>
+<span class="sd">    :type momentum: float</span>
+
+<span class="sd">    :param affine: a boolean value that when set to True, the Batch Norm \</span>
+<span class="sd">    layer will have learnable affine parameters</span>
+<span class="sd">    :type affine: bool</span>
+
+<span class="sd">    Inputs: input_features, time_steps</span>
+<span class="sd">        - **input_features**: same number of features as the input</span>
+<span class="sd">        - **time_steps**: the number of time-steps to unroll in the SNN</span>
+
+<span class="sd">    Outputs: bntt</span>
+<span class="sd">        -  **bntt** of shape `(time_steps)`: toch.nn.ModuleList of \</span>
+<span class="sd">        BatchNorm1d layers for the specified number of time-steps</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bntt</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm1d</span><span class="p">(</span>
+                <span class="n">input_features</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="n">momentum</span><span class="p">,</span> <span class="n">affine</span><span class="o">=</span><span class="n">affine</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_steps</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Disable bias/beta of Batch Norm</span>
+    <span class="k">for</span> <span class="n">bn</span> <span class="ow">in</span> <span class="n">bntt</span><span class="p">:</span>
+        <span class="n">bn</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">bntt</span></div>
+
+
+<div class="viewcode-block" id="BatchNormTT2d"><a class="viewcode-back" href="../../../snntorch.html#snntorch._layers.bntt.BatchNormTT2d">[docs]</a><span class="k">def</span> <span class="nf">BatchNormTT2d</span><span class="p">(</span>
+    <span class="n">input_features</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">affine</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a torch.nn.ModuleList of 2D Batch Normalization Layer with</span>
+<span class="sd">    length time_steps.</span>
+<span class="sd">    Input to this layer is the same as the  vanilla torch.nn.BatchNorm2d layer.</span>
+
+<span class="sd">    Batch Normalisation Through Time (BNTT) as presented in:</span>
+<span class="sd">    &#39;Revisiting Batch Normalization for Training Low-Latency Deep Spiking</span>
+<span class="sd">    Neural Networks From Scratch&#39;</span>
+<span class="sd">    By Youngeun Kim &amp; Priyadarshini Panda</span>
+<span class="sd">    arXiv preprint arXiv:2010.01729</span>
+
+<span class="sd">    Using LIF neuron as the neuron of choice for the math shown below.</span>
+
+<span class="sd">    Typically, for a single post-synaptic neuron i, we can represent its</span>
+<span class="sd">    membrane potential :math:`U_{i}^{t}` at time-step t as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            U_{i}^{t} = λ u_{i}^{t-1} + \\sum_j w_{ij}S_{j}^{t}</span>
+
+<span class="sd">    where:</span>
+
+<span class="sd">    * λ - a leak factor which is less than one</span>
+<span class="sd">    * j - the index of the pre-synaptic neuron</span>
+<span class="sd">    * :math:`S_{j}` - the binary spike activation</span>
+<span class="sd">    * :math:`w_{ij}` - the weight of the connection between the pre &amp; post \</span>
+<span class="sd">    neurons.</span>
+
+<span class="sd">    With Batch Normalization Throught Time, the membrane potential can be \</span>
+<span class="sd">    modeled as:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            U_{i}^{t} = λ u_{i}^{t-1} + BNTT_{γ^{t}}</span>
+
+<span class="sd">                      = λ u_{i}^{t-1}</span>
+<span class="sd">                      + γ_{i}^{t} (\\frac{\\sum_j</span>
+<span class="sd">                      w_{ij}S_{j}^{t}</span>
+<span class="sd">                      - µ_{i}^{t}}{\\sqrt{(σ _{i}^{t})^{2} + ε}})</span>
+
+<span class="sd">    :param input_features: number of channels of the input</span>
+<span class="sd">    :type input_features: int</span>
+
+<span class="sd">    :param time_steps: number of time-steps of the SNN</span>
+<span class="sd">    :type time_steps: int</span>
+
+<span class="sd">    :param eps: a value added to the denominator for numerical stability</span>
+<span class="sd">    :type eps: float</span>
+
+<span class="sd">    :param momentum: the value used for the running_mean and running_var \</span>
+<span class="sd">        computation</span>
+<span class="sd">    :type momentum: float</span>
+
+<span class="sd">    :param affine: a boolean value that when set to True, the Batch Norm \</span>
+<span class="sd">        layer will have learnable affine parameters</span>
+<span class="sd">    :type affine: bool</span>
+
+<span class="sd">    Inputs: input_features, time_steps</span>
+<span class="sd">        - **input_features**: same number of channels as the input</span>
+<span class="sd">        - **time_steps**: the number of time-steps to unroll in the SNN</span>
+
+<span class="sd">    Outputs: bntt</span>
+<span class="sd">        -  **bntt** of shape `(time_steps)`: toch.nn.ModuleList of \</span>
+<span class="sd">        BatchNorm1d layers for the specified number of time-steps</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bntt</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span>
+                <span class="n">input_features</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="n">eps</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="n">momentum</span><span class="p">,</span> <span class="n">affine</span><span class="o">=</span><span class="n">affine</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">time_steps</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Disable bias/beta of Batch Norm</span>
+    <span class="k">for</span> <span class="n">bn</span> <span class="ow">in</span> <span class="n">bntt</span><span class="p">:</span>
+        <span class="n">bn</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">bntt</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

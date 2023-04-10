@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.backprop &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch.backprop</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch.backprop</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">functional</span> <span class="k">as</span> <span class="n">SF</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="n">warn</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;The module </span><span class="si">{</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> will be deprecated in &quot;</span>
+    <span class="sa">f</span><span class="s2">&quot; a future release. Writing out your own training &quot;</span>
+    <span class="sa">f</span><span class="s2">&quot;loop will lead to substantially faster performance.&quot;</span><span class="p">,</span>
+    <span class="ne">DeprecationWarning</span><span class="p">,</span>
+    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="c1"># consider turning into a class s.t. dictionary params can be parsed at</span>
+<span class="c1"># __init__</span>
+<span class="c1"># and never touched again</span>
+<div class="viewcode-block" id="TBPTT"><a class="viewcode-back" href="../../snntorch.backprop.html#snntorch.backprop.TBPTT">[docs]</a><span class="k">def</span> <span class="nf">TBPTT</span><span class="p">(</span>
+    <span class="n">net</span><span class="p">,</span>
+    <span class="n">dataloader</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">,</span>
+    <span class="n">num_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># only specified if time-static</span>
+    <span class="n">time_var</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># specifies if data is time_varying</span>
+    <span class="n">time_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">regularization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+    <span class="n">K</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Truncated backpropagation through time. LIF layers require parameter</span>
+<span class="sd">    ``init_hidden = True``.</span>
+<span class="sd">    Weight updates are performed every ``K`` time steps.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch as snn</span>
+<span class="sd">        import snntorch.functional as SF</span>
+<span class="sd">        from snntorch import utils</span>
+<span class="sd">        from snntorch import backprop</span>
+<span class="sd">        import torch</span>
+<span class="sd">        import torch.nn as nn</span>
+
+<span class="sd">        lif1 = snn.Leaky(beta=0.9, init_hidden=True)</span>
+<span class="sd">        lif2 = snn.Leaky(beta=0.9, init_hidden=True, output=True)</span>
+
+<span class="sd">        net = nn.Sequential(nn.Flatten(),</span>
+<span class="sd">                            nn.Linear(784,500),</span>
+<span class="sd">                            lif1,</span>
+<span class="sd">                            nn.Linear(500, 10),</span>
+<span class="sd">                            lif2).to(device)</span>
+
+<span class="sd">        device = torch.device(&quot;cuda&quot;) if torch.cuda.is_available() else</span>
+<span class="sd">        torch.device(&quot;cpu&quot;)</span>
+<span class="sd">        num_steps = 100</span>
+
+<span class="sd">        optimizer = torch.optim.Adam(net.parameters(), lr=5e-4,</span>
+<span class="sd">        betas=(0.9, 0.999))</span>
+<span class="sd">        loss_fn = SF.mse_count_loss()</span>
+<span class="sd">        reg_fn = SF.l1_rate_sparsity()</span>
+
+<span class="sd">        # train_loader is of type torch.utils.data.DataLoader</span>
+<span class="sd">        # if input data is time-static, set time_var=False, and specify</span>
+<span class="sd">        # num_steps.</span>
+<span class="sd">        # if input data is time-varying, set time_var=True and do not</span>
+<span class="sd">        # specify num_steps.</span>
+<span class="sd">        # backprop is automatically applied every K=40 time steps</span>
+
+<span class="sd">        for epoch in range(5):</span>
+<span class="sd">            loss = backprop.RTRL(net, train_loader, optimizer=optimizer,</span>
+<span class="sd">            criterion=loss_fn, num_steps=num_steps, time_var=False,</span>
+<span class="sd">            regularization=reg_fn, device=device, K=40)</span>
+
+
+<span class="sd">    :param net: Network model (either wrapped in Sequential container or as a</span>
+<span class="sd">        class)</span>
+<span class="sd">    :type net: torch.nn.modules.container.Sequential</span>
+
+<span class="sd">    :param dataloader: DataLoader containing data and targets</span>
+<span class="sd">    :type dataloader: torch.utils.data.DataLoader</span>
+
+<span class="sd">    :param optimizer: Optimizer used, e.g., torch.optim.adam.Adam</span>
+<span class="sd">    :type optimizer: torch.optim</span>
+
+<span class="sd">    :param criterion: Loss criterion from snntorch.functional, e.g.,</span>
+<span class="sd">        snn.functional.mse_count_loss()</span>
+<span class="sd">    :type criterion: snn.functional.LossFunctions</span>
+
+<span class="sd">    :param num_steps: Number of time steps. Does not need to be</span>
+<span class="sd">        specified if ``time_var=True``.</span>
+<span class="sd">    :type num_steps: int, optional</span>
+
+<span class="sd">    :param time_var: Set to ``True`` if input data is time-varying</span>
+<span class="sd">        [T x B x dims]. Otherwise, set to false if input data is time-static</span>
+<span class="sd">        [B x dims], defaults to ``True``</span>
+<span class="sd">    :type time_var: Bool, optional</span>
+
+<span class="sd">    :param time_first: Set to ``False`` if first dimension of data is not</span>
+<span class="sd">        time [B x T x dims] AND must also be permuted to [T x B x dims],</span>
+<span class="sd">        defaults to ``True``</span>
+<span class="sd">    :type time_first: Bool, optional</span>
+
+<span class="sd">    :param regularization: Option to add a regularization term to the loss</span>
+<span class="sd">        function</span>
+<span class="sd">    :type regularization: snn.functional regularization function, optional</span>
+
+<span class="sd">    :param device: Specify either &quot;cuda&quot; or &quot;cpu&quot;, defaults to &quot;cpu&quot;</span>
+<span class="sd">    :type device: string, optional</span>
+
+<span class="sd">    :param K: Number of time steps to process per weight update, defaults</span>
+<span class="sd">        to ``1``</span>
+<span class="sd">    :type K: int, optional</span>
+
+<span class="sd">    :return: return average loss for one epoch</span>
+<span class="sd">    :rtype: torch.Tensor</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">num_steps</span> <span class="ow">and</span> <span class="n">time_var</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;``num_steps`` should not be specified if time_var is ``True``. &quot;</span>
+            <span class="s2">&quot;When using time-varying input data, the size of the time-first &quot;</span>
+            <span class="s2">&quot;dimension of each batch is automatically used as ``num_steps``.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_steps</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">time_var</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;``num_steps`` must be specified if ``time_var`` is ``False``. &quot;</span>
+            <span class="s2">&quot;When using time-static input data, ``num_steps`` must be &quot;</span>
+            <span class="s2">&quot;passed in.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">num_steps</span> <span class="ow">and</span> <span class="n">K</span> <span class="o">&gt;</span> <span class="n">num_steps</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;``K`` must be less than or equal to ``num_steps``.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">time_var</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="n">time_first</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;``time_first`` should not be specified if data is not &quot;</span>
+            <span class="s2">&quot;time-varying, i.e., ``time_var`` is ``False``.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># triggers global variables is_lapicque etc for neurons_dict</span>
+    <span class="c1"># redo reset in training loop</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">net</span><span class="o">=</span><span class="n">net</span><span class="p">)</span>
+
+    <span class="n">neurons_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_lapicque</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">Lapicque</span><span class="p">,</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_leaky</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">,</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_synaptic</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">Synaptic</span><span class="p">,</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_alpha</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">Alpha</span><span class="p">,</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_rleaky</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">RLeaky</span><span class="p">,</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_rsynaptic</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">RSynaptic</span><span class="p">,</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_sconv2dlstm</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">SConv2dLSTM</span><span class="p">,</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">is_slstm</span><span class="p">:</span> <span class="n">snn</span><span class="o">.</span><span class="n">SLSTM</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># element 1: if true: spk, if false, mem</span>
+    <span class="c1"># element 2: if true: time_varying_targets</span>
+    <span class="n">criterion_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;mse_membrane_loss&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="kc">False</span><span class="p">,</span>
+            <span class="kc">True</span><span class="p">,</span>
+        <span class="p">],</span>  <span class="c1"># if time_var_target is true, need a flag to let mse_mem_loss</span>
+        <span class="c1"># know when to re-start iterating targets from</span>
+        <span class="s2">&quot;ce_max_membrane_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+        <span class="s2">&quot;ce_rate_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+        <span class="s2">&quot;ce_count_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+        <span class="s2">&quot;mse_count_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+        <span class="s2">&quot;ce_latency_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+        <span class="s2">&quot;mse_temporal_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+        <span class="s2">&quot;ce_temporal_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+    <span class="p">}</span>  <span class="c1"># note: when using mse_count_loss, the target spike-count should be</span>
+    <span class="c1"># for a truncated time, not for the full time</span>
+
+    <span class="n">reg_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;l1_rate_sparsity&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+    <span class="c1"># acc_dict = {</span>
+    <span class="c1">#     SF.accuracy_rate : [False, False, False, True]</span>
+    <span class="c1"># }</span>
+
+    <span class="n">time_var_targets</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">criterion_dict</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">criterion_key</span> <span class="ow">in</span> <span class="n">criterion_dict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">criterion_key</span> <span class="o">==</span> <span class="n">criterion</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+            <span class="n">loss_spk</span><span class="p">,</span> <span class="n">time_var_targets</span> <span class="o">=</span> <span class="n">criterion_dict</span><span class="p">[</span>
+                <span class="n">criterion_key</span>
+            <span class="p">]</span>  <span class="c1"># m: mem, s: spk // s: every step, e: end</span>
+            <span class="k">if</span> <span class="n">time_var_targets</span><span class="p">:</span>
+                <span class="n">time_var_targets</span> <span class="o">=</span> <span class="n">criterion</span><span class="o">.</span><span class="n">time_var_targets</span>  <span class="c1"># check this</span>
+        <span class="n">counter</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">counter</span><span class="p">:</span>  <span class="c1"># fix the print statement</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;``criterion`` must be one of the loss functions in &quot;</span>
+            <span class="s2">&quot;``snntorch.functional``: e.g., &#39;mse_membrane_loss&#39;, &quot;</span>
+            <span class="s2">&quot;&#39;ce_max_membrane_loss&#39;, &#39;ce_rate_loss&#39; etc.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">regularization</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">reg_item</span> <span class="ow">in</span> <span class="n">reg_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">reg_item</span> <span class="o">==</span> <span class="n">regularization</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+                <span class="c1"># m: mem, s: spk // s: every step, e: end</span>
+                <span class="n">reg_spk</span> <span class="o">=</span> <span class="n">reg_dict</span><span class="p">[</span><span class="n">reg_item</span><span class="p">]</span>
+
+    <span class="n">num_return</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_final_layer_check</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>  <span class="c1"># number of outputs</span>
+
+    <span class="n">step_trunc</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># ranges from 0 to K, resetting every K time steps</span>
+    <span class="n">K_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">loss_trunc</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># reset every K time steps</span>
+    <span class="n">loss_avg</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">iter_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">mem_rec_trunc</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">spk_rec_trunc</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="n">data_iterator</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">data</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">data_iterator</span><span class="p">:</span>
+        <span class="n">iter_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">net</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">time_var</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time_first</span><span class="p">:</span>
+                <span class="n">num_steps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">num_steps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">K</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">K_flag</span> <span class="o">=</span> <span class="n">K</span>
+            <span class="k">if</span> <span class="n">K_flag</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">K</span> <span class="o">=</span> <span class="n">num_steps</span>
+
+        <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">net</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">num_return</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">time_var</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">time_first</span><span class="p">:</span>
+                        <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">step</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[</span><span class="n">step</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">num_return</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">time_var</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">time_first</span><span class="p">:</span>
+                        <span class="n">spk</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">step</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">spk</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[</span><span class="n">step</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">spk</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">num_return</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">time_var</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">time_first</span><span class="p">:</span>
+                        <span class="n">spk</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">step</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">spk</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[</span><span class="n">step</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">spk</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="c1"># else:  # assume not an snn.Layer returning 1 val</span>
+            <span class="c1">#     if time_var:</span>
+            <span class="c1">#         spk = net(data[step])</span>
+            <span class="c1">#     else:</span>
+            <span class="c1">#         spk = net(data)</span>
+            <span class="c1">#     spk_rec.append(spk)</span>
+
+            <span class="n">spk_rec_trunc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spk</span><span class="p">)</span>
+            <span class="n">mem_rec_trunc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="n">step_trunc</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">step_trunc</span> <span class="o">==</span> <span class="n">K</span><span class="p">:</span>
+                <span class="c1"># spk_rec += spk_rec_trunc # test</span>
+                <span class="c1"># mem_rec += mem_rec_trunc # test</span>
+
+                <span class="n">spk_rec_trunc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec_trunc</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">mem_rec_trunc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem_rec_trunc</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="c1"># loss_spk is True if input to criterion is spk;</span>
+                <span class="c1"># reg_spk is True if input to reg is spk</span>
+
+                <span class="c1"># catch case for time_varying_targets?</span>
+                <span class="k">if</span> <span class="n">time_var_targets</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">loss_spk</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span>
+                            <span class="n">spk_rec_trunc</span><span class="p">,</span>
+                            <span class="n">targets</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">K_count</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span> <span class="p">:</span> <span class="nb">int</span><span class="p">((</span><span class="n">K_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">K</span><span class="p">)],</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span>
+                            <span class="n">mem_rec_trunc</span><span class="p">,</span>
+                            <span class="n">targets</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">K_count</span> <span class="o">*</span> <span class="n">K</span><span class="p">)</span> <span class="p">:</span> <span class="nb">int</span><span class="p">((</span><span class="n">K_count</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">K</span><span class="p">)],</span>
+                        <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">loss_spk</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">spk_rec_trunc</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">mem_rec_trunc</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">regularization</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">reg_spk</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">+=</span> <span class="n">regularization</span><span class="p">(</span><span class="n">spk_rec_trunc</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">loss</span> <span class="o">+=</span> <span class="n">regularization</span><span class="p">(</span><span class="n">mem_rec_trunc</span><span class="p">)</span>
+
+                <span class="n">loss_trunc</span> <span class="o">+=</span> <span class="n">loss</span>
+                <span class="n">loss_avg</span> <span class="o">+=</span> <span class="n">loss</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">/</span> <span class="n">K</span><span class="p">)</span>
+
+                <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+                <span class="n">loss_trunc</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+                <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+                <span class="k">for</span> <span class="n">neuron</span> <span class="ow">in</span> <span class="n">neurons_dict</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">neuron</span><span class="p">:</span>
+                        <span class="n">neurons_dict</span><span class="p">[</span><span class="n">neuron</span><span class="p">]</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+                        <span class="c1"># detach_hidden --&gt; _reset_hidden</span>
+
+                <span class="n">K_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">step_trunc</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">loss_trunc</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">spk_rec_trunc</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">mem_rec_trunc</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">step</span> <span class="o">==</span> <span class="n">num_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">num_steps</span> <span class="o">%</span> <span class="n">K</span><span class="p">):</span>
+            <span class="n">spk_rec_trunc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec_trunc</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">mem_rec_trunc</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem_rec_trunc</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">time_var_targets</span><span class="p">:</span>
+                <span class="n">idx1</span> <span class="o">=</span> <span class="n">K_count</span> <span class="o">*</span> <span class="n">K</span>
+                <span class="n">idx2</span> <span class="o">=</span> <span class="n">K_count</span> <span class="o">*</span> <span class="n">K</span> <span class="o">+</span> <span class="n">num_steps</span> <span class="o">%</span> <span class="n">K</span>
+                <span class="k">if</span> <span class="n">loss_spk</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span>
+                        <span class="n">spk_rec_trunc</span><span class="p">,</span>
+                        <span class="n">targets</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">idx1</span><span class="p">)</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">idx2</span><span class="p">)],</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span>
+                        <span class="n">mem_rec_trunc</span><span class="p">,</span>
+                        <span class="n">targets</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">idx1</span><span class="p">)</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">idx2</span><span class="p">)],</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">loss_spk</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">spk_rec_trunc</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">mem_rec_trunc</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">regularization</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">reg_spk</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">+=</span> <span class="n">regularization</span><span class="p">(</span><span class="n">spk_rec_trunc</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">+=</span> <span class="n">regularization</span><span class="p">(</span><span class="n">mem_rec_trunc</span><span class="p">)</span>
+
+            <span class="n">loss_trunc</span> <span class="o">+=</span> <span class="n">loss</span>
+            <span class="n">loss_avg</span> <span class="o">+=</span> <span class="n">loss</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">%</span> <span class="n">K</span><span class="p">)</span>
+
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">loss_trunc</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="n">K_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">step_trunc</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">loss_trunc</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">spk_rec_trunc</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">mem_rec_trunc</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">neuron</span> <span class="ow">in</span> <span class="n">neurons_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">neuron</span><span class="p">:</span>
+                    <span class="n">neurons_dict</span><span class="p">[</span><span class="n">neuron</span><span class="p">]</span><span class="o">.</span><span class="n">detach_hidden</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">loss_avg</span> <span class="o">/</span> <span class="n">iter_count</span>  <span class="c1"># , spk_rec, mem_rec</span></div>
+
+
+<div class="viewcode-block" id="BPTT"><a class="viewcode-back" href="../../snntorch.backprop.html#snntorch.backprop.BPTT">[docs]</a><span class="k">def</span> <span class="nf">BPTT</span><span class="p">(</span>
+    <span class="n">net</span><span class="p">,</span>
+    <span class="n">dataloader</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">,</span>
+    <span class="n">num_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">time_var</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">time_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">regularization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Backpropagation through time. LIF layers require parameter</span>
+<span class="sd">    ``init_hidden = True``.</span>
+<span class="sd">    A forward pass is applied for each time step while the loss accumulates.</span>
+<span class="sd">    The backward pass and parameter update is only applied at the end of</span>
+<span class="sd">    each time step sequence.</span>
+<span class="sd">    BPTT is equivalent to TBPTT for the case where ``num_steps = K``.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch as snn</span>
+<span class="sd">        import snntorch.functional as SF</span>
+<span class="sd">        from snntorch import utils</span>
+<span class="sd">        from snntorch import backprop</span>
+<span class="sd">        import torch</span>
+<span class="sd">        import torch.nn as nn</span>
+
+<span class="sd">        lif1 = snn.Leaky(beta=0.9, init_hidden=True)</span>
+<span class="sd">        lif2 = snn.Leaky(beta=0.9, init_hidden=True, output=True)</span>
+
+<span class="sd">        net = nn.Sequential(nn.Flatten(),</span>
+<span class="sd">                            nn.Linear(784,500),</span>
+<span class="sd">                            lif1,</span>
+<span class="sd">                            nn.Linear(500, 10),</span>
+<span class="sd">                            lif2).to(device)</span>
+
+<span class="sd">        device = torch.device(&quot;cuda&quot;) if torch.cuda.is_available() else</span>
+<span class="sd">        torch.device(&quot;cpu&quot;)</span>
+<span class="sd">        num_steps = 100</span>
+
+<span class="sd">        optimizer = torch.optim.Adam(net.parameters(), lr=5e-4,</span>
+<span class="sd">        betas=(0.9, 0.999))</span>
+<span class="sd">        loss_fn = SF.mse_count_loss()</span>
+<span class="sd">        reg_fn = SF.l1_rate_sparsity()</span>
+
+
+<span class="sd">        # train_loader is of type torch.utils.data.DataLoader</span>
+<span class="sd">        # if input data is time-static, set time_var=False, and specify</span>
+<span class="sd">        # num_steps.</span>
+<span class="sd">        # if input data is time-varying, set time_var=True and do not</span>
+<span class="sd">        # specify num_steps.</span>
+
+<span class="sd">        for epoch in range(5):</span>
+<span class="sd">            loss = backprop.RTRL(net, train_loader, optimizer=optimizer,</span>
+<span class="sd">            criterion=loss_fn, num_steps=num_steps, time_var=False,</span>
+<span class="sd">            regularization=reg_fn, device=device)</span>
+
+
+<span class="sd">    :param net: Network model (either wrapped in Sequential container or as</span>
+<span class="sd">        a class)</span>
+<span class="sd">    :type net: torch.nn.modules.container.Sequential</span>
+
+<span class="sd">    :param dataloader: DataLoader containing data and targets</span>
+<span class="sd">    :type dataloader: torch.utils.data.DataLoader</span>
+
+<span class="sd">    :param optimizer: Optimizer used, e.g., torch.optim.adam.Adam</span>
+<span class="sd">    :type optimizer: torch.optim</span>
+
+<span class="sd">    :param criterion: Loss criterion from snntorch.functional, e.g.,</span>
+<span class="sd">        snn.functional.mse_count_loss()</span>
+<span class="sd">    :type criterion: snn.functional.LossFunctions</span>
+
+<span class="sd">    :param num_steps: Number of time steps. Does not need to be specified if</span>
+<span class="sd">        ``time_var=True``.</span>
+<span class="sd">    :type num_steps: int, optional</span>
+
+<span class="sd">    :param time_var: Set to ``True`` if input data is time-varying</span>
+<span class="sd">        [T x B x dims]. Otherwise, set to false if input data is time-static</span>
+<span class="sd">        [B x dims], defaults to ``True``</span>
+<span class="sd">    :type time_var: Bool, optional</span>
+
+<span class="sd">    :param time_first: Set to ``False`` if first dimension of data is not</span>
+<span class="sd">        time [B x T x dims] AND must also be permuted to [T x B x dims],</span>
+<span class="sd">        defaults to ``True``</span>
+<span class="sd">    :type time_first: Bool, optional</span>
+
+<span class="sd">    :param regularization: Option to add a regularization term to the loss</span>
+<span class="sd">        function</span>
+<span class="sd">    :type regularization: snn.functional regularization function, optional</span>
+
+<span class="sd">    :param device: Specify either &quot;cuda&quot; or &quot;cpu&quot;, defaults to &quot;cpu&quot;</span>
+<span class="sd">    :type device: string, optional</span>
+
+<span class="sd">    :return: return average loss for one epoch</span>
+<span class="sd">    :rtype: torch.Tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#  Net requires hidden instance variables rather than global instance</span>
+    <span class="c1">#  variables for TBPTT</span>
+    <span class="k">return</span> <span class="n">TBPTT</span><span class="p">(</span>
+        <span class="n">net</span><span class="p">,</span>
+        <span class="n">dataloader</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">criterion</span><span class="p">,</span>
+        <span class="n">num_steps</span><span class="p">,</span>
+        <span class="n">time_var</span><span class="p">,</span>
+        <span class="n">time_first</span><span class="p">,</span>
+        <span class="n">regularization</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">,</span>
+        <span class="n">K</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RTRL"><a class="viewcode-back" href="../../snntorch.backprop.html#snntorch.backprop.RTRL">[docs]</a><span class="k">def</span> <span class="nf">RTRL</span><span class="p">(</span>
+    <span class="n">net</span><span class="p">,</span>
+    <span class="n">dataloader</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">,</span>
+    <span class="n">num_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># must be specified in case data in is static</span>
+    <span class="n">time_var</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># specifies if data is time_varying</span>
+    <span class="n">time_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">regularization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Real-time Recurrent Learning. LIF layers require parameter</span>
+<span class="sd">    ``init_hidden = True``.</span>
+<span class="sd">    A forward pass, backward pass and parameter update are applied at each</span>
+<span class="sd">    time step.</span>
+<span class="sd">    RTRL is equivalent to TBPTT for the case where ``K = 1``.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch as snn</span>
+<span class="sd">        import snntorch.functional as SF</span>
+<span class="sd">        from snntorch import utils</span>
+<span class="sd">        from snntorch import backprop</span>
+<span class="sd">        import torch</span>
+<span class="sd">        import torch.nn as nn</span>
+
+<span class="sd">        lif1 = snn.Leaky(beta=0.9, init_hidden=True)</span>
+<span class="sd">        lif2 = snn.Leaky(beta=0.9, init_hidden=True, output=True)</span>
+
+<span class="sd">        net = nn.Sequential(nn.Flatten(),</span>
+<span class="sd">                            nn.Linear(784,500),</span>
+<span class="sd">                            lif1,</span>
+<span class="sd">                            nn.Linear(500, 10),</span>
+<span class="sd">                            lif2).to(device)</span>
+
+<span class="sd">        device = torch.device(&quot;cuda&quot;) if torch.cuda.is_available() else</span>
+<span class="sd">        torch.device(&quot;cpu&quot;)</span>
+<span class="sd">        num_steps = 100</span>
+
+<span class="sd">        optimizer = torch.optim.Adam(net.parameters(), lr=5e-4,</span>
+<span class="sd">        betas=(0.9, 0.999))</span>
+<span class="sd">        loss_fn = SF.mse_count_loss()</span>
+<span class="sd">        reg_fn = SF.l1_rate_sparsity()</span>
+
+<span class="sd">        # train_loader is of type torch.utils.data.DataLoader</span>
+<span class="sd">        # if input data is time-static, set time_var=False, and</span>
+<span class="sd">        specify num_steps.</span>
+
+<span class="sd">        for epoch in range(5):</span>
+<span class="sd">            loss = backprop.RTRL(net, train_loader, optimizer=optimizer,</span>
+<span class="sd">            criterion=loss_fn, num_steps=num_steps, time_var=False,</span>
+<span class="sd">            regularization=reg_fn, device=device)</span>
+
+
+<span class="sd">    :param net: Network model (either wrapped in Sequential container or as</span>
+<span class="sd">        a class)</span>
+<span class="sd">    :type net: torch.nn.modules.container.Sequential</span>
+
+<span class="sd">    :param dataloader: DataLoader containing data and targets</span>
+<span class="sd">    :type dataloader: torch.utils.data.DataLoader</span>
+
+<span class="sd">    :param optimizer: Optimizer used, e.g., torch.optim.adam.Adam</span>
+<span class="sd">    :type optimizer: torch.optim</span>
+
+<span class="sd">    :param criterion: Loss criterion from snntorch.functional, e.g.,</span>
+<span class="sd">        snn.functional.mse_count_loss()</span>
+<span class="sd">    :type criterion: snn.functional.LossFunctions</span>
+
+<span class="sd">    :param num_steps: Number of time steps. Does not need to be specified</span>
+<span class="sd">        if ``time_var=True``.</span>
+<span class="sd">    :type num_steps: int, optional</span>
+
+<span class="sd">    :param time_var: Set to ``True`` if input data is time-varying</span>
+<span class="sd">        [T x B x</span>
+<span class="sd">        dims]. Otherwise, set to false if input data is time-static [B x dims],</span>
+<span class="sd">        defaults to ``True``</span>
+<span class="sd">    :type time_var: Bool, optional</span>
+
+<span class="sd">    :param time_first: Set to ``False`` if first dimension of data is not</span>
+<span class="sd">        time [B x T x dims] AND must also be permuted to [T x B x dims],</span>
+<span class="sd">        defaults to ``True``</span>
+<span class="sd">    :type time_first: Bool, optional</span>
+
+<span class="sd">    :param regularization: Option to add a regularization term to the loss</span>
+<span class="sd">        function</span>
+<span class="sd">    :type regularization: snn.functional regularization function, optional</span>
+
+<span class="sd">    :param device: Specify either &quot;cuda&quot; or &quot;cpu&quot;, defaults to &quot;cpu&quot;</span>
+<span class="sd">    :type device: string, optional</span>
+
+<span class="sd">    :param K: Number of time steps to process per weight update, defaults</span>
+<span class="sd">        to ``1``</span>
+<span class="sd">    :type K: int, optional</span>
+
+<span class="sd">    :return: return average loss for one epoch</span>
+<span class="sd">    :rtype: torch.Tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">TBPTT</span><span class="p">(</span>
+        <span class="n">net</span><span class="p">,</span>
+        <span class="n">dataloader</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">criterion</span><span class="p">,</span>
+        <span class="n">num_steps</span><span class="p">,</span>
+        <span class="n">time_var</span><span class="p">,</span>
+        <span class="n">time_first</span><span class="p">,</span>
+        <span class="n">regularization</span><span class="p">,</span>
+        <span class="n">device</span><span class="p">,</span>
+        <span class="n">K</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="c1"># def BPTF(</span>
+<span class="c1">#     net,</span>
+<span class="c1">#     dataloader,</span>
+<span class="c1">#     num_steps,  # must be specified in case data in is static</span>
+<span class="c1">#     optimizer,</span>
+<span class="c1">#     criterion,</span>
+<span class="c1">#     time_var,  # specifies if data is time_varying</span>
+<span class="c1">#     regularization=False,</span>
+<span class="c1">#     device=&quot;cpu&quot;,</span>
+<span class="c1">#     K=1,</span>
+<span class="c1"># ):</span>
+<span class="c1">#     &quot;&quot;&quot;Backpropagation to the future. LIF layers require parameter</span>
+<span class="c1">#     ``init_hidden = True``.</span>
+<span class="c1">#     Forward and backward passes are performed at every time step.</span>
+<span class="c1">#     Gradients from previous time steps are propagated forward and scaled by</span>
+<span class="c1">#     the leaky rate.</span>
+
+<span class="c1">#     Example::</span>
+
+<span class="c1">#         import snntorch as snn</span>
+<span class="c1">#         import snntorch.functional as SF</span>
+<span class="c1">#         from snntorch import utils</span>
+<span class="c1">#         from snntorch import backprop</span>
+<span class="c1">#         import torch</span>
+<span class="c1">#         import torch.nn as nn</span>
+
+<span class="c1">#         lif1 = snn.Leaky(beta=0.9, init_hidden=True)</span>
+<span class="c1">#         lif2 = snn.Leaky(beta=0.9, init_hidden=True, output=True)</span>
+
+<span class="c1">#         net = nn.Sequential(nn.Flatten(),</span>
+<span class="c1">#                             nn.Linear(784,500),</span>
+<span class="c1">#                             lif1,</span>
+<span class="c1">#                             nn.Linear(500, 10),</span>
+<span class="c1">#                             lif2).to(device)</span>
+
+<span class="c1">#         device = torch.device(&quot;cuda&quot;) if torch.cuda.is_available() else</span>
+<span class="c1">#         torch.device(&quot;cpu&quot;)</span>
+<span class="c1">#         num_steps = 100</span>
+
+<span class="c1">#         optimizer = torch.optim.Adam(net.parameters(), lr=5e-4,</span>
+<span class="c1">#         betas=(0.9, 0.999))</span>
+<span class="c1">#         loss_fn = SF.mse_count_loss()</span>
+<span class="c1">#         reg_fn = SF.l1_rate_sparsity()</span>
+
+<span class="c1">#         # train_loader is of type torch.utils.data.DataLoader</span>
+<span class="c1">#         # backprop is automatically applied every K=40 time steps</span>
+<span class="c1">#         for epoch in range(5):</span>
+<span class="c1">#             loss, spk, mem = backprop.BPTF(net, train_loader,</span>
+<span class="c1">#             num_steps=num_steps,</span>
+<span class="c1">#             optimizer=optimizer, criterion=loss_fn,</span>
+<span class="c1">#             regularization=reg_fn, device=device)</span>
+
+
+<span class="c1">#     :param net: Network model (either wrapped in Sequential container or</span>
+<span class="c1">#     as a class)</span>
+<span class="c1">#     :type net: torch.nn.modules.container.Sequential</span>
+
+<span class="c1">#     :param dataloader: DataLoader containing data and targets</span>
+<span class="c1">#     :type dataloader: torch.utils.data.DataLoader</span>
+
+<span class="c1">#     :param num_steps: Number of time steps</span>
+<span class="c1">#     :type num_steps: int</span>
+
+<span class="c1">#     :param optimizer: Optimizer used, e.g., torch.optim.adam.Adam</span>
+<span class="c1">#     :type optimizer: torch.optim</span>
+
+<span class="c1">#     :param criterion: Loss criterion from snntorch.functional, e.g.,</span>
+<span class="c1">#     snn.functional.mse_count_loss()</span>
+<span class="c1">#     :type criterion: snn.functional.LossFunctions</span>
+
+<span class="c1">#     :param time_var: Set to ``True`` if input data is time-varying</span>
+<span class="c1">#     [T x B x dims]. Otherwise, set to false if input data is time-static</span>
+<span class="c1">#     [B x dims].</span>
+<span class="c1">#     :type time_var: Bool</span>
+
+<span class="c1">#     :param regularization: Option to add a regularization term to the loss</span>
+<span class="c1">#     function</span>
+<span class="c1">#     :type regularization: snn.functional regularization function, optional</span>
+
+<span class="c1">#     :param device: Specify either &quot;cuda&quot; or &quot;cpu&quot;, defaults to &quot;cpu&quot;</span>
+<span class="c1">#     :type device: string, optional</span>
+
+<span class="c1">#     :param K: Number of time steps to process per weight update, defaults</span>
+<span class="c1">#     to ``1``</span>
+<span class="c1">#     :type K: int, optional</span>
+
+<span class="c1">#     :return: return average loss for one epoch</span>
+<span class="c1">#     :rtype: torch.Tensor</span>
+
+<span class="c1">#     :return: return output spikes over time</span>
+<span class="c1">#     :rtype: torch.Tensor</span>
+
+<span class="c1">#     :return: return output membrane potential trace over time</span>
+<span class="c1">#     :rtype: torch.Tensor</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+
+<span class="c1"># def _rec_trunc(</span>
+<span class="c1">#     spk,</span>
+<span class="c1">#     mem,</span>
+<span class="c1">#     regularization,</span>
+<span class="c1">#     loss_spk,</span>
+<span class="c1">#     reg_spk=False,</span>
+<span class="c1">#     spk_rec_trunc=False,</span>
+<span class="c1">#     mem_rec_trunc=False,</span>
+<span class="c1"># ):</span>
+<span class="c1">#     &quot;&quot;&quot;Creates truncated mem and spk tensors where needed by criterion &amp;</span>
+<span class="c1">#     regularization.&quot;&quot;&quot;</span>
+
+<span class="c1">#     if regularization:</span>
+<span class="c1">#         if loss_spk and reg_spk:</span>
+<span class="c1">#             spk_rec_trunc.append(spk)</span>
+<span class="c1">#         if loss_spk != reg_spk:</span>
+<span class="c1">#             spk_rec_trunc.append(spk)</span>
+<span class="c1">#             mem_rec_trunc.append(mem)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             mem_rec_trunc.append(mem)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#         if loss_spk:  # risk: removing option for losses with both mem and</span>
+<span class="c1">#         spk</span>
+<span class="c1">#             spk_rec_trunc.append(spk)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#             mem_rec_trunc.append(mem)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

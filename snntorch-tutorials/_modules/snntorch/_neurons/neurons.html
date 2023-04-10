@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch._neurons.neurons &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch._neurons.neurons</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch._neurons.neurons</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;SpikingNeuron&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;LIF&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;_SpikeTensor&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;_SpikeTorchConv&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float</span>
+
+
+<div class="viewcode-block" id="SpikingNeuron"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron">[docs]</a><span class="k">class</span> <span class="nc">SpikingNeuron</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parent class for spiking neuron models.&quot;&quot;&quot;</span>
+
+    <span class="n">instances</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="sd">&quot;&quot;&quot;Each :mod:`snntorch.SpikingNeuron` neuron</span>
+<span class="sd">    (e.g., :mod:`snntorch.Synaptic`) will populate the</span>
+<span class="sd">    :mod:`snntorch.SpikingNeuron.instances` list with a new entry.</span>
+<span class="sd">    The list is used to initialize and clear neuron states when the</span>
+<span class="sd">    argument `init_hidden=True`.&quot;&quot;&quot;</span>
+
+    <span class="n">reset_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;subtract&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;zero&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;none&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">spike_grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">init_hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">inhibition</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">reset_mechanism</span><span class="o">=</span><span class="s2">&quot;subtract&quot;</span><span class="p">,</span>
+        <span class="n">state_quant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">graded_spikes_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">learn_graded_spikes_factor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SpikingNeuron</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="n">SpikingNeuron</span><span class="o">.</span><span class="n">instances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span> <span class="o">=</span> <span class="n">init_hidden</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inhibition</span> <span class="o">=</span> <span class="n">inhibition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">output</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_snn_cases</span><span class="p">(</span><span class="n">reset_mechanism</span><span class="p">,</span> <span class="n">inhibition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_snn_register_buffer</span><span class="p">(</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">learn_threshold</span><span class="o">=</span><span class="n">learn_threshold</span><span class="p">,</span>
+            <span class="n">reset_mechanism</span><span class="o">=</span><span class="n">reset_mechanism</span><span class="p">,</span>
+            <span class="n">graded_spikes_factor</span><span class="o">=</span><span class="n">graded_spikes_factor</span><span class="p">,</span>
+            <span class="n">learn_graded_spikes_factor</span><span class="o">=</span><span class="n">learn_graded_spikes_factor</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_mechanism</span> <span class="o">=</span> <span class="n">reset_mechanism</span>
+
+        <span class="k">if</span> <span class="n">spike_grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spike_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ATan</span><span class="o">.</span><span class="n">apply</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spike_grad</span> <span class="o">=</span> <span class="n">spike_grad</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span> <span class="o">=</span> <span class="n">state_quant</span>
+
+<div class="viewcode-block" id="SpikingNeuron.fire"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.fire">[docs]</a>    <span class="k">def</span> <span class="nf">fire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates spike if mem &gt; threshold.</span>
+<span class="sd">        Returns spk.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">:</span>
+            <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+        <span class="n">mem_shift</span> <span class="o">=</span> <span class="n">mem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_grad</span><span class="p">(</span><span class="n">mem_shift</span><span class="p">)</span>
+
+        <span class="n">spk</span> <span class="o">=</span> <span class="n">spk</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">graded_spikes_factor</span>
+
+        <span class="k">return</span> <span class="n">spk</span></div>
+
+<div class="viewcode-block" id="SpikingNeuron.fire_inhibition"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.fire_inhibition">[docs]</a>    <span class="k">def</span> <span class="nf">fire_inhibition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates spike if mem &gt; threshold, only for the largest membrane.</span>
+<span class="sd">        All others neurons will be inhibited for that time step.</span>
+<span class="sd">        Returns spk.&quot;&quot;&quot;</span>
+        <span class="n">mem_shift</span> <span class="o">=</span> <span class="n">mem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">mem_shift</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">spk_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_grad</span><span class="p">(</span><span class="n">mem_shift</span><span class="p">)</span>
+
+        <span class="n">mask_spk1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">spk_tmp</span><span class="p">)</span>
+        <span class="n">mask_spk1</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">batch_size</span><span class="p">),</span> <span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">spk</span> <span class="o">=</span> <span class="n">spk_tmp</span> <span class="o">*</span> <span class="n">mask_spk1</span>
+        <span class="c1"># reset = spk.clone().detach()</span>
+
+        <span class="k">return</span> <span class="n">spk</span></div>
+
+<div class="viewcode-block" id="SpikingNeuron.mem_reset"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.mem_reset">[docs]</a>    <span class="k">def</span> <span class="nf">mem_reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates detached reset signal if mem &gt; threshold.</span>
+<span class="sd">        Returns reset.&quot;&quot;&quot;</span>
+        <span class="n">mem_shift</span> <span class="o">=</span> <span class="n">mem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="n">reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_grad</span><span class="p">(</span><span class="n">mem_shift</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">reset</span></div>
+
+    <span class="k">def</span> <span class="nf">_snn_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_mechanism</span><span class="p">,</span> <span class="n">inhibition</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_cases</span><span class="p">(</span><span class="n">reset_mechanism</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">inhibition</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Inhibition is an unstable feature that has only been tested &quot;</span>
+                <span class="s2">&quot;for dense (fully-connected) layers. Use with caution!&quot;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reset_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_mechanism</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">reset_mechanism</span> <span class="o">!=</span> <span class="s2">&quot;subtract&quot;</span>
+            <span class="ow">and</span> <span class="n">reset_mechanism</span> <span class="o">!=</span> <span class="s2">&quot;zero&quot;</span>
+            <span class="ow">and</span> <span class="n">reset_mechanism</span> <span class="o">!=</span> <span class="s2">&quot;none&quot;</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;reset_mechanism must be set to either &#39;subtract&#39;, &quot;</span>
+                <span class="s2">&quot;&#39;zero&#39;, or &#39;none&#39;.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_snn_register_buffer</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="p">,</span>
+        <span class="n">learn_threshold</span><span class="p">,</span>
+        <span class="n">reset_mechanism</span><span class="p">,</span>
+        <span class="n">graded_spikes_factor</span><span class="p">,</span>
+        <span class="n">learn_graded_spikes_factor</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set variables as learnable parameters else register them in the</span>
+<span class="sd">        buffer.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_threshold_buffer</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">learn_threshold</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graded_spikes_buffer</span><span class="p">(</span>
+            <span class="n">graded_spikes_factor</span><span class="p">,</span> <span class="n">learn_graded_spikes_factor</span>
+        <span class="p">)</span>
+
+        <span class="c1"># reset buffer</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># if reset_mechanism_val is loaded from .pt, override</span>
+            <span class="c1"># reset_mechanism</span>
+            <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">is_tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">SpikingNeuron</span><span class="o">.</span><span class="n">reset_dict</span><span class="p">)[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span>
+                <span class="p">]</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="c1"># reset_mechanism_val has not yet been created, create it</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reset_mechanism_buffer</span><span class="p">(</span><span class="n">reset_mechanism</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_graded_spikes_buffer</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">graded_spikes_factor</span><span class="p">,</span> <span class="n">learn_graded_spikes_factor</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">graded_spikes_factor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">graded_spikes_factor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">graded_spikes_factor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">learn_graded_spikes_factor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">graded_spikes_factor</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">graded_spikes_factor</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;graded_spikes_factor&quot;</span><span class="p">,</span> <span class="n">graded_spikes_factor</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_threshold_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">learn_threshold</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">learn_threshold</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;threshold&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_reset_mechanism_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset_mechanism</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Assign mapping to each reset mechanism state.</span>
+<span class="sd">        Must be of type tensor to store in register buffer. See reset_dict</span>
+<span class="sd">        for mapping.&quot;&quot;&quot;</span>
+        <span class="n">reset_mechanism_val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span>
+            <span class="n">SpikingNeuron</span><span class="o">.</span><span class="n">reset_dict</span><span class="p">[</span><span class="n">reset_mechanism</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;reset_mechanism_val&quot;</span><span class="p">,</span> <span class="n">reset_mechanism_val</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_V_register_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">learn_V</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">V</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">learn_V</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reset_mechanism</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If reset_mechanism is modified, reset_mechanism_val is triggered</span>
+<span class="sd">        to update.</span>
+<span class="sd">        0: subtract, 1: zero, 2: none.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reset_mechanism</span>
+
+    <span class="nd">@reset_mechanism</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">reset_mechanism</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_reset_mechanism</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_cases</span><span class="p">(</span><span class="n">new_reset_mechanism</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span>
+            <span class="n">SpikingNeuron</span><span class="o">.</span><span class="n">reset_dict</span><span class="p">[</span><span class="n">new_reset_mechanism</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_mechanism</span> <span class="o">=</span> <span class="n">new_reset_mechanism</span>
+
+<div class="viewcode-block" id="SpikingNeuron.init"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.init">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Removes all items from :mod:`snntorch.SpikingNeuron.instances`</span>
+<span class="sd">        when called.&quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="SpikingNeuron.detach"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.detach">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Used to detach input arguments from the current graph.</span>
+<span class="sd">        Intended for use in truncated backpropagation through time where</span>
+<span class="sd">        hidden state variables are global variables.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SpikingNeuron.zeros"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.zeros">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">zeros</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Used to clear hidden state variables to zero.</span>
+<span class="sd">        Intended for use where hidden state variables are global variables.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">state</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SpikingNeuron.ATan"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.ATan">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">class</span> <span class="nc">ATan</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">        **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">            .. math::</span>
+
+<span class="sd">                S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">                0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">                \\end{cases}</span>
+
+<span class="sd">        **Backward pass:** Gradient of shifted arc-tan function.</span>
+
+<span class="sd">            .. math::</span>
+
+<span class="sd">                    S&amp;≈\\frac{1}{π}\\text{arctan}(πU \\frac{α}{2}) \\\\</span>
+<span class="sd">                    \\frac{∂S}{∂U}&amp;=\\frac{1}{π}\</span>
+<span class="sd">                    \\frac{1}{(1+(πU\\frac{α}{2})^2)}</span>
+
+
+<span class="sd">        :math:`alpha` defaults to 2, and can be modified by calling</span>
+<span class="sd">        ``surrogate.atan(alpha=2)``.</span>
+
+<span class="sd">        Adapted from:</span>
+
+<span class="sd">        *W. Fang, Z. Yu, Y. Chen, T. Masquelier, T. Huang, Y. Tian (2021)</span>
+<span class="sd">        Incorporating Learnable Membrane Time Constants to Enhance Learning</span>
+<span class="sd">        of Spiking Neural Networks. Proc. IEEE/CVF Int. Conf. Computer</span>
+<span class="sd">        Vision (ICCV), pp. 2661-2671.*&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SpikingNeuron.ATan.forward"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.ATan.forward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="SpikingNeuron.ATan.backward"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.SpikingNeuron.ATan.backward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">input_</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+            <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ctx</span><span class="o">.</span><span class="n">alpha</span>
+                <span class="o">/</span> <span class="mi">2</span>
+                <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">input_</span><span class="p">)</span><span class="o">.</span><span class="n">pow_</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+                <span class="o">*</span> <span class="n">grad_input</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span></div></div></div>
+
+    <span class="c1"># def atan(alpha=2.0):</span>
+    <span class="c1">#     &quot;&quot;&quot;ArcTan surrogate gradient enclosed with a parameterized slope.&quot;&quot;&quot;</span>
+    <span class="c1">#     alpha = alpha</span>
+
+    <span class="c1">#     def inner(x):</span>
+    <span class="c1">#         return ATan.apply(x, alpha)</span>
+
+    <span class="c1">#     return inner</span>
+
+
+<div class="viewcode-block" id="LIF"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.LIF">[docs]</a><span class="k">class</span> <span class="nc">LIF</span><span class="p">(</span><span class="n">SpikingNeuron</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parent class for leaky integrate and fire neuron models.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">spike_grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">init_hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">inhibition</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_beta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">reset_mechanism</span><span class="o">=</span><span class="s2">&quot;subtract&quot;</span><span class="p">,</span>
+        <span class="n">state_quant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">graded_spikes_factor</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">learn_graded_spikes_factor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">threshold</span><span class="p">,</span>
+            <span class="n">spike_grad</span><span class="p">,</span>
+            <span class="n">init_hidden</span><span class="p">,</span>
+            <span class="n">inhibition</span><span class="p">,</span>
+            <span class="n">learn_threshold</span><span class="p">,</span>
+            <span class="n">reset_mechanism</span><span class="p">,</span>
+            <span class="n">state_quant</span><span class="p">,</span>
+            <span class="n">output</span><span class="p">,</span>
+            <span class="n">graded_spikes_factor</span><span class="p">,</span>
+            <span class="n">learn_graded_spikes_factor</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lif_register_buffer</span><span class="p">(</span>
+            <span class="n">beta</span><span class="p">,</span>
+            <span class="n">learn_beta</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reset_mechanism</span> <span class="o">=</span> <span class="n">reset_mechanism</span>
+
+        <span class="c1"># TO-DO: Needs a tutorial change too</span>
+        <span class="k">if</span> <span class="n">spike_grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spike_grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ATan</span><span class="o">.</span><span class="n">apply</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spike_grad</span> <span class="o">=</span> <span class="n">spike_grad</span>
+
+    <span class="k">def</span> <span class="nf">_lif_register_buffer</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">learn_beta</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set variables as learnable parameters else register them in the</span>
+<span class="sd">        buffer.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_beta_buffer</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">learn_beta</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_beta_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">learn_beta</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>  <span class="c1"># TODO: or .tensor() if no copy</span>
+        <span class="k">if</span> <span class="n">learn_beta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;beta&quot;</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_V_register_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">learn_V</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">V</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                <span class="n">V</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">learn_V</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LIF.init_leaky"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.LIF.init_leaky">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_leaky</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to initialize mem as an empty SpikeTensor.</span>
+<span class="sd">        ``init_flag`` is used as an attribute in the forward pass to convert</span>
+<span class="sd">        the hidden states to the same as the input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mem</span></div>
+
+<div class="viewcode-block" id="LIF.init_rleaky"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.LIF.init_rleaky">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_rleaky</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to initialize spk and mem as an empty SpikeTensor.</span>
+<span class="sd">        ``init_flag`` is used as an attribute in the forward pass to convert</span>
+<span class="sd">        the hidden states to the same as the input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spk</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span></div>
+
+<div class="viewcode-block" id="LIF.init_synaptic"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.LIF.init_synaptic">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_synaptic</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Used to initialize syn and mem as an empty SpikeTensor.</span>
+<span class="sd">        ``init_flag`` is used as an attribute in the forward pass to convert</span>
+<span class="sd">        the hidden states to the same as the input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">syn</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">syn</span><span class="p">,</span> <span class="n">mem</span></div>
+
+<div class="viewcode-block" id="LIF.init_rsynaptic"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.LIF.init_rsynaptic">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_rsynaptic</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to initialize spk, syn and mem as an empty SpikeTensor.</span>
+<span class="sd">        ``init_flag`` is used as an attribute in the forward pass to convert</span>
+<span class="sd">        the hidden states to the same as the input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spk</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">syn</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">spk</span><span class="p">,</span> <span class="n">syn</span><span class="p">,</span> <span class="n">mem</span></div>
+
+<div class="viewcode-block" id="LIF.init_lapicque"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.LIF.init_lapicque">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_lapicque</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Used to initialize mem as an empty SpikeTensor.</span>
+<span class="sd">        ``init_flag`` is used as an attribute in the forward pass to convert</span>
+<span class="sd">        the hidden states to the same as the input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">LIF</span><span class="o">.</span><span class="n">init_leaky</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="LIF.init_alpha"><a class="viewcode-back" href="../../../snntorch.html#snntorch._neurons.neurons.LIF.init_alpha">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_alpha</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Used to initialize syn_exc, syn_inh and mem as an empty SpikeTensor.</span>
+<span class="sd">        ``init_flag`` is used as an attribute in the forward pass to convert</span>
+<span class="sd">        the hidden states to the same as the input.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">syn_exc</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">syn_inh</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">_SpikeTensor</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Inherits from torch.Tensor with additional attributes.</span>
+<span class="sd">    ``init_flag`` is set at the time of initialization.</span>
+<span class="sd">    When called in the forward function of any neuron, they are parsed and</span>
+<span class="sd">    replaced with a torch.Tensor variable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">init_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># super().__init__() # optional</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_flag</span> <span class="o">=</span> <span class="n">init_flag</span>
+
+
+<span class="k">def</span> <span class="nf">_SpikeTorchConv</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert SpikeTensor to torch.Tensor of the same size as ``input_``.&quot;&quot;&quot;</span>
+
+    <span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># if len(input_.size()) == 0:</span>
+    <span class="c1">#     _batch_size = 1  # assume batch_size=1 if 1D input</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     _batch_size = input_.size(0)</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">tuple</span>
+    <span class="p">):</span>  <span class="c1"># if only one hidden state, make it iterable</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">args</span><span class="p">,)</span>
+    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>  <span class="c1"># wash away the SpikeTensor class</span>
+        <span class="n">arg</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">states</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># otherwise, list isn&#39;t unpacked</span>
+        <span class="k">return</span> <span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">states</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

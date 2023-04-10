@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snn.RSynaptic &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="snn.SConv2dLSTM" href="snn.neurons_sconvlstm.html" />
+    <link rel="prev" title="snn.RLeaky" href="snn.neurons_rleaky.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            snntorch
+              <img src="_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="snntorch.html">snntorch</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="snntorch.html#snntorch-neurons">snnTorch Neurons</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="snntorch.html#neuron-list">Neuron List</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="snn.neurons_alpha.html">snn.Alpha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="snn.neurons_lapicque.html">snn.Lapicque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="snn.neurons_leaky.html">snn.Leaky</a></li>
+<li class="toctree-l3"><a class="reference internal" href="snn.neurons_rleaky.html">snn.RLeaky</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">snn.RSynaptic</a></li>
+<li class="toctree-l3"><a class="reference internal" href="snn.neurons_sconvlstm.html">snn.SConv2dLSTM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="snn.neurons_slstm.html">snn.SLSTM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="snn.neurons_synaptic.html">snn.Synaptic</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="snntorch.html#module-snntorch._layers.bntt">snnTorch Layers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="snntorch.html#module-snntorch._neurons.neurons">Neuron Parent Classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="snntorch.html">snntorch</a></li>
+      <li class="breadcrumb-item active">snn.RSynaptic</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/snn.neurons_rsynaptic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-snntorch._neurons.rsynaptic">
+<span id="snn-rsynaptic"></span><h1>snn.RSynaptic<a class="headerlink" href="#module-snntorch._neurons.rsynaptic" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RSynaptic">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch._neurons.rsynaptic.</span></span><span class="sig-name descname"><span class="pre">RSynaptic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">V</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all_to_all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conv2d_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spike_grad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_hidden</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inhibition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_recurrent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_mechanism</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'subtract'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_quant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/_neurons/rsynaptic.html#RSynaptic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch._neurons.rsynaptic.RSynaptic" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="snntorch.html#snntorch._neurons.neurons.LIF" title="snntorch._neurons.neurons.LIF"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch._neurons.neurons.LIF</span></code></a></p>
+<p>2nd order recurrent leaky integrate and fire neuron model accounting for
+synaptic conductance.
+The synaptic current jumps upon spike arrival, which causes a jump in
+membrane potential.
+Synaptic current and membrane potential decay exponentially with rates
+of alpha and beta, respectively.
+For <span class="math notranslate nohighlight">\(U[T] &gt; U_{\rm thr} ⇒ S[T+1] = 1\)</span>.</p>
+<p>If <cite>reset_mechanism = “subtract”</cite>, then <span class="math notranslate nohighlight">\(U[t+1]\)</span> will have
+<cite>threshold</cite> subtracted from it whenever the neuron emits a spike:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}I_{\rm syn}[t+1] = αI_{\rm syn}[t] + V(S_{\rm out}[t]
++ I_{\rm in}[t+1] \\
+U[t+1] = βU[t] + I_{\rm syn}[t+1] - RU_{\rm thr}\end{split}\]</div>
+<p>Where <span class="math notranslate nohighlight">\(V(\cdot)\)</span> acts either as a linear layer, a convolutional
+operator, or elementwise product on <span class="math notranslate nohighlight">\(S_{\rm out}\)</span>.</p>
+<ul class="simple">
+<li><p>If <cite>all_to_all = “True”</cite> and <cite>linear_features</cite> is specified, then         <span class="math notranslate nohighlight">\(V(\cdot)\)</span> acts as a recurrent linear layer of the same size         as <span class="math notranslate nohighlight">\(S_{\rm out}\)</span>.</p></li>
+<li><p>If <cite>all_to_all = “True”</cite> and <cite>conv2d_channels</cite> and <cite>kernel_size</cite> are         specified, then <span class="math notranslate nohighlight">\(V(\cdot)\)</span> acts as a recurrent convlutional         layer with padding to ensure the output matches the size of the input.</p></li>
+<li><p>If <cite>all_to_all = “False”</cite>, then <span class="math notranslate nohighlight">\(V(\cdot)\)</span> acts as an         elementwise multiplier with <span class="math notranslate nohighlight">\(V\)</span>.</p></li>
+<li><dl class="simple">
+<dt>If <cite>reset_mechanism = “zero”</cite>, then <span class="math notranslate nohighlight">\(U[t+1]\)</span> will be set to <cite>0</cite></dt><dd><p>whenever the neuron emits a spike:</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\begin{split}I_{\rm syn}[t+1] = αI_{\rm syn}[t] + VS_{\rm out}[t]
++ I_{\rm in}[t+1] \\
+U[t+1] = βU[t] + I_{\rm syn}[t+1] - R(βU[t] + I_{\rm syn}[t+1])\end{split}\]</div>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(I_{\rm syn}\)</span> - Synaptic current</p></li>
+<li><p><span class="math notranslate nohighlight">\(I_{\rm in}\)</span> - Input current</p></li>
+<li><p><span class="math notranslate nohighlight">\(U\)</span> - Membrane potential</p></li>
+<li><p><span class="math notranslate nohighlight">\(U_{\rm thr}\)</span> - Membrane threshold</p></li>
+<li><p><span class="math notranslate nohighlight">\(S_{\rm out}\)</span> - Output spike</p></li>
+<li><p><span class="math notranslate nohighlight">\(R\)</span> - Reset mechanism: if active, <span class="math notranslate nohighlight">\(R = 1\)</span>, otherwise         <span class="math notranslate nohighlight">\(R = 0\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(α\)</span> - Synaptic current decay rate</p></li>
+<li><p><span class="math notranslate nohighlight">\(β\)</span> - Membrane potential decay rate</p></li>
+<li><p><span class="math notranslate nohighlight">\(V\)</span> - Explicit recurrent weight when <cite>all_to_all=False</cite></p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1"># decay rate</span>
+<span class="n">V1</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1"># shared recurrent connection</span>
+<span class="n">V2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_outputs</span><span class="p">)</span> <span class="c1"># unshared recurrent connections</span>
+
+<span class="c1"># Define Network</span>
+<span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="c1"># initialize layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">num_inputs</span><span class="p">,</span> <span class="n">num_hidden</span><span class="p">)</span>
+
+        <span class="c1"># Default RLeaky Layer where recurrent connections</span>
+        <span class="c1"># are initialized using PyTorch defaults in nn.Linear.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">RLeaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+                    <span class="n">linear_features</span><span class="o">=</span><span class="n">num_hidden</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">num_hidden</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">)</span>
+
+        <span class="c1"># each neuron has a single connection back to itself</span>
+        <span class="c1"># where the output spike is scaled by V.</span>
+        <span class="c1"># For `all_to_all = True`, V can be shared between</span>
+        <span class="c1"># neurons (e.g., V1) or unique / unshared between</span>
+        <span class="c1"># neurons (e.g., V2).</span>
+        <span class="c1"># V is learnable by default.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">RLeaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">all_to_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">V</span><span class="o">=</span><span class="n">V1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="c1"># Initialize hidden states at t=0</span>
+        <span class="n">spk1</span><span class="p">,</span> <span class="n">syn1</span><span class="p">,</span> <span class="n">mem1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span><span class="o">.</span><span class="n">init_rsynaptic</span><span class="p">()</span>
+        <span class="n">spk2</span><span class="p">,</span> <span class="n">syn2</span><span class="p">,</span> <span class="n">mem2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span><span class="o">.</span><span class="n">init_rsynaptic</span><span class="p">()</span>
+
+        <span class="c1"># Record output layer spikes and membrane</span>
+        <span class="n">spk2_rec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mem2_rec</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># time-loop</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+            <span class="n">cur1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="n">spk1</span><span class="p">,</span> <span class="n">syn1</span><span class="p">,</span> <span class="n">mem1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span><span class="p">(</span><span class="n">cur1</span><span class="p">,</span> <span class="n">spk1</span><span class="p">,</span> <span class="n">syn1</span><span class="p">,</span> <span class="n">mem1</span><span class="p">)</span>
+            <span class="n">cur2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">spk1</span><span class="p">)</span>
+            <span class="n">spk2</span><span class="p">,</span> <span class="n">syn2</span><span class="p">,</span> <span class="n">mem2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span><span class="p">(</span><span class="n">cur2</span><span class="p">,</span> <span class="n">spk2</span><span class="p">,</span> <span class="n">syn2</span><span class="p">,</span> <span class="n">mem2</span><span class="p">)</span>
+
+            <span class="n">spk2_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spk2</span><span class="p">)</span>
+            <span class="n">mem2_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mem2</span><span class="p">)</span>
+
+        <span class="c1"># convert lists to tensors</span>
+        <span class="n">spk2_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk2_rec</span><span class="p">)</span>
+        <span class="n">mem2_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem2_rec</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">spk2_rec</span><span class="p">,</span> <span class="n">mem2_rec</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em><em> or </em><em>torch.tensor</em>) – synaptic current decay rate. Clipped between 0 and 1
+during the forward-pass. May be a single-valued tensor (i.e., equal
+decay rate for all neurons in a layer), or multi-valued (one weight per
+neuron).</p></li>
+<li><p><strong>beta</strong> (<em>float</em><em> or </em><em>torch.tensor</em>) – membrane potential decay rate. Clipped between 0 and 1
+during the forward-pass. May be a single-valued tensor (i.e., equal
+decay rate for all neurons in a layer), or multi-valued (one weight per
+neuron).</p></li>
+<li><p><strong>V</strong> (<em>float</em><em> or </em><em>torch.tensor</em>) – Recurrent weights to scale output spikes, only used when
+<cite>all_to_all=False</cite>. Defaults to 1.</p></li>
+<li><p><strong>all_to_all</strong> (<em>bool</em><em>, </em><em>optional</em>) – Enables output spikes to be connected in dense or
+convolutional recurrent structures instead of 1-to-1 connections.
+Defaults to True.</p></li>
+<li><p><strong>linear_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Size of each output sample. Must be specified if
+<cite>all_to_all=True</cite> and the input data is 1D. Defaults to None</p></li>
+<li><p><strong>conv2d_channels</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of channels in each output sample. Must
+be specified if <cite>all_to_all=True</cite> and the input data is 3D. Defaults to
+None</p></li>
+<li><p><strong>kernel_size</strong> (<em>int</em><em> or </em><em>tuple</em>) – Size of the convolving kernel. Must be specified if
+<cite>all_to_all=True</cite> and the input data is 3D. Defaults to None</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold for <span class="math notranslate nohighlight">\(mem\)</span> to reach in order to
+generate a spike <cite>S=1</cite>. Defaults to 1</p></li>
+<li><p><strong>spike_grad</strong> (<em>surrogate gradient function from snntorch.surrogate</em><em>,
+</em><em>optional</em>) – Surrogate gradient for the term dS/dU. Defaults to
+None (corresponds to ATan surrogate gradient. See
+<cite>snntorch.surrogate</cite> for more options)</p></li>
+<li><p><strong>init_hidden</strong> (<em>bool</em><em>, </em><em>optional</em>) – Instantiates state variables as instance variables.
+Defaults to False</p></li>
+<li><p><strong>inhibition</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>True</cite>, suppresses all spiking other than the
+neuron with the highest state. Defaults to False</p></li>
+<li><p><strong>learn_alpha</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to enable learnable alpha. Defaults to False</p></li>
+<li><p><strong>learn_beta</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to enable learnable beta. Defaults to False</p></li>
+<li><p><strong>learn_recurrent</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to enable learnable recurrent weights.
+Defaults to True</p></li>
+<li><p><strong>learn_threshold</strong> (<em>bool</em><em>, </em><em>optional</em>) – Option to enable learnable threshold.
+Defaults to False</p></li>
+<li><p><strong>reset_mechanism</strong> (<em>str</em><em>, </em><em>optional</em>) – Defines the reset mechanism applied to     <span class="math notranslate nohighlight">\(mem\)</span> each time the threshold is met. Reset-by-subtraction:
+“subtract”, reset-to-zero: “zero, none: “none”. Defaults to “subtract”</p></li>
+<li><p><strong>state_quant</strong> (<em>quantization function from snntorch.quant</em><em>, </em><em>optional</em>) – If specified, hidden states <span class="math notranslate nohighlight">\(mem\)</span> and     <span class="math notranslate nohighlight">\(syn\)</span> are quantized to a valid state for the forward pass.         Defaults to False</p></li>
+<li><p><strong>output</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>True</cite> as well as <cite>init_hidden=True</cite>, states are
+returned when neuron is called. Defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Inputs: input_, spk_0, syn_0, mem_0</dt><dd><ul class="simple">
+<li><p><strong>input_</strong> of shape <cite>(batch, input_size)</cite>: tensor containing input         features</p></li>
+<li><p><strong>spk_0</strong> of shape <cite>(batch, input_size)</cite>: tensor containing output         spike features</p></li>
+<li><p><strong>syn_0</strong> of shape <cite>(batch, input_size)</cite>: tensor containing input         features</p></li>
+<li><p><strong>mem_0</strong> of shape <cite>(batch, input_size)</cite>: tensor containing the         initial membrane potential for each element in the batch.</p></li>
+</ul>
+</dd>
+<dt>Outputs: spk_1, syn_1, mem_1</dt><dd><ul class="simple">
+<li><p><strong>spk_1</strong> of shape <cite>(batch, input_size)</cite>: tensor containing the         output spikes.</p></li>
+<li><p><strong>syn_1</strong> of shape <cite>(batch, input_size)</cite>: tensor containing the         next synaptic current for each element in the batch</p></li>
+<li><p><strong>mem_1</strong> of shape <cite>(batch, input_size)</cite>: tensor containing the         next membrane potential for each element in the batch</p></li>
+</ul>
+</dd>
+<dt>Learnable Parameters:</dt><dd><ul class="simple">
+<li><p><strong>RSynaptic.alpha</strong> (torch.Tensor) - optional learnable weights          must be manually passed in, of shape <cite>1</cite> or (input_size).</p></li>
+<li><p><strong>RSynaptic.beta</strong> (torch.Tensor) - optional learnable weights         must be manually passed in, of shape <cite>1</cite> or (input_size).</p></li>
+<li><p><strong>RSynaptic.recurrent.weight</strong> (torch.Tensor) - optional learnable         weights are automatically generated if <cite>all_to_all=True</cite>.         <cite>RSynaptic.recurrent</cite> stores a <cite>nn.Linear</cite> or <cite>nn.Conv2d</cite> layer         depending on input arguments provided.</p></li>
+<li><p><strong>RSynaptic.V</strong> (torch.Tensor) - optional learnable weights must         be manually passed in, of shape <cite>1</cite> or (input_size). It is only used         where <cite>all_to_all=False</cite> for 1-to-1 recurrent connections.</p></li>
+<li><p><strong>RSynaptic.threshold</strong> (torch.Tensor) - optional learnable         thresholds must be manually passed in, of shape <cite>1</cite> or`` (input_size).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RSynaptic.detach_hidden">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">detach_hidden</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/_neurons/rsynaptic.html#RSynaptic.detach_hidden"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch._neurons.rsynaptic.RSynaptic.detach_hidden" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the hidden states, detached from the current graph.
+Intended for use in truncated backpropagation through time where
+hidden state variables are instance variables.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RSynaptic.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">syn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mem</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/_neurons/rsynaptic.html#RSynaptic.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch._neurons.rsynaptic.RSynaptic.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RSynaptic.reset_hidden">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">reset_hidden</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/_neurons/rsynaptic.html#RSynaptic.reset_hidden"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch._neurons.rsynaptic.RSynaptic.reset_hidden" title="Permalink to this definition"></a></dt>
+<dd><p>Used to clear hidden state variables to zero.
+Intended for use where hidden state variables are instance
+variables.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RSynaptic.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#snntorch._neurons.rsynaptic.RSynaptic.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RecurrentOneToOne">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch._neurons.rsynaptic.</span></span><span class="sig-name descname"><span class="pre">RecurrentOneToOne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">V</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/_neurons/rsynaptic.html#RecurrentOneToOne"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch._neurons.rsynaptic.RecurrentOneToOne" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RecurrentOneToOne.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/_neurons/rsynaptic.html#RecurrentOneToOne.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch._neurons.rsynaptic.RecurrentOneToOne.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="snntorch._neurons.rsynaptic.RecurrentOneToOne.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#snntorch._neurons.rsynaptic.RecurrentOneToOne.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="snn.neurons_rleaky.html" class="btn btn-neutral float-left" title="snn.RLeaky" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="snn.neurons_sconvlstm.html" class="btn btn-neutral float-right" title="snn.SConv2dLSTM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

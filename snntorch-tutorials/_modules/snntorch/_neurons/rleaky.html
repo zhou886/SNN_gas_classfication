@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch._neurons.rleaky &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch._neurons.rleaky</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch._neurons.rleaky</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="c1"># from torch import functional as F</span>
+<span class="kn">from</span> <span class="nn">.neurons</span> <span class="kn">import</span> <span class="n">_SpikeTensor</span><span class="p">,</span> <span class="n">_SpikeTorchConv</span><span class="p">,</span> <span class="n">LIF</span>
+
+
+<div class="viewcode-block" id="RLeaky"><a class="viewcode-back" href="../../../snn.neurons_rleaky.html#snntorch._neurons.rleaky.RLeaky">[docs]</a><span class="k">class</span> <span class="nc">RLeaky</span><span class="p">(</span><span class="n">LIF</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    First-order recurrent leaky integrate-and-fire neuron model.</span>
+<span class="sd">    Input is assumed to be a current injection appended to the voltage</span>
+<span class="sd">    spike output.</span>
+<span class="sd">    Membrane potential decays exponentially with rate beta.</span>
+<span class="sd">    For :math:`U[T] &gt; U_{\\rm thr} ⇒ S[T+1] = 1`.</span>
+
+<span class="sd">    If `reset_mechanism = &quot;subtract&quot;`, then :math:`U[t+1]` will have</span>
+<span class="sd">    `threshold` subtracted from it whenever the neuron emits a spike:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            U[t+1] = βU[t] + I_{\\rm in}[t+1] + V(S_{\\rm out}[t]) -</span>
+<span class="sd">            RU_{\\rm thr}</span>
+
+<span class="sd">    Where :math:`V(\\cdot)` acts either as a linear layer, a convolutional</span>
+<span class="sd">    operator, or elementwise product on :math:`S_{\\rm out}`.</span>
+
+<span class="sd">    * If `all_to_all = &quot;True&quot;` and `linear_features` is specified, then \</span>
+<span class="sd">        :math:`V(\\cdot)` acts as a recurrent linear layer of the \</span>
+<span class="sd">        same size as :math:`S_{\\rm out}`.</span>
+<span class="sd">    * If `all_to_all = &quot;True&quot;` and `conv2d_channels` and `kernel_size` are \</span>
+<span class="sd">        specified, then :math:`V(\\cdot)` acts as a recurrent convlutional \</span>
+<span class="sd">        layer \</span>
+<span class="sd">        with padding to ensure the output matches the size of the input.</span>
+<span class="sd">    * If `all_to_all = &quot;False&quot;`, then :math:`V(\\cdot)` acts as an \</span>
+<span class="sd">        elementwise multiplier with :math:`V`.</span>
+
+<span class="sd">    * If `reset_mechanism = &quot;zero&quot;`, then :math:`U[t+1]` will be set to `0` \</span>
+<span class="sd">        whenever the neuron emits a spike:</span>
+
+<span class="sd">    .. math::</span>
+<span class="sd">            U[t+1] = βU[t] + I_{\\rm in}[t+1] +  V(S_{\\rm out}[t]) -</span>
+<span class="sd">            R(βU[t] + I_{\\rm in}[t+1] +  V(S_{\\rm out}[t]))</span>
+
+<span class="sd">    * :math:`I_{\\rm in}` - Input current</span>
+<span class="sd">    * :math:`U` - Membrane potential</span>
+<span class="sd">    * :math:`U_{\\rm thr}` - Membrane threshold</span>
+<span class="sd">    * :math:`S_{\\rm out}` - Output spike</span>
+<span class="sd">    * :math:`R` - Reset mechanism: if active, :math:`R = 1`, otherwise \</span>
+<span class="sd">        :math:`R = 0`</span>
+<span class="sd">    * :math:`β` - Membrane potential decay rate</span>
+<span class="sd">    * :math:`V` - Explicit recurrent weight when `all_to_all=False`</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import torch</span>
+<span class="sd">        import torch.nn as nn</span>
+<span class="sd">        import snntorch as snn</span>
+
+<span class="sd">        beta = 0.5 # decay rate</span>
+<span class="sd">        V1 = 0.5 # shared recurrent connection</span>
+<span class="sd">        V2 = torch.rand(num_outputs) # unshared recurrent connections</span>
+
+<span class="sd">        # Define Network</span>
+<span class="sd">        class Net(nn.Module):</span>
+<span class="sd">            def __init__(self):</span>
+<span class="sd">                super().__init__()</span>
+
+<span class="sd">                # initialize layers</span>
+<span class="sd">                self.fc1 = nn.Linear(num_inputs, num_hidden)</span>
+
+<span class="sd">                # Default RLeaky Layer where recurrent connections</span>
+<span class="sd">                # are initialized using PyTorch defaults in nn.Linear.</span>
+<span class="sd">                self.lif1 = snn.RLeaky(beta=beta,</span>
+<span class="sd">                            linear_features=num_hidden)</span>
+
+<span class="sd">                self.fc2 = nn.Linear(num_hidden, num_outputs)</span>
+
+<span class="sd">                # each neuron has a single connection back to itself</span>
+<span class="sd">                # where the output spike is scaled by V.</span>
+<span class="sd">                # For `all_to_all = False`, V can be shared between</span>
+<span class="sd">                # neurons (e.g., V1) or unique / unshared between</span>
+<span class="sd">                # neurons (e.g., V2).</span>
+<span class="sd">                # V is learnable by default.</span>
+<span class="sd">                self.lif2 = snn.RLeaky(beta=beta, all_to_all=False, V=V1)</span>
+
+<span class="sd">            def forward(self, x):</span>
+<span class="sd">                # Initialize hidden states at t=0</span>
+<span class="sd">                spk1, mem1 = self.lif1.init_rleaky()</span>
+<span class="sd">                spk2, mem2 = self.lif2.init_rleaky()</span>
+
+<span class="sd">                # Record output layer spikes and membrane</span>
+<span class="sd">                spk2_rec = []</span>
+<span class="sd">                mem2_rec = []</span>
+
+<span class="sd">                # time-loop</span>
+<span class="sd">                for step in range(num_steps):</span>
+<span class="sd">                    cur1 = self.fc1(x)</span>
+<span class="sd">                    spk1, mem1 = self.lif1(cur1, spk1, mem1)</span>
+<span class="sd">                    cur2 = self.fc2(spk1)</span>
+<span class="sd">                    spk2, mem2 = self.lif2(cur2, spk2, mem2)</span>
+
+<span class="sd">                    spk2_rec.append(spk2)</span>
+<span class="sd">                    mem2_rec.append(mem2)</span>
+
+<span class="sd">                # convert lists to tensors</span>
+<span class="sd">                spk2_rec = torch.stack(spk2_rec)</span>
+<span class="sd">                mem2_rec = torch.stack(mem2_rec)</span>
+
+<span class="sd">                return spk2_rec, mem2_rec</span>
+
+<span class="sd">    :param beta: membrane potential decay rate. Clipped between 0 and 1</span>
+<span class="sd">        during the forward-pass. May be a single-valued tensor (i.e., equal</span>
+<span class="sd">        decay rate for all neurons in a layer), or multi-valued</span>
+<span class="sd">        (one weight per neuron).</span>
+<span class="sd">    :type beta: float or torch.tensor</span>
+
+<span class="sd">    :param V: Recurrent weights to scale output spikes, only used when</span>
+<span class="sd">        `all_to_all=False`. Defaults to 1.</span>
+<span class="sd">    :type V: float or torch.tensor</span>
+
+<span class="sd">    :param all_to_all: Enables output spikes to be connected in dense or</span>
+<span class="sd">        convolutional recurrent structures instead of 1-to-1 connections.</span>
+<span class="sd">        Defaults to True.</span>
+<span class="sd">    :type all_to_all: bool, optional</span>
+
+<span class="sd">    :param linear_features: Size of each output sample. Must be specified</span>
+<span class="sd">        if `all_to_all=True` and the input data is 1D. Defaults to None</span>
+<span class="sd">    :type linear_features: int, optional</span>
+
+<span class="sd">    :param conv2d_channels: Number of channels in each output sample. Must</span>
+<span class="sd">        be specified if `all_to_all=True` and the input data is 3D.</span>
+<span class="sd">        Defaults to None</span>
+<span class="sd">    :type conv2d_channels: int, optional</span>
+
+<span class="sd">    :param kernel_size:  Size of the convolving kernel. Must be</span>
+<span class="sd">        specified if `all_to_all=True` and the input data is 3D.</span>
+<span class="sd">        Defaults to None</span>
+<span class="sd">    :type kernel_size: int or tuple</span>
+
+<span class="sd">    :param threshold: Threshold for :math:`mem` to reach in order to</span>
+<span class="sd">        generate a spike `S=1`. Defaults to 1 :type threshold: float,</span>
+<span class="sd">        optional</span>
+
+<span class="sd">    :param spike_grad: Surrogate gradient for the term dS/dU. Defaults</span>
+<span class="sd">        to None (corresponds to ATan surrogate gradient. See</span>
+<span class="sd">        `snntorch.surrogate` for more options)</span>
+<span class="sd">    :type spike_grad: surrogate gradient function from snntorch.surrogate,</span>
+<span class="sd">        optional</span>
+
+<span class="sd">    :param init_hidden: Instantiates state variables as instance variables.</span>
+<span class="sd">        Defaults to False :type init_hidden: bool, optional</span>
+
+<span class="sd">    :param inhibition: If `True`, suppresses all spiking other than the</span>
+<span class="sd">        neuron with the highest state. Defaults to False :type inhibition:</span>
+<span class="sd">        bool, optional</span>
+
+<span class="sd">    :param learn_beta: Option to enable learnable beta. Defaults to False</span>
+<span class="sd">    :type learn_beta: bool, optional</span>
+
+<span class="sd">    :param learn_recurrent: Option to enable learnable recurrent weights.</span>
+<span class="sd">        Defaults to True</span>
+<span class="sd">    :type learn_recurrent: bool, optional</span>
+
+<span class="sd">    :param learn_threshold: Option to enable learnable threshold.</span>
+<span class="sd">        Defaults to False</span>
+<span class="sd">    :type learn_threshold: bool, optional</span>
+
+<span class="sd">    :param reset_mechanism: Defines the reset mechanism applied to</span>
+<span class="sd">        :math:`mem` each time the threshold is met.</span>
+<span class="sd">        Reset-by-subtraction: &quot;subtract&quot;, reset-to-zero: &quot;zero&quot;,</span>
+<span class="sd">        none: &quot;none&quot;. Defaults to &quot;subtract&quot;</span>
+<span class="sd">    :type reset_mechanism: str, optional</span>
+
+<span class="sd">    :param state_quant: If specified, hidden state :math:`mem` is</span>
+<span class="sd">        quantized to a valid state for the forward pass. Defaults to False</span>
+<span class="sd">    :type state_quant: quantization function from snntorch.quant, optional</span>
+
+<span class="sd">    :param output: If `True` as well as `init_hidden=True`, states are</span>
+<span class="sd">        returned when neuron is called. Defaults to False :type output:</span>
+<span class="sd">        bool, optional</span>
+
+
+
+
+<span class="sd">    Inputs: \\input_, spk_0, mem_0</span>
+<span class="sd">        - **input_** of shape `(batch, input_size)`: tensor containing</span>
+<span class="sd">        input</span>
+<span class="sd">          features</span>
+<span class="sd">        - **spk_0** of shape `(batch, input_size)`: tensor containing</span>
+<span class="sd">        output</span>
+<span class="sd">          spike features</span>
+<span class="sd">        - **mem_0** of shape `(batch, input_size)`: tensor containing the</span>
+<span class="sd">          initial membrane potential for each element in the batch.</span>
+
+<span class="sd">    Outputs: spk_1, mem_1</span>
+<span class="sd">        - **spk_1** of shape `(batch, input_size)`: tensor containing the</span>
+<span class="sd">        output</span>
+<span class="sd">          spikes.</span>
+<span class="sd">        - **mem_1** of shape `(batch, input_size)`: tensor containing</span>
+<span class="sd">        the next</span>
+<span class="sd">          membrane potential for each element in the batch</span>
+
+<span class="sd">    Learnable Parameters:</span>
+<span class="sd">        - **RLeaky.beta** (torch.Tensor) - optional learnable weights</span>
+<span class="sd">        must be</span>
+<span class="sd">          manually passed in, of shape `1` or (input_size).</span>
+<span class="sd">        - **RLeaky.recurrent.weight** (torch.Tensor) - optional learnable</span>
+<span class="sd">          weights are automatically generated if `all_to_all=True`.</span>
+<span class="sd">          `RLeaky.recurrent` stores a `nn.Linear` or `nn.Conv2d` layer</span>
+<span class="sd">          depending on input arguments provided.</span>
+<span class="sd">        - **RLeaky.V** (torch.Tensor) - optional learnable weights must be</span>
+<span class="sd">          manually passed in, of shape `1` or (input_size). It is only used</span>
+<span class="sd">          where `all_to_all=False` for 1-to-1 recurrent connections.</span>
+<span class="sd">        - **RLeaky.threshold** (torch.Tensor) - optional learnable</span>
+<span class="sd">            thresholds must be manually passed in, of shape `1` or``</span>
+<span class="sd">            (input_size).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">V</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">all_to_all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">linear_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">conv2d_channels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">spike_grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">init_hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">inhibition</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_beta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_recurrent</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># changed learn_V</span>
+        <span class="n">reset_mechanism</span><span class="o">=</span><span class="s2">&quot;subtract&quot;</span><span class="p">,</span>
+        <span class="n">state_quant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RLeaky</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">beta</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="p">,</span>
+            <span class="n">spike_grad</span><span class="p">,</span>
+            <span class="n">init_hidden</span><span class="p">,</span>
+            <span class="n">inhibition</span><span class="p">,</span>
+            <span class="n">learn_beta</span><span class="p">,</span>
+            <span class="n">learn_threshold</span><span class="p">,</span>
+            <span class="n">reset_mechanism</span><span class="p">,</span>
+            <span class="n">state_quant</span><span class="p">,</span>
+            <span class="n">output</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_to_all</span> <span class="o">=</span> <span class="n">all_to_all</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learn_recurrent</span> <span class="o">=</span> <span class="n">learn_recurrent</span>
+
+        <span class="c1"># linear params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear_features</span> <span class="o">=</span> <span class="n">linear_features</span>
+
+        <span class="c1"># Conv2d params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">=</span> <span class="n">kernel_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conv2d_channels</span> <span class="o">=</span> <span class="n">conv2d_channels</span>
+
+        <span class="c1"># catch cases</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rleaky_init_cases</span><span class="p">()</span>
+
+        <span class="c1"># initialize recurrent connections</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_to_all</span><span class="p">:</span>  <span class="c1"># init all-all connections</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_recurrent_net</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># initialize 1-1 connections</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_V_register_buffer</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">learn_recurrent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_recurrent_one_to_one</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">learn_recurrent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_disable_recurrent_grad</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_rleaky</span><span class="p">()</span>
+        <span class="c1">#     self.state_fn = self._build_state_function_hidden</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.state_fn = self._build_state_function</span>
+
+<div class="viewcode-block" id="RLeaky.forward"><a class="viewcode-back" href="../../../snn.neurons_rleaky.html#snntorch._neurons.rleaky.RLeaky.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">spk</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="n">mem</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span>
+        <span class="p">):</span>  <span class="c1"># only triggered on first-pass</span>
+            <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTorchConv</span><span class="p">(</span><span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">,</span> <span class="n">input_</span><span class="o">=</span><span class="n">input_</span><span class="p">)</span>
+        <span class="c1"># init_hidden case</span>
+        <span class="k">elif</span> <span class="n">mem</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTorchConv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span> <span class="n">input_</span><span class="o">=</span><span class="n">input_</span>
+            <span class="p">)</span>
+
+        <span class="c1"># TO-DO: alternatively, we could do torch.exp(-1 /</span>
+        <span class="c1"># self.beta.clamp_min(0)), giving actual time constants instead of</span>
+        <span class="c1"># values in [0, 1] as initial beta beta = self.beta.clamp(0, 1)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_reset</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+            <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">:</span>
+                <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inhibition</span><span class="p">:</span>
+                <span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire_inhibition</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">mem</span><span class="p">)</span>  <span class="c1"># batch_size</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span>
+
+        <span class="c1"># intended for truncated-BPTT where instance variables are hidden</span>
+        <span class="c1"># states</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rleaky_forward_cases</span><span class="p">(</span><span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inhibition</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire_inhibition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>  <span class="c1"># read-out layer returns output+states</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># hidden layer e.g., in nn.Sequential, only returns output</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk</span></div>
+
+    <span class="k">def</span> <span class="nf">_init_recurrent_net</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">all_to_all</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_features</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_recurrent_linear</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_init_recurrent_conv2d</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_recurrent_one_to_one</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_init_recurrent_linear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recurrent</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linear_features</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_features</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_recurrent_conv2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_padding</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recurrent</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span>
+            <span class="n">in_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">conv2d_channels</span><span class="p">,</span>
+            <span class="n">out_channels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">conv2d_channels</span><span class="p">,</span>
+            <span class="n">kernel_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="nf">_init_recurrent_one_to_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recurrent</span> <span class="o">=</span> <span class="n">RecurrentOneToOne</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">V</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_disable_recurrent_grad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recurrent</span><span class="o">.</span><span class="n">parameters</span><span class="p">():</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_base_state_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="n">base_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">mem</span> <span class="o">+</span> <span class="n">input_</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">recurrent</span><span class="p">(</span><span class="n">spk</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base_fn</span>
+
+    <span class="k">def</span> <span class="nf">_build_state_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># reset by subtraction</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span>
+                <span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># reset to zero</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span>
+                <span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span>
+            <span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># no reset, pure integration</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_fn</span>
+
+    <span class="k">def</span> <span class="nf">_base_state_function_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="n">base_fn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span>
+            <span class="o">+</span> <span class="n">input_</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">recurrent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spk</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">base_fn</span>
+
+    <span class="k">def</span> <span class="nf">_build_state_function_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># reset by subtraction</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+                <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># reset to zero</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span>
+                <span class="n">input_</span>
+            <span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># no reset, pure integration</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_fn</span>
+
+    <span class="k">def</span> <span class="nf">_rleaky_forward_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">spk</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;When `init_hidden=True`,&quot;</span> <span class="s2">&quot;RLeaky expects 1 input argument.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_rleaky_init_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">all_to_all_bool</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">all_to_all</span><span class="p">)</span>
+        <span class="n">linear_features_bool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_features</span>
+        <span class="n">conv2d_channels_bool</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv2d_channels</span><span class="p">)</span>
+        <span class="n">kernel_size_bool</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_size</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">all_to_all_bool</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">linear_features_bool</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">conv2d_channels_bool</span> <span class="ow">or</span> <span class="n">kernel_size_bool</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="s2">&quot;When `all_to_all=True`, RLeaky requires either&quot;</span>
+                        <span class="s2">&quot;`linear_features` or (`conv2d_channels` and &quot;</span>
+                        <span class="s2">&quot;`kernel_size`) to be specified. The &quot;</span>
+                        <span class="s2">&quot;shape should match the shape of the output spike of &quot;</span>
+                        <span class="s2">&quot;the layer.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">conv2d_channels_bool</span> <span class="o">^</span> <span class="n">kernel_size_bool</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="s2">&quot;`conv2d_channels` and `kernel_size` must both be&quot;</span>
+                        <span class="s2">&quot;specified. The shape of `conv2d_channels` should &quot;</span>
+                        <span class="s2">&quot;match the shape of the output&quot;</span>
+                        <span class="s2">&quot;spikes.&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">linear_features_bool</span> <span class="ow">and</span> <span class="n">kernel_size_bool</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">linear_features_bool</span> <span class="ow">and</span> <span class="n">conv2d_channels_bool</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;`linear_features` cannot be specified at the same time as&quot;</span>
+                    <span class="s2">&quot;`conv2d_channels` or `kernel_size`. A linear layer and &quot;</span>
+                    <span class="s2">&quot;conv2d layer cannot both&quot;</span>
+                    <span class="s2">&quot;be specified at the same time.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">linear_features_bool</span>
+                <span class="ow">or</span> <span class="n">conv2d_channels_bool</span>
+                <span class="ow">or</span> <span class="n">kernel_size_bool</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s2">&quot;When `all_to_all`=False, none of `linear_features`,&quot;</span>
+                    <span class="s2">&quot;`conv2d_channels`, or `kernel_size` should be specified. &quot;</span>
+                    <span class="s2">&quot;The weight `V` is used&quot;</span>
+                    <span class="s2">&quot;instead.&quot;</span>
+                <span class="p">)</span>
+
+<div class="viewcode-block" id="RLeaky.detach_hidden"><a class="viewcode-back" href="../../../snn.neurons_rleaky.html#snntorch._neurons.rleaky.RLeaky.detach_hidden">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">detach_hidden</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the hidden states, detached from the current graph.</span>
+<span class="sd">        Intended</span>
+<span class="sd">        for use in truncated backpropagation through time where hidden state</span>
+<span class="sd">        variables</span>
+<span class="sd">        are instance variables.&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">],</span> <span class="n">RLeaky</span><span class="p">):</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">mem</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">spk</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="RLeaky.reset_hidden"><a class="viewcode-back" href="../../../snn.neurons_rleaky.html#snntorch._neurons.rleaky.RLeaky.reset_hidden">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reset_hidden</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Used to clear hidden state variables to zero.</span>
+<span class="sd">        Intended for use where hidden state variables are instance variables.</span>
+<span class="sd">        Assumes hidden states have a batch dimension already.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">],</span> <span class="n">RLeaky</span><span class="p">):</span>
+                <span class="p">(</span>
+                    <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">spk</span><span class="p">,</span>
+                    <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span>
+                <span class="p">)</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">init_rleaky</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="RecurrentOneToOne"><a class="viewcode-back" href="../../../snn.neurons_rleaky.html#snntorch._neurons.rleaky.RecurrentOneToOne">[docs]</a><span class="k">class</span> <span class="nc">RecurrentOneToOne</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RecurrentOneToOne</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span> <span class="o">=</span> <span class="n">V</span>
+
+<div class="viewcode-block" id="RecurrentOneToOne.forward"><a class="viewcode-back" href="../../../snn.neurons_rleaky.html#snntorch._neurons.rleaky.RecurrentOneToOne.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">V</span>  <span class="c1"># element-wise or global multiplication</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

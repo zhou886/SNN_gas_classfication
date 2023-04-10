@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snnTorch Documentation &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="readme.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            snntorch
+              <img src="_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">snnTorch Documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="snntorch-documentation">
+<h1>snnTorch Documentation<a class="headerlink" href="#snntorch-documentation" title="Permalink to this headline"></a></h1>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
+<a class="reference external image-reference" href="https://snntorch.readthedocs.io/en/latest/?badge=latest"><img alt="https://github.com/jeshraghian/snntorch/actions/workflows/build.yml/badge.svg" src="https://github.com/jeshraghian/snntorch/actions/workflows/build.yml/badge.svg" /></a>
+<a class="reference external image-reference" href="https://snntorch.readthedocs.io/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/snntorch/badge/?version=latest" /></a>
+<a class="reference external image-reference" href="https://discord.gg/cdZb5brajb"><img alt="Discord" src="https://img.shields.io/discord/906036932725841941" /></a>
+<a class="reference external image-reference" href="https://pypi.python.org/pypi/snntorch"><img alt="https://img.shields.io/pypi/v/snntorch.svg" src="https://img.shields.io/pypi/v/snntorch.svg" /></a>
+<a class="reference external image-reference" href="https://anaconda.org/conda-forge/snntorch"><img alt="https://img.shields.io/conda/vn/conda-forge/snntorch.svg" src="https://img.shields.io/conda/vn/conda-forge/snntorch.svg" /></a>
+<a class="reference external image-reference" href="https://pepy.tech/project/snntorch"><img alt="https://static.pepy.tech/personalized-badge/snntorch?period=total&amp;units=international_system&amp;left_color=grey&amp;right_color=orange&amp;left_text=Downloads" src="https://static.pepy.tech/personalized-badge/snntorch?period=total&amp;units=international_system&amp;left_color=grey&amp;right_color=orange&amp;left_text=Downloads" /></a>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/snntorch_alpha_scaled.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/snntorch_alpha_scaled.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/snntorch_alpha_scaled.png?raw=true" style="width: 700px;" /></a>
+<p>The brain is the perfect place to look for inspiration to develop more efficient neural networks. One of the main differences with modern deep learning is that the brain encodes information in spikes rather than continuous activations.
+snnTorch is a Python package for performing gradient-based learning with spiking neural networks.
+It extends the capabilities of PyTorch, taking advantage of its GPU accelerated tensor
+computation and applying it to networks of spiking neurons. Pre-designed spiking neuron models are seamlessly integrated within the PyTorch framework and can be treated as recurrent activation units.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/spike_excite_alpha_ps2.gif?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/spike_excite_alpha_ps2.gif?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/spike_excite_alpha_ps2.gif?raw=true" style="width: 800px;" /></a>
+<p>If you like this project, please consider starring ⭐ this repo as it is the easiest and best way to support it.</p>
+<p>If you have issues, comments, or are looking for advice on training spiking neural networks, you can open an issue, a discussion, or chat in our <a class="reference external" href="https://discord.gg/cdZb5brajb">discord</a> channel.</p>
+<section id="snntorch-structure">
+<h3>snnTorch Structure<a class="headerlink" href="#snntorch-structure" title="Permalink to this headline"></a></h3>
+<p>snnTorch contains the following components:</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Component</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.html">snntorch</a></p></td>
+<td><p>a spiking neuron library like torch.nn, deeply integrated with autograd</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.functional.html">snntorch.functional</a></p></td>
+<td><p>common arithmetic operations on spikes, e.g., loss, regularization etc.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html">snntorch.spikegen</a></p></td>
+<td><p>a library for spike generation and data conversion</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikeplot.html">snntorch.spikeplot</a></p></td>
+<td><p>visualization tools for spike-based data using matplotlib and celluloid</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.surrogate.html">snntorch.surrogate</a></p></td>
+<td><p>optional surrogate gradient functions</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.utils.html">snntorch.utils</a></p></td>
+<td><p>dataset utility functions</p></td>
+</tr>
+</tbody>
+</table>
+<p>snnTorch is designed to be intuitively used with PyTorch, as though each spiking neuron were simply another activation in a sequence of layers.
+It is therefore agnostic to fully-connected layers, convolutional layers, residual connections, etc.</p>
+<p>At present, the neuron models are represented by recursive functions which removes the need to store membrane potential traces for all neurons in a system in order to calculate the gradient.
+The lean requirements of snnTorch enable small and large networks to be viably trained on CPU, where needed.
+Provided that the network models and tensors are loaded onto CUDA, snnTorch takes advantage of GPU acceleration in the same way as PyTorch.</p>
+</section>
+<section id="citation">
+<h3>Citation<a class="headerlink" href="#citation" title="Permalink to this headline"></a></h3>
+<p>If you find snnTorch useful in your work, please cite the following source:</p>
+<p><a class="reference external" href="https://arxiv.org/abs/2109.12894">Jason K. Eshraghian, Max Ward, Emre Neftci, Xinxin Wang, Gregor Lenz, Girish
+Dwivedi, Mohammed Bennamoun, Doo Seok Jeong, and Wei D. Lu “Training
+Spiking Neural Networks Using Lessons From Deep Learning”. arXiv preprint arXiv:2109.12894,
+September 2021.</a></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>@article<span class="o">{</span>eshraghian2021training,
+        <span class="nv">title</span>   <span class="o">=</span>  <span class="o">{</span>Training spiking neural networks using lessons from deep learning<span class="o">}</span>,
+        <span class="nv">author</span>  <span class="o">=</span>  <span class="o">{</span>Eshraghian, Jason K and Ward, Max and Neftci, Emre and Wang, Xinxin
+                    and Lenz, Gregor and Dwivedi, Girish and Bennamoun, Mohammed and
+                   Jeong, Doo Seok and Lu, Wei D<span class="o">}</span>,
+        <span class="nv">journal</span> <span class="o">=</span> <span class="o">{</span>arXiv preprint arXiv:2109.12894<span class="o">}</span>,
+        <span class="nv">year</span>    <span class="o">=</span> <span class="o">{</span><span class="m">2021</span><span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Let us know if you are using snnTorch in any interesting work, research or blogs, as we would love to hear more about it! Reach out at <a class="reference external" href="mailto:snntorch&#37;&#52;&#48;gmail&#46;com">snntorch<span>&#64;</span>gmail<span>&#46;</span>com</a>.</p>
+</section>
+<section id="requirements">
+<h3>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h3>
+<p>The following packages need to be installed to use snnTorch:</p>
+<ul class="simple">
+<li><p>torch &gt;= 1.1.0</p></li>
+<li><p>numpy &gt;= 1.17</p></li>
+<li><p>pandas</p></li>
+<li><p>matplotlib</p></li>
+<li><p>math</p></li>
+</ul>
+<p>They are automatically installed if snnTorch is installed using the pip command. Ensure the correct version of torch is installed for your system to enable CUDA compatibility.</p>
+</section>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h3>
+<p>Run the following to install:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python
+$ pip install snntorch
+</pre></div>
+</div>
+<p>To install snnTorch from source instead:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone https://github.com/jeshraghian/snnTorch
+$ cd snntorch
+$ python setup.py install
+</pre></div>
+</div>
+<p>To install snntorch with conda:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda install -c conda-forge snntorch
+</pre></div>
+</div>
+<p>To install for an Intelligent Processing Units (IPU) based build using Graphcore’s accelerators:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install snntorch-ipu
+</pre></div>
+</div>
+</section>
+<section id="api-examples">
+<h3>API &amp; Examples<a class="headerlink" href="#api-examples" title="Permalink to this headline"></a></h3>
+<p>A complete API is available <a class="reference external" href="https://snntorch.readthedocs.io/">here</a>. Examples, tutorials and Colab notebooks are provided.</p>
+</section>
+<section id="quickstart">
+<h3>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline"></a></h3>
+<a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/quickstart.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+<p>Here are a few ways you can get started with snnTorch:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/quickstart.ipynb">Quickstart Notebook (Opens in Colab)</a></p></li>
+<li><p><a class="reference external" href="https://snntorch.readthedocs.io/">The API Reference</a></p></li>
+<li><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/examples.html">Examples</a></p></li>
+<li><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/index.html">Tutorials</a></p></li>
+</ul>
+<p>For a quick example to run snnTorch, see the following snippet, or test the quickstart notebook:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span><span class="o">,</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">surrogate</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+
+<span class="n">num_steps</span> <span class="o">=</span> <span class="mi">25</span> <span class="c1"># number of time steps</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># neuron decay rate</span>
+<span class="n">spike_grad</span> <span class="o">=</span> <span class="n">surrogate</span><span class="o">.</span><span class="n">fast_sigmoid</span><span class="p">()</span> <span class="c1"># surrogate gradient</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+      <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+      <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+      <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">),</span>
+      <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+      <span class="n">nn</span><span class="o">.</span><span class="n">MaxPool2d</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+      <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">),</span>
+      <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+      <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">16</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+      <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+      <span class="p">)</span>
+
+<span class="n">data_in</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span> <span class="c1"># random input data</span>
+<span class="n">spike_recording</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># record spikes over time</span>
+<span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">net</span><span class="p">)</span> <span class="c1"># reset/initialize hidden states for all neurons</span>
+
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span> <span class="c1"># loop over time</span>
+    <span class="n">spike</span><span class="p">,</span> <span class="n">state</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">data_in</span><span class="p">[</span><span class="n">step</span><span class="p">])</span> <span class="c1"># one time step of forward-pass</span>
+    <span class="n">spike_recording</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spike</span><span class="p">)</span> <span class="c1"># record spikes in list</span>
+</pre></div>
+</div>
+</section>
+<section id="a-deep-dive-into-snns">
+<h3>A Deep Dive into SNNs<a class="headerlink" href="#a-deep-dive-into-snns" title="Permalink to this headline"></a></h3>
+<p>If you wish to learn all the fundamentals of training spiking neural networks, from neuron models, to the neural code, up to backpropagation, the snnTorch tutorial series is a great place to begin.
+It consists of interactive notebooks with complete explanations that can get you up to speed.</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 55%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Tutorial</p></th>
+<th class="head"><p>Title</p></th>
+<th class="head"><p>Colab Link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_1.html">Tutorial 1</a></p></td>
+<td><p>Spike Encoding with snnTorch</p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_1_spikegen.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_2.html">Tutorial 2</a></p></td>
+<td><p>The Leaky Integrate and Fire Neuron</p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_2_lif_neuron.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_3.html">Tutorial 3</a></p></td>
+<td><p>A Feedforward Spiking Neural Network</p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_3_feedforward_snn.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_4.html">Tutorial 4</a></p></td>
+<td><p>2nd Order Spiking Neuron Models (Optional)</p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_4_advanced_neurons.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_5.html">Tutorial 5</a></p></td>
+<td><p>Training Spiking Neural Networks with snnTorch</p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_5_FCN.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_6.html">Tutorial 6</a></p></td>
+<td><p>Surrogate Gradient Descent in a Convolutional SNN</p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_6_CNN.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_7.html">Tutorial 7</a></p></td>
+<td><p>Neuromorphic Datasets with Tonic + snnTorch</p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_7_neuromorphic_datasets.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 64%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Advanced Tutorials</p></th>
+<th class="head"><p>Colab Link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_pop.html">Population Coding</a></p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_pop.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_regression_1.html">Regression: Part I - Membrane Potential Learning with LIF Neurons</a></p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_regression_1.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_regression_2.html">Regression: Part II - Regression-based Classification with Recurrent LIF Neurons</a></p></td>
+<td><a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_regression_2.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+</td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_ipu_1.html">Accelerating snnTorch on IPUs</a></p></td>
+<td><p>—</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intelligent-processing-unit-ipu-acceleration">
+<h3>Intelligent Processing Unit (IPU) Acceleration<a class="headerlink" href="#intelligent-processing-unit-ipu-acceleration" title="Permalink to this headline"></a></h3>
+<p>snnTorch has been optimized for <a class="reference external" href="https://www.graphcore.ai/">Graphcore’s IPU accelerators</a>.
+To install an IPU based build of snnTorch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install snntorch-ipu
+</pre></div>
+</div>
+<p>Low-level custom operations for IPU compatibility will be automatically compiled when <code class="code docutils literal notranslate"><span class="pre">import</span> <span class="pre">snntorch</span></code> is called for the first time.</p>
+<p>When updating the Poplar SDK, these operations may need to be recompiled.
+This can be done by reinstalling <code class="code docutils literal notranslate"><span class="pre">snntorch-ipu</span></code>, or deleting files in the base directory with an .so extension.</p>
+<p>The <code class="code docutils literal notranslate"><span class="pre">snntorch.backprop</span></code> module, and several functions from <code class="code docutils literal notranslate"><span class="pre">snntorch.functional</span></code> and <code class="code docutils literal notranslate"><span class="pre">snntorch.surrogate</span></code>, are incompatible with IPUs, but can be recreated using PyTorch primitives.</p>
+<p>Additional requirements include:</p>
+<ul class="simple">
+<li><p>poptorch</p></li>
+<li><p>The Poplar SDK</p></li>
+</ul>
+<p>Refer to <a class="reference external" href="https://github.com/graphcore/poptorch">Graphcore’s documentation</a> for installation instructions of poptorch and the Poplar SDK.</p>
+<p>The homepage for the snnTorch IPU project can be found <a class="reference external" href="https://github.com/vinniesun/snntorch-ipu">here</a>.
+A tutorial for training SNNs is provided <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/tutorial_ipu_1.html">here</a>.</p>
+</section>
+<section id="contributing">
+<h3>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline"></a></h3>
+<p>If you’re ready to contribute to snnTorch, instructions to do so can be <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/contributing.html">found here</a>.</p>
+</section>
+<section id="acknowledgments">
+<h3>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this headline"></a></h3>
+<p>snnTorch is currently maintained by the <a class="reference external" href="https://ncg.ucsc.edu">UCSC Neuromorphic Computing Group</a>. It was initially developed by <a class="reference external" href="https://jasoneshraghian.com">Jason K. Eshraghian</a> in the <a class="reference external" href="https://lugroup.engin.umich.edu/">Lu Group (University of Michigan)</a>.</p>
+<p>Additional contributions were made by <a class="reference external" href="https://github.com/vinniesun">Vincent Sun</a>, <a class="reference external" href="https://github.com/pengzhouzp">Peng Zhou</a>, <a class="reference external" href="https://github.com/ridgerchu">Ridger Zhu</a>, <a class="reference external" href="https://github.com/ahenkes1">Alexander Henkes</a>, Xinxin Wang, and Emre Neftci.</p>
+</section>
+<section id="license-copyright">
+<h3>License &amp; Copyright<a class="headerlink" href="#license-copyright" title="Permalink to this headline"></a></h3>
+<p>snnTorch source code is published under the terms of the MIT License.
+snnTorch’s documentation is licensed under a Creative Commons Attribution-Share Alike 3.0 Unported License (<a class="reference external" href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>).</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="readme.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

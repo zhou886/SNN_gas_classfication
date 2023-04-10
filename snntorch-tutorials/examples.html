@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Spiking Neurons and Networks" href="examples/examples_snn.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            snntorch
+              <img src="_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples_snn.html">Spiking Neurons and Networks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples_splt.html">Spike Plot and Animation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples_svision.html">Spikevision Datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples_sur.html">Surrogate Gradients</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/examples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h1>
+<p>Samples of code snippets demonstrating usage of various modules and functions of snnTorch can be found here.</p>
+<p>More detail is available in the <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/index.html">tutorials.</a></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples_snn.html">Spiking Neurons and Networks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_snn/example_snn_lapicque1.html">Building Networks: Lapicque’s Neuron</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_snn/example_snn_srm01.html">Building Networks: 0th Order Spike Response Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_snn/example_snn_synaptic.html">Building Networks: Synaptic Conductance-based LIF Neuron</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_snn/example_snn_synaptic2.html">Building Networks with Instance Variables: Synaptic Conductance-based LIF Neuron</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples_splt.html">Spike Plot and Animation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_splt/example_splt_anim.html">Animator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_splt/example_splt_raster.html">Raster</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_splt/example_splt_spikecount.html">Spike Count</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_splt/example_splt_traces.html">Traces</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples_svision.html">Spikevision Datasets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples_svision/example_sv_dvsgesture.html">Spikevision Datasets: DVS Gesture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples_svision/example_sv_nmnist.html">Spikevision Datasets: NMNIST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/examples_svision/example_sv_shd.html">Spikevision Datasets: SHD Dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples/examples_sur.html">Surrogate Gradients</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_sur/example_sur_fs.html">Fast Sigmoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_sur/example_sur_lso.html">Leaky Spike Operator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_sur/example_sur_s.html">Sigmoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_sur/example_sur_sre.html">Spike Rate Escape</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/example_sur/example_sur_sso.html">Stochastic Spike Operator</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples/examples_snn.html" class="btn btn-neutral float-right" title="Spiking Neurons and Networks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

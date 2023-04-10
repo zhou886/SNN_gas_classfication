@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Regression with SNNs: Part I &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Regression with SNNs: Part II" href="tutorial_regression_2.html" />
+    <link rel="prev" title="Population Coding in Spiking Neural Nets" href="tutorial_pop.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            snntorch
+              <img src="../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_1.html">Tutorial 1 - Spike Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_2.html">Tutorial 2 - The Leaky Integrate-and-Fire Neuron</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_3.html">Tutorial 3 - A Feedforward Spiking Neural Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_4.html">Tutorial 4 - 2nd Order Spiking Neuron Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_5.html">Tutorial 5 - Training Spiking Neural Networks with snntorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_6.html">Tutorial 6 - Surrogate Gradient Descent in a Convolutional SNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_7.html">Tutorial 7 - Neuromorphic Datasets with Tonic + snnTorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_ipu_1.html">Accelerating snnTorch on IPUs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_pop.html">Population Coding in Spiking Neural Nets</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Regression with SNNs: Part I</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#learning-membrane-potentials-with-lif-neurons">Learning Membrane Potentials with LIF Neurons</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#spiking-regression">1. Spiking Regression</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#a-quick-background-on-linear-and-nonlinear-regression">1.1 A Quick Background on Linear and Nonlinear Regression</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spiking-neurons-in-regression">1.2 Spiking Neurons in Regression</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-regression-problem">2. Setting up the Regression Problem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#create-dataset">2.1 Create Dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#create-dataloader">2.2 Create DataLoader</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#construct-model">3. Construct Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#construct-training-loop">4. Construct Training Loop</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation">5. Evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-resources">Additional Resources</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_regression_2.html">Regression with SNNs: Part II</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Regression with SNNs: Part I</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/tutorial_regression_1.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="regression-with-snns-part-i">
+<h1>Regression with SNNs: Part I<a class="headerlink" href="#regression-with-snns-part-i" title="Permalink to this headline"></a></h1>
+<section id="learning-membrane-potentials-with-lif-neurons">
+<h2>Learning Membrane Potentials with LIF Neurons<a class="headerlink" href="#learning-membrane-potentials-with-lif-neurons" title="Permalink to this headline"></a></h2>
+<p>Tutorial written by Alexander Henkes (<a class="reference external" href="https://orcid.org/0000-0003-4615-9271">ORCID</a>) and Jason K. Eshraghian (<a class="reference external" href="https://ncg.ucsc.edu">ncg.ucsc.edu</a>)</p>
+<a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_regression_1.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+<p>This tutorial is based on the following papers on nonlinear regression
+and spiking neural networks. If you find these resources or code useful
+in your work, please consider citing the following sources:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/2210.03515">Alexander Henkes, Jason K. Eshraghian, and Henning Wessels. “Spiking
+neural networks for nonlinear regression”, arXiv preprint
+arXiv:2210.03515, October 2022.</a></p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/2109.12894">Jason K. Eshraghian, Max Ward, Emre Neftci, Xinxin Wang, Gregor Lenz, Girish
+Dwivedi, Mohammed Bennamoun, Doo Seok Jeong, and Wei D. Lu. “Training
+Spiking Neural Networks Using Lessons From Deep Learning”. arXiv preprint arXiv:2109.12894,
+September 2021.</a></p>
+</div></blockquote>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>This tutorial is a static non-editable version. Interactive, editable versions are available via the following links:</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_regression_1.ipynb">Google Colab</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jeshraghian/snntorch/tree/master/examples">Local Notebook (download via GitHub)</a></p></li>
+</ul>
+</dd>
+</dl>
+</div>
+<p>In the regression tutorial series, you will learn how to use snnTorch to
+perform regression using a variety of spiking neuron models, including:</p>
+<ul class="simple">
+<li><p>Leaky Integrate-and-Fire (LIF) Neurons</p></li>
+<li><p>Recurrent LIF Neurons</p></li>
+<li><p>Spiking LSTMs</p></li>
+</ul>
+<p>An overview of the regression tutorial series:</p>
+<ul class="simple">
+<li><p>Part I (this tutorial) will train the membrane potential of a LIF
+neuron to follow a given trajectory over time.</p></li>
+<li><p>Part II will use LIF neurons with recurrent feedback to perform classification using regression-based loss functions</p></li>
+<li><p>Part III will use a more complex spiking LSTM network instead to train the firing time of a neuron.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>!pip install snntorch --quiet
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">surrogate</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">functional</span> <span class="k">as</span> <span class="n">SF</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">statistics</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+</pre></div>
+</div>
+<p>Fix the random seed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Seed</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="spiking-regression">
+<h2>1. Spiking Regression<a class="headerlink" href="#spiking-regression" title="Permalink to this headline"></a></h2>
+<section id="a-quick-background-on-linear-and-nonlinear-regression">
+<h3>1.1 A Quick Background on Linear and Nonlinear Regression<a class="headerlink" href="#a-quick-background-on-linear-and-nonlinear-regression" title="Permalink to this headline"></a></h3>
+<p>The tutorials so far have focused on multi-class classification
+problems. But if you’ve made it this far, then it’s probably safe to say
+that your brain can do more than distinguish cats and dogs. You’re
+amazing and we believe in you.</p>
+<p>An alternative problem is regression, where multiple input features
+<span class="math notranslate nohighlight">\(x_i\)</span> are used to estimate an output on a continuous number line
+<span class="math notranslate nohighlight">\(y \in \mathbb{R}\)</span>. A classic example is estimating the price of a
+house, given a bunch of inputs such as land size, number of rooms, and
+the local demand for avocado toast.</p>
+<p>The objective of a regression problem is often the mean-square error:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{L}_{MSE} = \frac{1}{n}\sum_{i=1}^n(y_i-\hat{y_i})^2\]</div>
+<p>or the mean absolute error:</p>
+<div class="math notranslate nohighlight">
+\[\mathcal{L}_{L1} = \frac{1}{n}\sum_{i=1}^n|y_i-\hat{y_i}|\]</div>
+<p>where <span class="math notranslate nohighlight">\(y\)</span> is the target and <span class="math notranslate nohighlight">\(\hat{y}\)</span> is the predicted
+value.</p>
+<p>One of the challenges of linear regression is that it can only use
+linear weightings of input features in predicting the output. Using a
+neural network trained using the mean-square error as the cost function
+allows us to perform nonlinear regression on more complex data.</p>
+</section>
+<section id="spiking-neurons-in-regression">
+<h3>1.2 Spiking Neurons in Regression<a class="headerlink" href="#spiking-neurons-in-regression" title="Permalink to this headline"></a></h3>
+<p>Spikes are a type of nonlinearity that can also be used to learn more
+complex regression tasks. But if spiking neurons only emit spikes that
+are represented with 1’s and 0’s, then how might we perform regression?
+I’m glad you asked! Here are a few ideas:</p>
+<ul class="simple">
+<li><p>Use the total number of spikes (a rate-based code)</p></li>
+<li><p>Use the time of the spike (a temporal/latency-based code)</p></li>
+<li><p>Use the distance between pairs of spikes (i.e., using the interspike
+interval)</p></li>
+</ul>
+<p>Or perhaps you pierce the neuron membrane with an electrical probe and
+decide to use the membrane potential instead, which is a continuous
+value.</p>
+<blockquote>
+<div><p>Note: is it cheating to directly access the membrane potential, i.e.,
+something that is meant to be a ‘hidden state’? At this time, there
+isn’t much consensus in the neuromorphic community. Despite being a
+high precision variable in many models (and thus computationally
+expensive), the membrane potential is commonly used in loss functions
+as it is a more ‘continuous’ variable compared to discrete time steps
+or spike counts. While it costs more in terms of power and latency to
+operate on higher-precision values, the impact might be minor if you
+have a small output layer, or if the output does not need to be
+scaled by weights. It really is a task-specific and hardware-specific
+question.</p>
+</div></blockquote>
+</section>
+</section>
+<section id="setting-up-the-regression-problem">
+<h2>2. Setting up the Regression Problem<a class="headerlink" href="#setting-up-the-regression-problem" title="Permalink to this headline"></a></h2>
+<section id="create-dataset">
+<h3>2.1 Create Dataset<a class="headerlink" href="#create-dataset" title="Permalink to this headline"></a></h3>
+<p>Let’s construct a simple toy problem. The following class returns the
+function we are hoping to learn. If <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">=</span> <span class="pre">&quot;linear&quot;</span></code>, a straight line
+with a random slope is generated. If <code class="docutils literal notranslate"><span class="pre">mode</span> <span class="pre">=</span> <span class="pre">&quot;sqrt&quot;</span></code>, then the square
+root of this straight line is taken instead.</p>
+<p>Our goal: train a leaky integrate-and-fire neuron such that its membrane
+potential follows the sample over time.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">RegressionDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simple regression dataset.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Linear relation between input and output&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span> <span class="o">=</span> <span class="n">num_samples</span> <span class="c1"># number of generated samples</span>
+        <span class="n">feature_lst</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># store each generated sample in a list</span>
+
+        <span class="c1"># generate linear functions one by one</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_samples</span><span class="p">):</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="c1"># random final point</span>
+            <span class="n">lin_vec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="n">timesteps</span><span class="p">)</span> <span class="c1"># generate linear function from 0 to end</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">lin_vec</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">timesteps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">feature_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span> <span class="c1"># add sample to list</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">feature_lst</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># convert list to tensor</span>
+
+        <span class="c1"># option to generate linear function or square-root function</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">*</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;sqrt&quot;</span><span class="p">:</span>
+            <span class="n">slope</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">*</span> <span class="n">slope</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;linear&#39;, &#39;sqrt&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of samples.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_samples</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;General implementation, but we only have one sample.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">,</span> <span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">,</span> <span class="p">:]</span>
+</pre></div>
+</div>
+<p>To see what a random sample looks like, run the following code-block:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">num_steps</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">num_samples</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;sqrt&quot;</span> <span class="c1"># &#39;linear&#39; or &#39;sqrt&#39;</span>
+
+<span class="c1"># generate a single data sample</span>
+<span class="n">dataset</span> <span class="o">=</span> <span class="n">RegressionDataset</span><span class="p">(</span><span class="n">timesteps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">num_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+<span class="c1"># plot</span>
+<span class="n">sample</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">labels</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Target function to teach network&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Membrane Potential&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-1.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-1.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-1.png?raw=true" style="width: 450px;" /></a>
+</section>
+<section id="create-dataloader">
+<h3>2.2 Create DataLoader<a class="headerlink" href="#create-dataloader" title="Permalink to this headline"></a></h3>
+<p>The Dataset objects created above load data into memory, and the
+DataLoader will serve it up in batches. DataLoaders in PyTorch are a
+handy interface for passing data into a network. They return an iterator
+divided up into mini-batches of size <code class="docutils literal notranslate"><span class="pre">batch_size</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># only one sample to learn</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_last</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="construct-model">
+<h2>3. Construct Model<a class="headerlink" href="#construct-model" title="Permalink to this headline"></a></h2>
+<p>Let us try a simple network using only leaky integrate-and-fire layers
+without recurrence. Subsequent tutorials will show how to use more
+complex neuron types with higher-order recurrence. These architectures
+should work just fine, if there is no strong time dependency in the
+data, i.e., the next time step has weak dependence on the previous one.</p>
+<p>A few notes on the architecture below:</p>
+<ul class="simple">
+<li><p>Setting <code class="docutils literal notranslate"><span class="pre">learn_beta=True</span></code> enables the decay rate <code class="docutils literal notranslate"><span class="pre">beta</span></code> to be a
+learnable parameter</p></li>
+<li><p>Each neuron has a unique, and randomly initialized threshold and
+decay rate</p></li>
+<li><p>The output layer has the reset mechanism disabled by setting
+<code class="docutils literal notranslate"><span class="pre">reset_mechanism=&quot;none&quot;</span></code> as we will not use any output spikes</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simple spiking neural network in snntorch.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">,</span> <span class="n">hidden</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">timesteps</span> <span class="o">=</span> <span class="n">timesteps</span> <span class="c1"># number of time steps to simulate the network</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hidden</span> <span class="o">=</span> <span class="n">hidden</span> <span class="c1"># number of hidden neurons</span>
+        <span class="n">spike_grad</span> <span class="o">=</span> <span class="n">surrogate</span><span class="o">.</span><span class="n">fast_sigmoid</span><span class="p">()</span> <span class="c1"># surrogate gradient function</span>
+
+        <span class="c1"># randomly initialize decay rate and threshold for layer 1</span>
+        <span class="n">beta_in</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span>
+        <span class="n">thr_in</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span>
+
+        <span class="c1"># layer 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc_in</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif_in</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta_in</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thr_in</span><span class="p">,</span> <span class="n">learn_beta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">)</span>
+
+        <span class="c1"># randomly initialize decay rate and threshold for layer 2</span>
+        <span class="n">beta_hidden</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span>
+        <span class="n">thr_hidden</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span>
+
+        <span class="c1"># layer 2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc_hidden</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif_hidden</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta_hidden</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thr_hidden</span><span class="p">,</span> <span class="n">learn_beta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">)</span>
+
+        <span class="c1"># randomly initialize decay rate for output neuron</span>
+        <span class="n">beta_out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># layer 3: leaky integrator neuron. Note the reset mechanism is disabled and we will disregard output spikes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc_out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">in_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hidden</span><span class="p">,</span> <span class="n">out_features</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">li_out</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta_out</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">learn_beta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">reset_mechanism</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Forward pass for several time steps.&quot;&quot;&quot;</span>
+
+        <span class="c1"># Initalize membrane potential</span>
+        <span class="n">mem_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif_in</span><span class="o">.</span><span class="n">init_leaky</span><span class="p">()</span>
+        <span class="n">mem_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif_hidden</span><span class="o">.</span><span class="n">init_leaky</span><span class="p">()</span>
+        <span class="n">mem_3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">li_out</span><span class="o">.</span><span class="n">init_leaky</span><span class="p">()</span>
+
+        <span class="c1"># Empty lists to record outputs</span>
+        <span class="n">mem_3_rec</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Loop over</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timesteps</span><span class="p">):</span>
+            <span class="n">x_timestep</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">step</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+            <span class="n">cur_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc_in</span><span class="p">(</span><span class="n">x_timestep</span><span class="p">)</span>
+            <span class="n">spk_in</span><span class="p">,</span> <span class="n">mem_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif_in</span><span class="p">(</span><span class="n">cur_in</span><span class="p">,</span> <span class="n">mem_1</span><span class="p">)</span>
+
+            <span class="n">cur_hidden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc_hidden</span><span class="p">(</span><span class="n">spk_in</span><span class="p">)</span>
+            <span class="n">spk_hidden</span><span class="p">,</span> <span class="n">mem_2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">li_out</span><span class="p">(</span><span class="n">cur_hidden</span><span class="p">,</span> <span class="n">mem_2</span><span class="p">)</span>
+
+            <span class="n">cur_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc_out</span><span class="p">(</span><span class="n">spk_hidden</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">mem_3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">li_out</span><span class="p">(</span><span class="n">cur_out</span><span class="p">,</span> <span class="n">mem_3</span><span class="p">)</span>
+
+            <span class="n">mem_3_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mem_3</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem_3_rec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Instantiate the network below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">hidden</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span><span class="n">timesteps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">hidden</span><span class="o">=</span><span class="n">hidden</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s observe the behavior of the output neuron before it has been
+trained and how it compares to the target function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">train_batch</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+
+<span class="c1"># run a single forward-pass</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">train_batch</span><span class="p">:</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">feature</span><span class="p">,</span> <span class="n">axis0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">axis0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+
+<span class="c1"># plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mem</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Output&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">label</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Target&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Untrained Output Neuron&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Membrane Potential&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-2.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-2.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-2.png?raw=true" style="width: 450px;" /></a>
+<p>As the network has not yet been trained, it is unsurprising the membrane
+potential follows a senseless evolution.</p>
+</section>
+<section id="construct-training-loop">
+<h2>4. Construct Training Loop<a class="headerlink" href="#construct-training-loop" title="Permalink to this headline"></a></h2>
+<p>We call <code class="docutils literal notranslate"><span class="pre">torch.nn.MSELoss()</span></code> to minimize the mean square error between
+the membrane potential and the target evolution.</p>
+<p>We iterate over the same sample of data.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">num_iter</span> <span class="o">=</span> <span class="mi">100</span> <span class="c1"># train for 100 iterations</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">params</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">)</span>
+<span class="n">loss_function</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+
+<span class="n">loss_hist</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># record loss</span>
+
+<span class="c1"># training loop</span>
+<span class="k">with</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">trange</span><span class="p">(</span><span class="n">num_iter</span><span class="p">)</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">pbar</span><span class="p">:</span>
+        <span class="n">train_batch</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+        <span class="n">minibatch_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">loss_epoch</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">train_batch</span><span class="p">:</span>
+            <span class="c1"># prepare data</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">feature</span><span class="p">,</span> <span class="n">axis0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">axis0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">feature</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+            <span class="c1"># forward pass</span>
+            <span class="n">mem</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+            <span class="n">loss_val</span> <span class="o">=</span> <span class="n">loss_function</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="c1"># calculate loss</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span> <span class="c1"># zero out gradients</span>
+            <span class="n">loss_val</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span> <span class="c1"># calculate gradients</span>
+            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span> <span class="c1"># update weights</span>
+
+            <span class="c1"># store loss</span>
+            <span class="n">loss_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss_val</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+            <span class="n">loss_epoch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss_val</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+            <span class="n">minibatch_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">avg_batch_loss</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">loss_epoch</span><span class="p">)</span> <span class="o">/</span> <span class="n">minibatch_counter</span> <span class="c1"># calculate average loss p/epoch</span>
+            <span class="n">pbar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.3e</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">avg_batch_loss</span><span class="p">)</span> <span class="c1"># print loss p/batch</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluation">
+<h2>5. Evaluation<a class="headerlink" href="#evaluation" title="Permalink to this headline"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">()</span> <span class="c1"># Use L1 loss instead</span>
+
+ <span class="c1"># pause gradient calculation during evaluation</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+
+    <span class="n">test_batch</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+    <span class="n">minibatch_counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">rel_err_lst</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># loop over data samples</span>
+    <span class="k">for</span> <span class="n">feature</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">test_batch</span><span class="p">:</span>
+
+        <span class="c1"># prepare data</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">feature</span><span class="p">,</span> <span class="n">axis0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">axis0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis1</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">feature</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># forward-pass</span>
+        <span class="n">mem</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+
+        <span class="c1"># calculate relative error</span>
+        <span class="n">rel_err</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">mem</span> <span class="o">-</span> <span class="n">label</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rel_err</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rel_err</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:])</span>
+
+        <span class="c1"># calculate loss</span>
+        <span class="n">loss_val</span> <span class="o">=</span> <span class="n">loss_function</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+
+        <span class="c1"># store loss</span>
+        <span class="n">loss_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss_val</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+        <span class="n">rel_err_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rel_err</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+        <span class="n">minibatch_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">mean_L1</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">loss_hist</span><span class="p">)</span>
+    <span class="n">mean_rel</span> <span class="o">=</span> <span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">rel_err_lst</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Mean L1-loss:&#39;</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="mi">20</span><span class="si">}}{</span><span class="n">mean_L1</span><span class="si">:</span><span class="s2">1.2e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;Mean rel. err.:&#39;</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="mi">20</span><span class="si">}}{</span><span class="n">mean_rel</span><span class="si">:</span><span class="s2">1.2e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="n">Mean</span> <span class="n">L1</span><span class="o">-</span><span class="n">loss</span><span class="p">:</span>       <span class="mf">1.22e-02</span>
+<span class="o">&gt;&gt;</span> <span class="n">Mean</span> <span class="n">rel</span><span class="o">.</span> <span class="n">err</span><span class="o">.</span><span class="p">:</span>     <span class="mf">2.84e-02</span>
+</pre></div>
+</div>
+<p>Let’s plot our results for some visual intuition:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mem</span> <span class="o">=</span> <span class="n">mem</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+<span class="n">label</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Trained Output Neuron&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Membrane Potential&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mem</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Output&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">label</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">cpu</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Target&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-3.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-3.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/regression1/reg_1-3.png?raw=true" style="width: 450px;" /></a>
+<p>It is a little jagged, but it’s not looking too bad.</p>
+<p>You might try to improve the curve fit by expanding the size of the
+hidden layer, increasing the number of iterations, adding extra time
+steps, hyperparameter fine-tuning, or using a completely different
+neuron type.</p>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline"></a></h2>
+<p>The next regression tutorials will test more powerful spiking neurons,
+such as Reucrrent LIF neurons and spiking LSTMs, to see how they
+compare.</p>
+<p>If you like this project, please consider starring ⭐ the repo on GitHub
+as it is the easiest and best way to support it.</p>
+</section>
+<section id="additional-resources">
+<h2>Additional Resources<a class="headerlink" href="#additional-resources" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/jeshraghian/snntorch">Check out the snnTorch GitHub project
+here.</a></p></li>
+<li><p>More detail on nonlinear regression with SNNs can be found in our
+corresponding preprint here: <a class="reference external" href="https://arxiv.org/abs/2210.03515">Henkes, A.; Eshraghian, J. K.; and
+Wessels, H. “Spiking neural networks for nonlinear regression”, arXiv
+preprint arXiv:2210.03515,
+Oct. 2022.</a></p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial_pop.html" class="btn btn-neutral float-left" title="Population Coding in Spiking Neural Nets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial_regression_2.html" class="btn btn-neutral float-right" title="Regression with SNNs: Part II" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

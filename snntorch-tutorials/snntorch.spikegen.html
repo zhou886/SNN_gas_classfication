@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.spikegen &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="snntorch.spikeplot" href="snntorch.spikeplot.html" />
+    <link rel="prev" title="snntorch.functional" href="snntorch.functional.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            snntorch
+              <img src="_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">snntorch.spikegen</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-use-spikegen">How to use spikegen</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">snntorch.spikegen</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/snntorch.spikegen.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="snntorch-spikegen">
+<h1>snntorch.spikegen<a class="headerlink" href="#snntorch-spikegen" title="Permalink to this headline"></a></h1>
+<p><a class="reference internal" href="#module-snntorch.spikegen" title="snntorch.spikegen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.spikegen</span></code></a> is a module that provides a variety of common spike generation and conversion methods, including spike-rate and latency coding.</p>
+<section id="how-to-use-spikegen">
+<h2>How to use spikegen<a class="headerlink" href="#how-to-use-spikegen" title="Permalink to this headline"></a></h2>
+<p>In general, tensors containing non-spiking data can simply be passed into one of the functions in <a class="reference internal" href="#module-snntorch.spikegen" title="snntorch.spikegen"><code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.spikegen</span></code></a> to convert them into discrete spikes.
+There are a variety of methods to achieve this conversion. At present, <cite>snntorch</cite> supports:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html#snntorch.spikegen.rate">rate coding</a></p></li>
+<li><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html#snntorch.spikegen.latency">latency coding</a></p></li>
+<li><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.spikegen.html#snntorch.spikegen.delta">delta modulation</a></p></li>
+</ul>
+<p>There are also options for converting targets into time-varying spikes.</p>
+<span class="target" id="module-snntorch.spikegen"></span><dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.delta">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_spike</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#delta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.delta" title="Permalink to this definition"></a></dt>
+<dd><p>Generate spike only when the difference between two subsequent
+time steps meets a threshold.
+Optionally include off_spikes for negative changes.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">2.9</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">3.9</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="n">spikegen</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">2.9</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">off_spike</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span> <span class="mf">1.</span><span class="p">,</span>  <span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span>  <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">])</span>
+
+<span class="n">spikegen</span><span class="o">.</span><span class="n">delta</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">off_spike</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span> <span class="mf">0.</span><span class="p">,</span>  <span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span>  <span class="mf">1.</span><span class="p">,</span>  <span class="mf">0.</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single batch of shape [num_steps x batch
+x input_size]</p></li>
+<li><p><strong>threshold</strong> – Input features with a change greater than the thresold
+across one timestep will generate a spike, defaults to <code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></li>
+<li><p><strong>padding</strong> (<em>bool</em><em>, </em><em>optional</em>) – Used to change how the first time step of spikes are
+measured. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the first time step will be repeated with itself
+resulting in <code class="docutils literal notranslate"><span class="pre">0</span></code>’s for the output spikes.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the first time step will be padded with <code class="docutils literal notranslate"><span class="pre">0</span></code>’s, defaults
+to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>off_spike</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, negative spikes for changes less than
+<code class="docutils literal notranslate"><span class="pre">-threshold</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.from_one_hot">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">from_one_hot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">one_hot_label</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#from_one_hot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.from_one_hot" title="Permalink to this definition"></a></dt>
+<dd><p>Convert one-hot encoding back into an integer</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">one_hot_label</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+                              <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">from_one_hot</span><span class="p">(</span><span class="n">one_hot_label</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>targets</strong> (<em>torch.Tensor</em>) – one-hot label vector</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>targets</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.latency">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">latency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bypass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#latency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.latency" title="Permalink to this definition"></a></dt>
+<dd><p>Latency encoding of input or target label data. Use input features
+to determine time-to-first spike. Expected inputs should be
+between 0 and 1.</p>
+<p>Assume a LIF neuron model that charges up with time constant tau.
+Tensor dimensions use time first.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">latency</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single batch of shape [batch x input_size]</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Explicitly needed if
+<code class="docutils literal notranslate"><span class="pre">normalize=True</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code> (then changed to <code class="docutils literal notranslate"><span class="pre">1</span></code>
+if <code class="docutils literal notranslate"><span class="pre">normalize=False</span></code>)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Input features below the threhold will fire at the
+final time step unless <code class="docutils literal notranslate"><span class="pre">clip=True</span></code> in which case they will not
+fire at all, defaults to <code class="docutils literal notranslate"><span class="pre">0.01</span></code></p></li>
+<li><p><strong>tau</strong> (<em>float</em><em>, </em><em>optional</em>) – RC Time constant for LIF model used to calculate
+firing time, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time to first spike, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>on_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target at spike times, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>off_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target during refractory period, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>clip</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Option to remove spikes from features that fall
+below the threshold, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>normalize</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Option to normalize the latency code such
+that the final spike(s) occur within num_steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>linear</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Apply a linear latency code rather than the
+default logarithmic code, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>interpolate</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Applies linear interpolation such that
+there is a gradually increasing target up to each spike, defaults to
+<code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>bypass</strong> (<em>bool</em><em>, </em><em>optional</em>) – Used to block error messages that occur from either: i)
+spike times exceeding the bounds of <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>, or ii) if
+<code class="docutils literal notranslate"><span class="pre">num_steps</span></code> is not specified, setting <code class="docutils literal notranslate"><span class="pre">bypass=True</span></code>
+allows the largest spike time to set <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>. Defaults to
+<code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – A tiny positive value to avoid rounding errors
+when using torch.arange, defaults to <code class="docutils literal notranslate"><span class="pre">1e-7</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>latency encoding spike train of features or labels</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.latency_code">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">latency_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#latency_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.latency_code" title="Permalink to this definition"></a></dt>
+<dd><p>Latency encoding of input data. Convert input features or
+target labels to spike times. Assumes a LIF neuron model
+that charges up with time constant tau by default.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">latency_code</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.9200</span><span class="p">,</span> <span class="mf">2.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">]),</span> <span class="n">tensor</span><span class="p">([</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single batch of shape [batch x input_size]</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Explicitly needed if
+<code class="docutils literal notranslate"><span class="pre">normalize=True</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code> (then changed to <code class="docutils literal notranslate"><span class="pre">1</span></code>
+if <code class="docutils literal notranslate"><span class="pre">normalize=False</span></code>)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Input features below the threhold will fire at
+the final time step unless <code class="docutils literal notranslate"><span class="pre">clip=True</span></code> in which case they will
+not fire at all, defaults to <code class="docutils literal notranslate"><span class="pre">0.01</span></code></p></li>
+<li><p><strong>tau</strong> (<em>float</em><em>, </em><em>optional</em>) – RC Time constant for LIF model used to calculate
+firing time, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time to first spike, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>normalize</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Option to normalize the latency code such
+that the final spike(s) occur within num_steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>linear</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Apply a linear latency code rather than the
+default logarithmic code, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – A tiny positive value to avoid rounding errors
+when using torch.arange, defaults to <code class="docutils literal notranslate"><span class="pre">1e-7</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>latency encoding spike times of features</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tensor of Boolean values which correspond to the
+latency encoding elements that fall below the threshold.
+Used in <code class="docutils literal notranslate"><span class="pre">latency_conv</span></code> to clip saturated spikes.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.latency_code_linear">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">latency_code_linear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#latency_code_linear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.latency_code_linear" title="Permalink to this definition"></a></dt>
+<dd><p>Linear latency encoding of input data. Convert input features
+or target labels to spike times.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">latency_code</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linear</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">3.9200</span><span class="p">,</span> <span class="mf">2.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">]),</span> <span class="n">tensor</span><span class="p">([</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single batch of shape [batch x input_size]</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Explicitly needed if
+<code class="docutils literal notranslate"><span class="pre">normalize=True</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>
+(then changed to <code class="docutils literal notranslate"><span class="pre">1</span></code> if <code class="docutils literal notranslate"><span class="pre">normalize=False</span></code>)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Input features below the threhold will
+fire at the final time step, defaults to <code class="docutils literal notranslate"><span class="pre">0.01</span></code></p></li>
+<li><p><strong>tau</strong> (<em>float</em><em>, </em><em>optional</em>) – Linear time constant used to calculate firing time,
+defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time to first spike, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>normalize</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Option to normalize the latency code such that
+the final spike(s) occur within num_steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>linear latency encoding spike times of features</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.latency_code_log">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">latency_code_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#latency_code_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.latency_code_log" title="Permalink to this definition"></a></dt>
+<dd><p>Logarithmic latency encoding of input data. Convert input features
+or target labels to spike times.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">latency_code</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">4.0000</span><span class="p">,</span> <span class="mf">0.1166</span><span class="p">,</span> <span class="mf">0.0580</span><span class="p">]),</span> <span class="n">tensor</span><span class="p">([</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single batch of shape [batch x input_size]</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Explicitly needed if
+<code class="docutils literal notranslate"><span class="pre">normalize=True</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code> (then changed to <code class="docutils literal notranslate"><span class="pre">1</span></code> if
+<code class="docutils literal notranslate"><span class="pre">normalize=False</span></code>)</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Input features below the threhold will fire at the
+final time step, defaults to <code class="docutils literal notranslate"><span class="pre">0.01</span></code></p></li>
+<li><p><strong>tau</strong> (<em>float</em><em>, </em><em>optional</em>) – Logarithmic time constant used to calculate firing time,
+defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time to first spike, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>normalize</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Option to normalize the latency code such that
+the final spike(s) occur within num_steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – A tiny positive value to avoid rounding errors when
+using torch.arange, defaults to <code class="docutils literal notranslate"><span class="pre">1e-7</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>logarithmic latency encoding spike times of features</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.latency_interpolate">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">latency_interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spike_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#latency_interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.latency_interpolate" title="Permalink to this definition"></a></dt>
+<dd><p>Apply linear interpolation to a tensor of target spike times to
+enable gradual increasing membrane.
+Each spike is assumed to occur from a separate neuron.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">latency_interpolate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([[</span><span class="mf">1.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.2500</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.5000</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.7500</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.0000</span><span class="p">,</span> <span class="mf">1.0000</span><span class="p">]])</span>
+
+<span class="n">spikegen</span><span class="o">.</span><span class="n">latency_interpolate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">on_target</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span>
+<span class="n">off_target</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([[</span><span class="mf">1.2500</span><span class="p">,</span> <span class="mf">0.2500</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.2500</span><span class="p">,</span> <span class="mf">0.5000</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.2500</span><span class="p">,</span> <span class="mf">0.7500</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.2500</span><span class="p">,</span> <span class="mf">1.0000</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.2500</span><span class="p">,</span> <span class="mf">1.2500</span><span class="p">]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spike_time</strong> – spike time targets in terms of steps</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>on_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target at spike times, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>off_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target during refractory period, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>interpolated target of output neurons. Output tensor will use
+time-first dimensions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.rate">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_var_input</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.rate" title="Permalink to this definition"></a></dt>
+<dd><p>Spike rate encoding of input data. Convert tensor into Poisson spike
+trains using the features as the mean of a
+binomial distribution. If <cite>num_steps</cite> is specified, then the data will be
+first repeated in the first dimension
+before rate encoding.</p>
+<p>If data is time-varying, tensor dimensions use time first.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 100% chance of spike generation</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+
+<span class="c1"># 0% chance of spike generation</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="c1"># 50% chance of spike generation per time step</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+
+<span class="c1"># Increasing num_steps will increase the length of the first</span>
+<span class="n">dimension</span> <span class="p">(</span><span class="n">time</span><span class="o">-</span><span class="n">first</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]),</span> <span class="n">num_steps</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single batch of shape [batch x input_size]</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Only specify if input data
+does not already have time dimension, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>gain</strong> (<em>float</em><em>, </em><em>optional</em>) – Scale input features by the gain, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>offset</strong> (<em>torch.optim</em><em>, </em><em>optional</em>) – Shift input features by the offset, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time to first spike, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>time_var_input</strong> (<em>bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">True</span></code> if input tensor is time-varying.
+Otherwise, <cite>first_spike_time!=0</cite> will modify the wrong dimension.
+Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rate encoding spike train of input features of shape
+[num_steps x batch x input_size]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.rate_conv">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">rate_conv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#rate_conv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.rate_conv" title="Permalink to this definition"></a></dt>
+<dd><p>Convert tensor into Poisson spike trains using the features as
+the mean of a binomial distribution.
+Values outside the range of [0, 1] are clipped so they can be
+treated as probabilities.</p>
+<blockquote>
+<div><p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 100% chance of spike generation</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate_conv</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+
+<span class="c1"># 0% chance of spike generation</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate_conv</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="c1"># 50% chance of spike generation per time step</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate_conv</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+</pre></div>
+</div>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single batch of shape [batch x input_size]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rate encoding spike train of input features of shape
+[num_steps x batch x input_size]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.rate_interpolate">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">rate_interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spike_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#rate_interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.rate_interpolate" title="Permalink to this definition"></a></dt>
+<dd><p>Apply linear interpolation to a tensor of target spike times to
+enable gradual increasing membrane.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate_interpolate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.0000</span><span class="p">,</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.3333</span><span class="p">,</span> <span class="mf">0.6667</span><span class="p">,</span> <span class="mf">1.0000</span><span class="p">])</span>
+
+<span class="n">spikegen</span><span class="o">.</span><span class="n">rate_interpolate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">on_target</span><span class="o">=</span><span class="mf">1.25</span><span class="p">,</span>
+<span class="n">off_target</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.2500</span><span class="p">,</span> <span class="mf">0.2500</span><span class="p">,</span> <span class="mf">0.5833</span><span class="p">,</span> <span class="mf">0.9167</span><span class="p">,</span> <span class="mf">1.2500</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spike_time</strong> – spike time targets in terms of steps</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>on_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target at spike times, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>off_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target during refractory period, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – A tiny positive value to avoid rounding errors when
+using torch.arange, defaults to <code class="docutils literal notranslate"><span class="pre">1e-7</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>interpolated target of output neurons. Output tensor will
+use time-first dimensions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.target_rate_code">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">target_rate_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_steps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firing_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'regular'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#target_rate_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.target_rate_code" title="Permalink to this definition"></a></dt>
+<dd><p>Rate coding a single output neuron of tensor of length <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>
+containing spikes, and another tensor containing the spike times.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">spikegen</span><span class="o">.</span><span class="n">target_rate_code</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]))</span>
+
+<span class="n">spikegen</span><span class="o">.</span><span class="n">target_rate_code</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">first_spike_time</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]),</span> <span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]))</span>
+
+<span class="n">spikegen</span><span class="o">.</span><span class="n">target_rate_code</span><span class="p">(</span><span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span> <span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+
+<span class="n">spikegen</span><span class="o">.</span><span class="n">target_rate_code</span><span class="p">(</span>
+<span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">firing_pattern</span><span class="o">=</span><span class="s2">&quot;poisson&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]),</span> <span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time step for first spike to occur,
+defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Firing frequency as a ratio, e.g., <code class="docutils literal notranslate"><span class="pre">1</span></code>
+enables firing at every step; <code class="docutils literal notranslate"><span class="pre">0.5</span></code> enables firing at 50% of steps,
+<code class="docutils literal notranslate"><span class="pre">0</span></code> means no firing, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>firing_pattern</strong> (<em>string</em><em>, </em><em>optional</em>) – Firing pattern of correct and
+incorrect classes. <code class="docutils literal notranslate"><span class="pre">'regular'</span></code> enables periodic firing,
+<code class="docutils literal notranslate"><span class="pre">'uniform'</span></code> samples spike times from a uniform distributions
+(duplicates are removed), <code class="docutils literal notranslate"><span class="pre">'poisson'</span></code> samples from a binomial
+distribution at each step where each probability
+is the firing frequency,
+defaults to <code class="docutils literal notranslate"><span class="pre">'regular'</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rate coded target of single neuron class of length <code class="docutils literal notranslate"><span class="pre">num_steps</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rate coded spike times in terms of steps</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.targets_convert">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">targets_convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rate'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incorrect_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firing_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'regular'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bypass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#targets_convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.targets_convert" title="Permalink to this definition"></a></dt>
+<dd><p>Spike encoding of targets. Expected input is a 1-D tensor with
+index of targets.
+If the output tensor is time-varying, the returned tensor will
+have time in the first dimension.
+If it is not time-varying, then the returned tensor will omit
+the time dimension and use batch first.</p>
+<dl class="simple">
+<dt>The following arguments will necessarily incur a time-varying output:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">code='latency'</span></code>, <code class="docutils literal notranslate"><span class="pre">first_spike_time!=0</span></code>, <code class="docutils literal notranslate"><span class="pre">correct_rate!=1</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">incorrect_rate!=0</span></code></p>
+</dd>
+</dl>
+<p>The target output may be applied to the internal state (e.g., membrane)
+of the neuron or to the spike.
+The following arguments will produce an output tensor that may
+sensibly be applied as a target to either the output spike or the
+membrane potential, as the output will consistently be either a
+<cite>1</cite> or <cite>0</cite>:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">on_target=1</span></code>, <code class="docutils literal notranslate"><span class="pre">off_target=0</span></code>, and <code class="docutils literal notranslate"><span class="pre">interpolate=False</span></code></p>
+</div></blockquote>
+<p>If any of the above 3 conditions do not hold, then the target is
+better suited for the output membrane potential, as it will likely
+include values other than <cite>1</cite> and <cite>0</cite>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">4</span><span class="p">])</span>
+
+<span class="c1"># rate-coding</span>
+<span class="c1"># one-hot</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_convert</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s2">&quot;rate&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> <span class="p">)</span>
+
+<span class="c1"># one-hot + time-first</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_convert</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="s2">&quot;rate&quot;</span><span class="p">,</span>
+<span class="n">correct_rate</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">incorrect_rate</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>For more examples of rate-coding, see
+<code class="docutils literal notranslate"><span class="pre">help(snntorch.spikegen(targets_rate))</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>torch.Tensor</em>) – Target tensor for a single batch.
+The target should be a class index in the range [0, C-1]
+where C=number of classes.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of outputs.</p></li>
+<li><p><strong>code</strong> (<em>string</em><em>, </em><em>optional</em>) – Encoding scheme. Options of <code class="docutils literal notranslate"><span class="pre">'rate'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'latency'</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">'rate'</span></code></p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time step for first spike to occur,
+defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>correct_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Firing frequency of correct class as a ratio,
+e.g., <code class="docutils literal notranslate"><span class="pre">1</span></code> enables firing at every step; <code class="docutils literal notranslate"><span class="pre">0.5</span></code> enables firing at
+50% of steps, <code class="docutils literal notranslate"><span class="pre">0</span></code> means no firing, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>incorrect_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Firing frequency of incorrect class(es),
+e.g., <code class="docutils literal notranslate"><span class="pre">1</span></code> enables firing at every step; <code class="docutils literal notranslate"><span class="pre">0.5</span></code> enables firing at
+50% of steps, <code class="docutils literal notranslate"><span class="pre">0</span></code> means no firing, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>on_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target at spike times, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>off_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target during refractory period, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>firing_pattern</strong> (<em>string</em><em>, </em><em>optional</em>) – Firing pattern of correct and incorrect classes.
+<code class="docutils literal notranslate"><span class="pre">'regular'</span></code> enables periodic firing, <code class="docutils literal notranslate"><span class="pre">'uniform'</span></code> samples spike
+times from a uniform distributions (duplicates are removed),
+<code class="docutils literal notranslate"><span class="pre">'poisson'</span></code> samples from a binomial distribution at each step where
+each probability is the firing frequency, defaults to <code class="docutils literal notranslate"><span class="pre">'regular'</span></code></p></li>
+<li><p><strong>interpolate</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Applies linear interpolation such that there is
+a gradually increasing target up to each spike, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – A tiny positive value to avoid rounding errors when
+using torch.arange, defaults to <code class="docutils literal notranslate"><span class="pre">1e-7</span></code></p></li>
+<li><p><strong>bypass</strong> (<em>bool</em><em>, </em><em>optional</em>) – Used to block error messages that occur from either: i)
+spike times exceeding the bounds of <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>, or ii) if
+<code class="docutils literal notranslate"><span class="pre">num_steps</span></code> is not specified, setting <code class="docutils literal notranslate"><span class="pre">bypass=True</span></code> allows
+the largest spike time to set <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>spike coded target of output neurons. If targets are
+time-varying, the output tensor will use time-first dimensions.
+Otherwise, time is omitted from the tensor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.targets_latency">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">targets_latency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linear</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bypass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#targets_latency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.targets_latency" title="Permalink to this definition"></a></dt>
+<dd><p>Latency encoding of target labels. Use target labels to determine
+time-to-first spike. Expected input is index of correct class.
+The index is one-hot-encoded before being passed to <code class="docutils literal notranslate"><span class="pre">spikegen.latency</span></code>.</p>
+<p>Assume a LIF neuron model that charges up with time constant tau.
+Tensor dimensions use time first.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_latency</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+
+<span class="c1"># time evolution of correct neuron class</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_latency</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="c1"># time evolution of incorrect neuron class</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_latency</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
+
+<span class="c1"># correct class w/interpolation</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_latency</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+
+<span class="c1"># incorrect class w/interpolation</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_latency</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">normalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">0.0000</span><span class="p">,</span> <span class="mf">0.2500</span><span class="p">,</span> <span class="mf">0.5000</span><span class="p">,</span> <span class="mf">0.7500</span><span class="p">,</span> <span class="mf">1.0000</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>torch.Tensor</em>) – Target tensor for a single batch. The target
+should be a class index in the range [0, C-1]
+where C=number of classes.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of outputs.</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Explicitly needed if
+<code class="docutils literal notranslate"><span class="pre">normalize=True</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>
+(then changed to <code class="docutils literal notranslate"><span class="pre">1</span></code> if <code class="docutils literal notranslate"><span class="pre">normalize=False</span></code>)</p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time to first spike, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>on_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target at spike times, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>off_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target during refractory period, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>interpolate</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Applies linear interpolation such that there is
+a gradually increasing target up to each spike, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Input features below the threhold will fire at the
+final time step unless <code class="docutils literal notranslate"><span class="pre">clip=True</span></code> in which case they will not fire
+at all, defaults to <code class="docutils literal notranslate"><span class="pre">0.01</span></code></p></li>
+<li><p><strong>tau</strong> (<em>float</em><em>, </em><em>optional</em>) – RC Time constant for LIF model used to calculate firing
+time, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>clip</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Option to remove spikes from features that fall below
+the threshold, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>normalize</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Option to normalize the latency code such that the
+final spike(s) occur within num_steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>linear</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Apply a linear latency code rather than the default
+logarithmic code, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>bypass</strong> (<em>bool</em><em>, </em><em>optional</em>) – Used to block error messages that occur from either: i)
+spike times exceeding the bounds of <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>, or ii) if
+<code class="docutils literal notranslate"><span class="pre">num_steps</span></code> is not specified, setting <code class="docutils literal notranslate"><span class="pre">bypass=True</span></code>
+allows the largest spike time to set <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>.
+Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – A tiny positive value to avoid rounding errors when
+using torch.arange, defaults to <code class="docutils literal notranslate"><span class="pre">1e-7</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>latency encoding spike train of features or labels</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.targets_rate">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">targets_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_spike_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incorrect_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firing_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'regular'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#targets_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.targets_rate" title="Permalink to this definition"></a></dt>
+<dd><p>Spike rate encoding of targets. Input tensor must be one-dimensional
+with target indexes.
+If the output tensor is time-varying, the returned tensor will have
+time in the first dimension.
+If it is not time-varying, then the returned tensor will omit the time
+dimension and use batch first.
+If <code class="docutils literal notranslate"><span class="pre">first_spike_time!=0</span></code>, <code class="docutils literal notranslate"><span class="pre">correct_rate!=1</span></code>, or <code class="docutils literal notranslate"><span class="pre">incorrect_rate!=0</span></code>,
+the output tensor will be time-varying.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">on_target=1</span></code>, <code class="docutils literal notranslate"><span class="pre">off_target=0</span></code>, and <code class="docutils literal notranslate"><span class="pre">interpolate=False</span></code>,
+then the target may sensibly be applied as a target for the output spike.
+IF any of the above 3 conditions do not hold, then the target would
+be better suited for the output membrane potential.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">4</span><span class="p">])</span>
+
+<span class="c1"># one-hot</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_rate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]]),</span> <span class="p">)</span>
+
+<span class="c1"># first spike time delay, spike evolution over time</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_rate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">first_spike_time</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_rate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">first_spike_time</span><span class="o">=</span><span class="mi">2</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]))</span>
+
+<span class="c1"># note: time has not been repeated because every time step</span>
+ <span class="n">would</span> <span class="n">be</span> <span class="n">identical</span> <span class="n">where</span> <span class="n">first_spike_time</span> <span class="n">defaults</span> <span class="n">to</span> <span class="mi">0</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_rate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+
+<span class="c1"># on/off targets - membrane evolution over time</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_rate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">first_spike_time</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">on_target</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span> <span class="n">off_target</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">(</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.5000</span><span class="p">,</span> <span class="mf">0.5000</span><span class="p">,</span> <span class="mf">1.2000</span><span class="p">,</span> <span class="mf">1.2000</span><span class="p">,</span> <span class="mf">1.2000</span><span class="p">]))</span>
+
+<span class="c1"># correct rate at 25% + linear interpolation of membrane evolution</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_rate</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+<span class="n">correct_rate</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">on_target</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+<span class="n">off_target</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">interpolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([</span><span class="mf">1.2000</span><span class="p">,</span> <span class="mf">0.5000</span><span class="p">,</span> <span class="mf">0.7333</span><span class="p">,</span> <span class="mf">0.9667</span><span class="p">,</span> <span class="mf">1.2000</span><span class="p">])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>torch.Tensor</em>) – Target tensor for a single batch. The target
+should be a class index in the range [0, C-1]
+where C=number of classes.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of outputs.</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>first_spike_time</strong> (<em>int</em><em>, </em><em>optional</em>) – Time step for first spike to occur,
+defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>correct_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Firing frequency of correct class as a
+ratio, e.g., <code class="docutils literal notranslate"><span class="pre">1</span></code> enables firing at every step; <code class="docutils literal notranslate"><span class="pre">0.5</span></code>
+enables firing at 50% of steps, <code class="docutils literal notranslate"><span class="pre">0</span></code> means no firing,
+defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>incorrect_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Firing frequency of incorrect class(es), e.g.,
+<code class="docutils literal notranslate"><span class="pre">1</span></code> enables firing at every step; <code class="docutils literal notranslate"><span class="pre">0.5</span></code>
+enables firing at 50% of steps,
+<code class="docutils literal notranslate"><span class="pre">0</span></code> means no firing, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>on_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target at spike times, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>off_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Target during refractory period, defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>firing_pattern</strong> (<em>string</em><em>, </em><em>optional</em>) – Firing pattern of correct and incorrect classes.
+<code class="docutils literal notranslate"><span class="pre">'regular'</span></code> enables periodic firing, <code class="docutils literal notranslate"><span class="pre">'uniform'</span></code> samples spike
+times from a uniform distributions (duplicates are removed),
+<code class="docutils literal notranslate"><span class="pre">'poisson'</span></code> samples from a binomial distribution at each step
+where each probability is the firing frequency,
+defaults to <code class="docutils literal notranslate"><span class="pre">'regular'</span></code></p></li>
+<li><p><strong>interpolate</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Applies linear interpolation such that there
+is a gradually increasing target
+up to each spike, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>epsilon</strong> (<em>float</em><em>, </em><em>optional</em>) – A tiny positive value to avoid rounding errors when
+using torch.arange, defaults to <code class="docutils literal notranslate"><span class="pre">1e-7</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rate coded target of output neurons. If targets are
+time-varying, the output tensor will use time-first dimensions.
+Otherwise, time is omitted from the tensor.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.to_one_hot">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">to_one_hot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#to_one_hot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.to_one_hot" title="Permalink to this definition"></a></dt>
+<dd><p>One hot encoding of target labels.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">targets_to_spikes</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span>
+            <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<em>torch.Tensor</em>) – Target tensor for a single batch</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Number of classes</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>one-hot encoding of targets of shape [batch x num_classes]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikegen.to_one_hot_inverse">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikegen.</span></span><span class="sig-name descname"><span class="pre">to_one_hot_inverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">one_hot_targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikegen.html#to_one_hot_inverse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikegen.to_one_hot_inverse" title="Permalink to this definition"></a></dt>
+<dd><p>Boolean inversion of a matrix of 1’s and 0’s.
+Used to merge the targets of correct and incorrect neuron classes in
+<code class="docutils literal notranslate"><span class="pre">targets_rate</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">spikegen</span><span class="o">.</span><span class="n">to_one_hot_inverse</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">tensor</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="snntorch.functional.html" class="btn btn-neutral float-left" title="snntorch.functional" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="snntorch.spikeplot.html" class="btn btn-neutral float-right" title="snntorch.spikeplot" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.backprop &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="snntorch.functional" href="snntorch.functional.html" />
+    <link rel="prev" title="snn.Synaptic" href="snn.neurons_synaptic.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            snntorch
+              <img src="_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.html">snntorch</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">snntorch.backprop</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-use-backprop">How to use backprop</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">snntorch.backprop</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/snntorch.backprop.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="snntorch-backprop">
+<h1>snntorch.backprop<a class="headerlink" href="#snntorch-backprop" title="Permalink to this headline"></a></h1>
+<p><a class="reference internal" href="#module-snntorch.backprop" title="snntorch.backprop"><code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.backprop</span></code></a> is a module implementing various time-variant backpropagation algorithms. Each method will perform the forward-pass, backward-pass, and parameter update across all time steps in a single line of code.</p>
+<section id="how-to-use-backprop">
+<h2>How to use backprop<a class="headerlink" href="#how-to-use-backprop" title="Permalink to this headline"></a></h2>
+<p>To use <a class="reference internal" href="#module-snntorch.backprop" title="snntorch.backprop"><code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.backprop</span></code></a> you must first construct a network, determine a loss criterion, and select an optimizer. When initializing neurons, set <code class="docutils literal notranslate"><span class="pre">init_hidden=True</span></code>. This enables the methods in <a class="reference internal" href="#module-snntorch.backprop" title="snntorch.backprop"><code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.backprop</span></code></a> to automatically clear the hidden state variables, as well as detach them from the computational graph when necessary.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The first dimension of input <code class="docutils literal notranslate"><span class="pre">data</span></code> is assumed to be time. The built-in backprop functions iterate through the first dimension of <code class="docutils literal notranslate"><span class="pre">data</span></code> by default. For time-invariant inputs, set <code class="docutils literal notranslate"><span class="pre">time_var=False</span></code>.</p>
+</div>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">,</span> <span class="n">betas</span><span class="o">=</span><span class="n">betas</span><span class="p">)</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+
+<span class="c1"># Time-variant input data</span>
+<span class="k">for</span> <span class="nb">input</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+   <span class="n">loss</span> <span class="o">=</span> <span class="n">BPTT</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+
+<span class="c1"># Time-invariant input data</span>
+<span class="k">for</span> <span class="nb">input</span><span class="p">,</span> <span class="n">targets</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+   <span class="n">loss</span> <span class="o">=</span> <span class="n">BPTT</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">criterion</span><span class="p">,</span> <span class="n">time_var</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<span class="target" id="module-snntorch.backprop"></span><dl class="py function">
+<dt class="sig sig-object py" id="snntorch.backprop.BPTT">
+<span class="sig-prename descclassname"><span class="pre">snntorch.backprop.</span></span><span class="sig-name descname"><span class="pre">BPTT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/backprop.html#BPTT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.backprop.BPTT" title="Permalink to this definition"></a></dt>
+<dd><p>Backpropagation through time. LIF layers require parameter
+<code class="docutils literal notranslate"><span class="pre">init_hidden</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+A forward pass is applied for each time step while the loss accumulates.
+The backward pass and parameter update is only applied at the end of
+each time step sequence.
+BPTT is equivalent to TBPTT for the case where <code class="docutils literal notranslate"><span class="pre">num_steps</span> <span class="pre">=</span> <span class="pre">K</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">backprop</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">784</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span>
+                    <span class="n">lif1</span><span class="p">,</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                    <span class="n">lif2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">num_steps</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">,</span>
+<span class="n">betas</span><span class="o">=</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">))</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">mse_count_loss</span><span class="p">()</span>
+<span class="n">reg_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">l1_rate_sparsity</span><span class="p">()</span>
+
+
+<span class="c1"># train_loader is of type torch.utils.data.DataLoader</span>
+<span class="c1"># if input data is time-static, set time_var=False, and specify</span>
+<span class="c1"># num_steps.</span>
+<span class="c1"># if input data is time-varying, set time_var=True and do not</span>
+<span class="c1"># specify num_steps.</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">backprop</span><span class="o">.</span><span class="n">RTRL</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">time_var</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">regularization</span><span class="o">=</span><span class="n">reg_fn</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>torch.nn.modules.container.Sequential</em>) – Network model (either wrapped in Sequential container or as
+a class)</p></li>
+<li><p><strong>dataloader</strong> (<em>torch.utils.data.DataLoader</em>) – DataLoader containing data and targets</p></li>
+<li><p><strong>optimizer</strong> (<em>torch.optim</em>) – Optimizer used, e.g., torch.optim.adam.Adam</p></li>
+<li><p><strong>criterion</strong> (<em>snn.functional.LossFunctions</em>) – Loss criterion from snntorch.functional, e.g.,
+snn.functional.mse_count_loss()</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Does not need to be specified if
+<code class="docutils literal notranslate"><span class="pre">time_var=True</span></code>.</p></li>
+<li><p><strong>time_var</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">True</span></code> if input data is time-varying
+[T x B x dims]. Otherwise, set to false if input data is time-static
+[B x dims], defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>time_first</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">False</span></code> if first dimension of data is not
+time [B x T x dims] AND must also be permuted to [T x B x dims],
+defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>regularization</strong> (<em>snn.functional regularization function</em><em>, </em><em>optional</em>) – Option to add a regularization term to the loss
+function</p></li>
+<li><p><strong>device</strong> (<em>string</em><em>, </em><em>optional</em>) – Specify either “cuda” or “cpu”, defaults to “cpu”</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return average loss for one epoch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.backprop.RTRL">
+<span class="sig-prename descclassname"><span class="pre">snntorch.backprop.</span></span><span class="sig-name descname"><span class="pre">RTRL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/backprop.html#RTRL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.backprop.RTRL" title="Permalink to this definition"></a></dt>
+<dd><p>Real-time Recurrent Learning. LIF layers require parameter
+<code class="docutils literal notranslate"><span class="pre">init_hidden</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+A forward pass, backward pass and parameter update are applied at each
+time step.
+RTRL is equivalent to TBPTT for the case where <code class="docutils literal notranslate"><span class="pre">K</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">backprop</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">784</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span>
+                    <span class="n">lif1</span><span class="p">,</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                    <span class="n">lif2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">num_steps</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">,</span>
+<span class="n">betas</span><span class="o">=</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">))</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">mse_count_loss</span><span class="p">()</span>
+<span class="n">reg_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">l1_rate_sparsity</span><span class="p">()</span>
+
+<span class="c1"># train_loader is of type torch.utils.data.DataLoader</span>
+<span class="c1"># if input data is time-static, set time_var=False, and</span>
+<span class="n">specify</span> <span class="n">num_steps</span><span class="o">.</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">backprop</span><span class="o">.</span><span class="n">RTRL</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">time_var</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">regularization</span><span class="o">=</span><span class="n">reg_fn</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>torch.nn.modules.container.Sequential</em>) – Network model (either wrapped in Sequential container or as
+a class)</p></li>
+<li><p><strong>dataloader</strong> (<em>torch.utils.data.DataLoader</em>) – DataLoader containing data and targets</p></li>
+<li><p><strong>optimizer</strong> (<em>torch.optim</em>) – Optimizer used, e.g., torch.optim.adam.Adam</p></li>
+<li><p><strong>criterion</strong> (<em>snn.functional.LossFunctions</em>) – Loss criterion from snntorch.functional, e.g.,
+snn.functional.mse_count_loss()</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Does not need to be specified
+if <code class="docutils literal notranslate"><span class="pre">time_var=True</span></code>.</p></li>
+<li><p><strong>time_var</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">True</span></code> if input data is time-varying
+[T x B x
+dims]. Otherwise, set to false if input data is time-static [B x dims],
+defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>time_first</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">False</span></code> if first dimension of data is not
+time [B x T x dims] AND must also be permuted to [T x B x dims],
+defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>regularization</strong> (<em>snn.functional regularization function</em><em>, </em><em>optional</em>) – Option to add a regularization term to the loss
+function</p></li>
+<li><p><strong>device</strong> (<em>string</em><em>, </em><em>optional</em>) – Specify either “cuda” or “cpu”, defaults to “cpu”</p></li>
+<li><p><strong>K</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps to process per weight update, defaults
+to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return average loss for one epoch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.backprop.TBPTT">
+<span class="sig-prename descclassname"><span class="pre">snntorch.backprop.</span></span><span class="sig-name descname"><span class="pre">TBPTT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">net</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataloader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_first</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/backprop.html#TBPTT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.backprop.TBPTT" title="Permalink to this definition"></a></dt>
+<dd><p>Truncated backpropagation through time. LIF layers require parameter
+<code class="docutils literal notranslate"><span class="pre">init_hidden</span> <span class="pre">=</span> <span class="pre">True</span></code>.
+Weight updates are performed every <code class="docutils literal notranslate"><span class="pre">K</span></code> time steps.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">backprop</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">784</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span>
+                    <span class="n">lif1</span><span class="p">,</span>
+                    <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                    <span class="n">lif2</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">num_steps</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">,</span>
+<span class="n">betas</span><span class="o">=</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">))</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">mse_count_loss</span><span class="p">()</span>
+<span class="n">reg_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">l1_rate_sparsity</span><span class="p">()</span>
+
+<span class="c1"># train_loader is of type torch.utils.data.DataLoader</span>
+<span class="c1"># if input data is time-static, set time_var=False, and specify</span>
+<span class="c1"># num_steps.</span>
+<span class="c1"># if input data is time-varying, set time_var=True and do not</span>
+<span class="c1"># specify num_steps.</span>
+<span class="c1"># backprop is automatically applied every K=40 time steps</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">backprop</span><span class="o">.</span><span class="n">RTRL</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="o">=</span><span class="n">loss_fn</span><span class="p">,</span> <span class="n">num_steps</span><span class="o">=</span><span class="n">num_steps</span><span class="p">,</span> <span class="n">time_var</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">regularization</span><span class="o">=</span><span class="n">reg_fn</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">K</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>torch.nn.modules.container.Sequential</em>) – Network model (either wrapped in Sequential container or as a
+class)</p></li>
+<li><p><strong>dataloader</strong> (<em>torch.utils.data.DataLoader</em>) – DataLoader containing data and targets</p></li>
+<li><p><strong>optimizer</strong> (<em>torch.optim</em>) – Optimizer used, e.g., torch.optim.adam.Adam</p></li>
+<li><p><strong>criterion</strong> (<em>snn.functional.LossFunctions</em>) – Loss criterion from snntorch.functional, e.g.,
+snn.functional.mse_count_loss()</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps. Does not need to be
+specified if <code class="docutils literal notranslate"><span class="pre">time_var=True</span></code>.</p></li>
+<li><p><strong>time_var</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">True</span></code> if input data is time-varying
+[T x B x dims]. Otherwise, set to false if input data is time-static
+[B x dims], defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>time_first</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Set to <code class="docutils literal notranslate"><span class="pre">False</span></code> if first dimension of data is not
+time [B x T x dims] AND must also be permuted to [T x B x dims],
+defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>regularization</strong> (<em>snn.functional regularization function</em><em>, </em><em>optional</em>) – Option to add a regularization term to the loss
+function</p></li>
+<li><p><strong>device</strong> (<em>string</em><em>, </em><em>optional</em>) – Specify either “cuda” or “cpu”, defaults to “cpu”</p></li>
+<li><p><strong>K</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of time steps to process per weight update, defaults
+to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>return average loss for one epoch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="snn.neurons_synaptic.html" class="btn btn-neutral float-left" title="snn.Synaptic" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="snntorch.functional.html" class="btn btn-neutral float-right" title="snntorch.functional" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

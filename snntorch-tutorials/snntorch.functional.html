@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.functional &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="snntorch.spikegen" href="snntorch.spikegen.html" />
+    <link rel="prev" title="snntorch.backprop" href="snntorch.backprop.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            snntorch
+              <img src="_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">snntorch.functional</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-use-functional">How to use functional</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-snntorch.functional.acc">Accuracy Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-snntorch.functional.loss">Loss Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-snntorch.functional.reg">Regularization Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-snntorch.functional.quant">State Quantization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-snntorch.functional.probe">Probe</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">snntorch.functional</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/snntorch.functional.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="snntorch-functional">
+<h1>snntorch.functional<a class="headerlink" href="#snntorch-functional" title="Permalink to this headline"></a></h1>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.functional</span></code> implements common arithmetic operations applied to spiking neurons, such as loss and regularization functions, and state quantization etc.</p>
+<section id="how-to-use-functional">
+<h2>How to use functional<a class="headerlink" href="#how-to-use-functional" title="Permalink to this headline"></a></h2>
+<p>To use <code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.functional</span></code> you assign the function state to a variable, and then call that variable.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">,</span> <span class="n">betas</span><span class="o">=</span><span class="n">betas</span><span class="p">)</span>
+<span class="n">criterion</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">ce_count_loss</span><span class="p">()</span>  <span class="c1"># apply cross-entropy to spike count</span>
+
+<span class="n">spk_rec</span><span class="p">,</span> <span class="n">mem_rec</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+<span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+
+<span class="c1"># Weight Update</span>
+<span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="module-snntorch.functional.acc">
+<span id="accuracy-functions"></span><h2>Accuracy Functions<a class="headerlink" href="#module-snntorch.functional.acc" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.functional.acc.accuracy_rate">
+<span class="sig-prename descclassname"><span class="pre">snntorch.functional.acc.</span></span><span class="sig-name descname"><span class="pre">accuracy_rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spk_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/acc.html#accuracy_rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.acc.accuracy_rate" title="Permalink to this definition"></a></dt>
+<dd><p>Use spike count to measure accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spk_out</strong> (<em>torch.Tensor</em>) – Output spikes of shape     [num_steps x batch_size x num_outputs]</p></li>
+<li><p><strong>targets</strong> (<em>torch.Tensor</em>) – Target tensor (without one-hot-encoding) of shape     [batch_size]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>accuracy</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.float64</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.functional.acc.accuracy_temporal">
+<span class="sig-prename descclassname"><span class="pre">snntorch.functional.acc.</span></span><span class="sig-name descname"><span class="pre">accuracy_temporal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spk_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/acc.html#accuracy_temporal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.acc.accuracy_temporal" title="Permalink to this definition"></a></dt>
+<dd><p>Use spike timing to measure accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spk_out</strong> (<em>torch.Tensor</em>) – Output spikes of shape     [num_steps x batch_size x num_outputs]</p></li>
+<li><p><strong>targets</strong> (<em>torch.Tensor</em>) – Target tensor (without one-hot-encoding) of shape     [batch_size]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>accuracy</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.float64</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-snntorch.functional.loss">
+<span id="loss-functions"></span><h2>Loss Functions<a class="headerlink" href="#module-snntorch.functional.loss" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.LossFunctions">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">LossFunctions</span></span><a class="reference internal" href="_modules/snntorch/functional/loss.html#LossFunctions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.LossFunctions" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">SpikeTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_is_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_spike</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
+<p>Used by ce_temporal_loss and mse_temporal_loss to convert spike
+outputs into spike times.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.FirstSpike">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">FirstSpike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.FirstSpike"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.FirstSpike" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.autograd.function.Function</span></code></p>
+<p>Convert spk_rec of 1/0s [TxBxN] –&gt; first spike time [BxN].
+Linearize df/dS=-1 if spike, 0 if no spike.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.FirstSpike.backward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.FirstSpike.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.FirstSpike.backward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines a formula for differentiating the operation with backward mode
+automatic differentiation (alias to the vjp function).</p>
+<p>This function is to be overridden by all subclasses.</p>
+<p>It must accept a context <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx</span></code> as the first argument, followed by
+as many outputs as the <a class="reference internal" href="#snntorch.functional.loss.SpikeTime.FirstSpike.forward" title="snntorch.functional.loss.SpikeTime.FirstSpike.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> returned (None will be passed in
+for non tensor outputs of the forward function),
+and it should return as many tensors, as there were inputs to
+<a class="reference internal" href="#snntorch.functional.loss.SpikeTime.FirstSpike.forward" title="snntorch.functional.loss.SpikeTime.FirstSpike.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a>. Each argument is the gradient w.r.t the given output,
+and each returned value should be the gradient w.r.t. the
+corresponding input. If an input is not a Tensor or is a Tensor not
+requiring grads, you can just pass None as a gradient for that input.</p>
+<p>The context can be used to retrieve tensors saved during the forward
+pass. It also has an attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx.needs_input_grad</span></code> as a tuple
+of booleans representing whether each input needs gradient. E.g.,
+<a class="reference internal" href="#snntorch.functional.loss.SpikeTime.FirstSpike.backward" title="snntorch.functional.loss.SpikeTime.FirstSpike.backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward()</span></code></a> will have <code class="docutils literal notranslate"><span class="pre">ctx.needs_input_grad[0]</span> <span class="pre">=</span> <span class="pre">True</span></code> if the
+first input to <a class="reference internal" href="#snntorch.functional.loss.SpikeTime.FirstSpike.forward" title="snntorch.functional.loss.SpikeTime.FirstSpike.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> needs gradient computated w.r.t. the
+output.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.FirstSpike.forward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spk_rec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.FirstSpike.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.FirstSpike.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Convert spk_rec of 1/0s [TxBxN] –&gt; spk_time [TxBxN].
+0’s indicate no spike –&gt; +1 is first time step.
+Transpose accounts for broadcasting along final dimension
+(i.e., multiply along T).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.MultiSpike">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MultiSpike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.MultiSpike"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.MultiSpike" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.autograd.function.Function</span></code></p>
+<p>Convert spk_rec of 1/0s [TxBxN] –&gt; first F spike times [FxBxN].
+Linearize df/dS=-1 if spike, 0 if no spike.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.MultiSpike.backward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.MultiSpike.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.MultiSpike.backward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines a formula for differentiating the operation with backward mode
+automatic differentiation (alias to the vjp function).</p>
+<p>This function is to be overridden by all subclasses.</p>
+<p>It must accept a context <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx</span></code> as the first argument, followed by
+as many outputs as the <a class="reference internal" href="#snntorch.functional.loss.SpikeTime.MultiSpike.forward" title="snntorch.functional.loss.SpikeTime.MultiSpike.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> returned (None will be passed in
+for non tensor outputs of the forward function),
+and it should return as many tensors, as there were inputs to
+<a class="reference internal" href="#snntorch.functional.loss.SpikeTime.MultiSpike.forward" title="snntorch.functional.loss.SpikeTime.MultiSpike.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a>. Each argument is the gradient w.r.t the given output,
+and each returned value should be the gradient w.r.t. the
+corresponding input. If an input is not a Tensor or is a Tensor not
+requiring grads, you can just pass None as a gradient for that input.</p>
+<p>The context can be used to retrieve tensors saved during the forward
+pass. It also has an attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx.needs_input_grad</span></code> as a tuple
+of booleans representing whether each input needs gradient. E.g.,
+<a class="reference internal" href="#snntorch.functional.loss.SpikeTime.MultiSpike.backward" title="snntorch.functional.loss.SpikeTime.MultiSpike.backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward()</span></code></a> will have <code class="docutils literal notranslate"><span class="pre">ctx.needs_input_grad[0]</span> <span class="pre">=</span> <span class="pre">True</span></code> if the
+first input to <a class="reference internal" href="#snntorch.functional.loss.SpikeTime.MultiSpike.forward" title="snntorch.functional.loss.SpikeTime.MultiSpike.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> needs gradient computated w.r.t. the
+output.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.MultiSpike.forward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spk_rec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spk_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.MultiSpike.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.MultiSpike.forward" title="Permalink to this definition"></a></dt>
+<dd><p>This function is to be overridden by all subclasses. There are two ways
+to define forward:</p>
+<p>Usage 1 (Combined forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>It must accept a context ctx as the first argument, followed by any
+number of arguments (tensors or other types).</p></li>
+<li><p>See <span class="xref std std-ref">combining-forward-context</span> for more details</p></li>
+</ul>
+<p>Usage 2 (Separate forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">setup_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The forward no longer accepts a ctx argument.</p></li>
+<li><p>Instead, you must also override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.setup_context()</span></code>
+staticmethod to handle setting up the <code class="docutils literal notranslate"><span class="pre">ctx</span></code> object.
+<code class="docutils literal notranslate"><span class="pre">output</span></code> is the output of the forward, <code class="docutils literal notranslate"><span class="pre">inputs</span></code> are a Tuple of inputs
+to the forward.</p></li>
+<li><p>See <span class="xref std std-ref">extending-autograd</span> for more details</p></li>
+</ul>
+<p>The context can be used to store arbitrary data that can be then
+retrieved during the backward pass. Tensors should not be stored
+directly on <cite>ctx</cite> (though this is not currently enforced for
+backward compatibility). Instead, tensors should be saved either with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_backward()</span></code> if they are intended to be used in
+<code class="docutils literal notranslate"><span class="pre">backward</span></code> (equivalently, <code class="docutils literal notranslate"><span class="pre">vjp</span></code>) or <code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_forward()</span></code>
+if they are intended to be used for in <code class="docutils literal notranslate"><span class="pre">jvp</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.Tolerance">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Tolerance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.Tolerance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.Tolerance" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.autograd.function.Function</span></code></p>
+<p>If spike time is ‘close enough’ to target spike within tolerance,
+set the time to target for loss calc only.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.Tolerance.backward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.Tolerance.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.Tolerance.backward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines a formula for differentiating the operation with backward mode
+automatic differentiation (alias to the vjp function).</p>
+<p>This function is to be overridden by all subclasses.</p>
+<p>It must accept a context <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx</span></code> as the first argument, followed by
+as many outputs as the <a class="reference internal" href="#snntorch.functional.loss.SpikeTime.Tolerance.forward" title="snntorch.functional.loss.SpikeTime.Tolerance.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> returned (None will be passed in
+for non tensor outputs of the forward function),
+and it should return as many tensors, as there were inputs to
+<a class="reference internal" href="#snntorch.functional.loss.SpikeTime.Tolerance.forward" title="snntorch.functional.loss.SpikeTime.Tolerance.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a>. Each argument is the gradient w.r.t the given output,
+and each returned value should be the gradient w.r.t. the
+corresponding input. If an input is not a Tensor or is a Tensor not
+requiring grads, you can just pass None as a gradient for that input.</p>
+<p>The context can be used to retrieve tensors saved during the forward
+pass. It also has an attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx.needs_input_grad</span></code> as a tuple
+of booleans representing whether each input needs gradient. E.g.,
+<a class="reference internal" href="#snntorch.functional.loss.SpikeTime.Tolerance.backward" title="snntorch.functional.loss.SpikeTime.Tolerance.backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward()</span></code></a> will have <code class="docutils literal notranslate"><span class="pre">ctx.needs_input_grad[0]</span> <span class="pre">=</span> <span class="pre">True</span></code> if the
+first input to <a class="reference internal" href="#snntorch.functional.loss.SpikeTime.Tolerance.forward" title="snntorch.functional.loss.SpikeTime.Tolerance.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> needs gradient computated w.r.t. the
+output.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.Tolerance.forward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spk_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.Tolerance.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.Tolerance.forward" title="Permalink to this definition"></a></dt>
+<dd><p>This function is to be overridden by all subclasses. There are two ways
+to define forward:</p>
+<p>Usage 1 (Combined forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>It must accept a context ctx as the first argument, followed by any
+number of arguments (tensors or other types).</p></li>
+<li><p>See <span class="xref std std-ref">combining-forward-context</span> for more details</p></li>
+</ul>
+<p>Usage 2 (Separate forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">setup_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The forward no longer accepts a ctx argument.</p></li>
+<li><p>Instead, you must also override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.setup_context()</span></code>
+staticmethod to handle setting up the <code class="docutils literal notranslate"><span class="pre">ctx</span></code> object.
+<code class="docutils literal notranslate"><span class="pre">output</span></code> is the output of the forward, <code class="docutils literal notranslate"><span class="pre">inputs</span></code> are a Tuple of inputs
+to the forward.</p></li>
+<li><p>See <span class="xref std std-ref">extending-autograd</span> for more details</p></li>
+</ul>
+<p>The context can be used to store arbitrary data that can be then
+retrieved during the backward pass. Tensors should not be stored
+directly on <cite>ctx</cite> (though this is not currently enforced for
+backward compatibility). Instead, tensors should be saved either with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_backward()</span></code> if they are intended to be used in
+<code class="docutils literal notranslate"><span class="pre">backward</span></code> (equivalently, <code class="docutils literal notranslate"><span class="pre">vjp</span></code>) or <code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_forward()</span></code>
+if they are intended to be used for in <code class="docutils literal notranslate"><span class="pre">jvp</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spk_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.label_to_multi_spike">
+<span class="sig-name descname"><span class="pre">label_to_multi_spike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.label_to_multi_spike"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.label_to_multi_spike" title="Permalink to this definition"></a></dt>
+<dd><p>Convert labels from neuron index (dim: B) to multiple spike times
+(dim: F x B x N).
+F is the number of spikes per neuron. Assumes target is iterable
+along F.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.label_to_single_spike">
+<span class="sig-name descname"><span class="pre">label_to_single_spike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.label_to_single_spike"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.label_to_single_spike" title="Permalink to this definition"></a></dt>
+<dd><p>Convert labels from neuron index (dim: B) to first spike time
+(dim: B x N).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.labels_to_spike_times">
+<span class="sig-name descname"><span class="pre">labels_to_spike_times</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_outputs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#SpikeTime.labels_to_spike_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.labels_to_spike_times" title="Permalink to this definition"></a></dt>
+<dd><p>Convert index labels [B] into spike times.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="snntorch.functional.loss.SpikeTime.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#snntorch.functional.loss.SpikeTime.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.ce_count_loss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">ce_count_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">population_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#ce_count_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.ce_count_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.loss.LossFunctions" title="snntorch.functional.loss.LossFunctions"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.loss.LossFunctions</span></code></a></p>
+<p>Cross Entropy Spike Count Loss.</p>
+<p>The spikes at each time step [num_steps x batch_size x num_outputs]
+are accumulated and then passed through the Cross Entropy Loss function.
+This criterion combines log_softmax and NLLLoss in a single function.
+The Cross Entropy Loss encourages the correct class to fire at all
+time steps, and aims to suppress incorrect classes from firing.</p>
+<p>The Cross Entropy Count Loss accumulates spikes first, and applies
+Cross Entropy Loss only once.
+In contrast, the Cross Entropy Rate Loss applies the Cross Entropy
+function at every time step.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="c1"># if not using population codes (i.e., more output neurons than</span>
+<span class="n">there</span> <span class="n">are</span> <span class="n">classes</span><span class="p">)</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">ce_count_loss</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+<span class="c1"># if using population codes; e.g., 200 output neurons, 10 output</span>
+<span class="n">classes</span> <span class="o">--&gt;</span> <span class="mi">20</span> <span class="n">output</span> <span class="n">neurons</span> <span class="n">p</span><span class="o">/</span><span class="k">class</span>
+<span class="nc">loss_fn</span> <span class="o">=</span> <span class="n">ce_count_loss</span><span class="p">(</span><span class="n">population_code</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>population_code</strong> (<em>bool</em><em>, </em><em>optional</em>) – Specify if a population code is applied, i.e.,
+the number of outputs is greater than the number of classes. Defaults
+to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of output classes must be specified if
+<code class="docutils literal notranslate"><span class="pre">population_code=True</span></code>. Must be a factor of the number of output
+neurons if population code is enabled. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loss</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor (single element)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.ce_max_membrane_loss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">ce_max_membrane_loss</span></span><a class="reference internal" href="_modules/snntorch/functional/loss.html#ce_max_membrane_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.ce_max_membrane_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.loss.LossFunctions" title="snntorch.functional.loss.LossFunctions"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.loss.LossFunctions</span></code></a></p>
+<p>Cross Entropy Max Membrane Loss.
+When called, the maximum membrane potential value for each output
+neuron is sampled and passed through the Cross Entropy Loss Function.
+This criterion combines log_softmax and NLLLoss in a single function.
+The Cross Entropy Loss encourages the maximum membrane potential of
+the correct class to increase, while suppressing the maximum membrane
+potential of incorrect classes.
+This function is adopted from SpyTorch by Friedemann Zenke.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">ce_max_membrane_loss</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mem_out</strong> (<em>torch.Tensor</em>) – The output tensor of the SNN’s membrane potential,
+of the dimension timestep * batch_size * num_output_neurons</p></li>
+<li><p><strong>targets</strong> (<em>torch.Tensor</em>) – The tensor containing the targets of the current
+mini-batch, of the dimension batch_size</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loss</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor (single element)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.ce_rate_loss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">ce_rate_loss</span></span><a class="reference internal" href="_modules/snntorch/functional/loss.html#ce_rate_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.ce_rate_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.loss.LossFunctions" title="snntorch.functional.loss.LossFunctions"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.loss.LossFunctions</span></code></a></p>
+<p>Cross Entropy Spike Rate Loss.
+When called, the spikes at each time step are sequentially passed
+through the Cross Entropy Loss function.
+This criterion combines log_softmax and NLLLoss in a single function.
+The losses are accumulated over time steps to give the final loss.
+The Cross Entropy Loss encourages the correct class to fire at all
+time steps, and aims to suppress incorrect classes from firing.</p>
+<p>The Cross Entropy Rate Loss applies the Cross Entropy function at
+every time step. In contrast, the Cross Entropy Count Loss accumulates
+spikes first, and applies Cross Entropy Loss only once.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">ce_rate_loss</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Loss</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>torch.Tensor (single element)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.ce_temporal_loss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">ce_temporal_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inverse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'negate'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#ce_temporal_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.ce_temporal_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Cross Entropy Temporal Loss.</p>
+<p>The cross entropy loss of an ‘inverted’ first spike time of each output
+neuron [batch_size x num_outputs] is calculated.
+The ‘inversion’ is applied such that maximizing the value of the correct
+class decreases the first spike time (i.e., earlier spike).</p>
+<p>Options for inversion include: <code class="docutils literal notranslate"><span class="pre">inverse='negate'</span></code> which applies
+(-1 * output), or <code class="docutils literal notranslate"><span class="pre">inverse='reciprocal'</span></code> which takes (1/output).</p>
+<p>Note that the derivative of each spike time with respect to the spike
+df/dU is non-differentiable for most neuron classes, and is set to a
+sign estimator of -1.
+I.e., increasing membrane potential causes a proportionately earlier
+firing time.</p>
+<p>Index labels are passed as the target. To specify the exact spike time,
+use <code class="docutils literal notranslate"><span class="pre">mse_temporal_loss</span></code> instead.</p>
+<p>Note: After spike times with specified targets, no penalty is applied
+for subsequent spiking.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="c1"># correct classes aimed to fire by default at t=0, incorrect at</span>
+<span class="n">final</span> <span class="n">step</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">ce_temporal_loss</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>inverse</strong> (<em>str</em><em>, </em><em>optional</em>) – Specify how to invert output before taking cross
+entropy. Either scale by (-1 * x) with <code class="docutils literal notranslate"><span class="pre">inverse='negate'</span></code> or take the
+reciprocal (1/x) with <code class="docutils literal notranslate"><span class="pre">inverse='reciprocal'</span></code>. Defaults to <code class="docutils literal notranslate"><span class="pre">negate</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loss</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor (single element)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.mse_count_loss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">mse_count_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">correct_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">incorrect_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">population_code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#mse_count_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.mse_count_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.loss.LossFunctions" title="snntorch.functional.loss.LossFunctions"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.loss.LossFunctions</span></code></a></p>
+<p>Mean Square Error Spike Count Loss.
+When called, the total spike count is accumulated over time for
+each neuron.
+The target spike count for correct classes is set to
+(num_steps * correct_rate), and for incorrect classes
+(num_steps * incorrect_rate).
+The spike counts and target spike counts are then applied to a</p>
+<blockquote>
+<div><p>Mean Square Error Loss Function.</p>
+</div></blockquote>
+<p>This function is adopted from SLAYER by Sumit Bam Shrestha and
+Garrick Orchard.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">SF</span><span class="o">.</span><span class="n">mse_count_loss</span><span class="p">(</span><span class="n">correct_rate</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">incorrect_rate</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>correct_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Firing frequency of correct class as a ratio, e.g.,
+<code class="docutils literal notranslate"><span class="pre">1</span></code> promotes firing at every step; <code class="docutils literal notranslate"><span class="pre">0.5</span></code> promotes firing at 50% of
+steps, <code class="docutils literal notranslate"><span class="pre">0</span></code> discourages any firing, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>incorrect_rate</strong> (<em>float</em><em>, </em><em>optional</em>) – Firing frequency of incorrect class(es) as a
+ratio, e.g., <code class="docutils literal notranslate"><span class="pre">1</span></code> promotes firing at every step; <code class="docutils literal notranslate"><span class="pre">0.5</span></code> promotes
+firing at 50% of steps, <code class="docutils literal notranslate"><span class="pre">0</span></code> discourages any firing, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>population_code</strong> (<em>bool</em><em>, </em><em>optional</em>) – Specify if a population code is applied, i.e., the
+number of outputs is greater than the number of classes. Defaults to
+<code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>num_classes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of output classes must be specified if
+<code class="docutils literal notranslate"><span class="pre">population_code=True</span></code>. Must be a factor of the number of output
+neurons if population code is enabled. Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loss</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor (single element)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.mse_membrane_loss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">mse_membrane_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_var_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#mse_membrane_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.mse_membrane_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.loss.LossFunctions" title="snntorch.functional.loss.LossFunctions"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.loss.LossFunctions</span></code></a></p>
+<p>Mean Square Error Membrane Loss.
+When called, pass the output membrane of shape [num_steps x batch_size x
+num_outputs] and the target tensor of membrane potential.
+The membrane potential and target are then applied to a Mean Square Error
+Loss Function.
+This function is adopted from Spike-Op by Jason K. Eshraghian.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="c1"># if targets are the same at each time-step</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">mse_membrane_loss</span><span class="p">(</span><span class="n">time_var_targets</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+<span class="c1"># if targets are time-varying</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">mse_membrane_loss</span><span class="p">(</span><span class="n">time_var_targets</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_var_targets</strong> – Specifies whether the targets are time-varying,
+defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>on_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Specify target membrane potential for correct class,
+defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>off_target</strong> (<em>float</em><em>, </em><em>optional</em>) – Specify target membrane potential for incorrect class,
+defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loss</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor (single element)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.loss.mse_temporal_loss">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.loss.</span></span><span class="sig-name descname"><span class="pre">mse_temporal_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_is_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">off_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_spike</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/loss.html#mse_temporal_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.loss.mse_temporal_loss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Mean Square Error Temporal Loss.</p>
+<p>The first spike time of each output neuron [batch_size x num_outputs] is
+measured against the desired spike time with the Mean Square Error Loss
+Function.
+Note that the derivative of each spike time with respect to the spike
+df/dU is non-differentiable for most neuron classes, and is set to a sign
+estimator of -1.
+I.e., increasing membrane potential causes a proportionately earlier
+firing time.</p>
+<p>The Mean Square Error Temporal Loss can account for multiple spikes by
+setting <code class="docutils literal notranslate"><span class="pre">multi_spike=True</span></code>.
+If the actual spike time is close enough to the target spike time within
+a given tolerance, e.g., <code class="docutils literal notranslate"><span class="pre">tolerance</span> <span class="pre">=</span> <span class="pre">5</span></code> time steps, then it does not
+contribute to the loss.</p>
+<p>Index labels are passed as the target by default.
+To enable passing in the spike time(s) for output neuron(s), set
+<code class="docutils literal notranslate"><span class="pre">target_is_time=True</span></code>.</p>
+<p>Note: After spike times with specified targets, no penalty is applied
+for subsequent spiking.
+To eliminate later spikes, an additional target should be applied.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">snntorch.functional</span> <span class="k">as</span> <span class="nn">SF</span>
+
+<span class="c1"># default takes in idx labels as targets</span>
+<span class="c1"># correct classes aimed to fire by default at t=0, incorrect at t=-1</span>
+<span class="p">(</span><span class="n">final</span> <span class="n">time</span> <span class="n">step</span><span class="p">)</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">mse_temporal_loss</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+<span class="c1"># as above, but correct class fire @ t=5, incorrect at t=100 with a</span>
+<span class="n">tolerance</span> <span class="n">of</span> <span class="mi">2</span> <span class="n">steps</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">mse_temporal_loss</span><span class="p">(</span><span class="n">on_target</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">off_target</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+<span class="c1"># as above with multiple spike time targets</span>
+<span class="n">on_target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">off_target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">105</span><span class="p">)</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">mse_temporal_loss</span><span class="p">(</span><span class="n">on_target</span><span class="o">=</span><span class="n">on_target</span><span class="p">,</span>
+<span class="n">off_target</span><span class="o">=</span><span class="n">off_target</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+<span class="c1"># specify first spike time for 5 neurons individually, zero tolerance</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">mse_temporal_loss</span><span class="p">(</span><span class="n">target_is_time</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_is_time</strong> (<em>bool</em><em>, </em><em>optional</em>) – Specify if target is specified as spike times
+(True) or as neuron indexes (False). Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>on_target</strong> (int
+(or interable over multiple int if <code class="docutils literal notranslate"><span class="pre">multi_spike=True</span></code>), optional) – Spike time for correct classes
+(only if target_is_time=False). Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>off_target</strong> (int (or interable over multiple int if
+<code class="docutils literal notranslate"><span class="pre">multi_spike=True</span></code>), optional) – Spike time for incorrect classes
+(only if target_is_time=False).
+Defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>, i.e., final time step</p></li>
+<li><p><strong>tolerance</strong> (<em>int</em><em>, </em><em>optional</em>) – If the distance between the spike time and target is
+less than the specified tolerance, then it does not contribute to the
+loss. Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>multi_spike</strong> (<em>bool</em><em>, </em><em>optional</em>) – Specify if multiple spikes in target. Defaults to
+<code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Loss</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.Tensor (single element)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-snntorch.functional.reg">
+<span id="regularization-functions"></span><h2>Regularization Functions<a class="headerlink" href="#module-snntorch.functional.reg" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.reg.l1_rate_sparsity">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.reg.</span></span><span class="sig-name descname"><span class="pre">l1_rate_sparsity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Lambda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/reg.html#l1_rate_sparsity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.reg.l1_rate_sparsity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>L1 regularization using total spike count as the penalty term.
+Lambda is a scalar factor for regularization.</p>
+</dd></dl>
+
+</section>
+<section id="module-snntorch.functional.quant">
+<span id="state-quantization"></span><h2>State Quantization<a class="headerlink" href="#module-snntorch.functional.quant" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.quant.StateQuant">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.quant.</span></span><span class="sig-name descname"><span class="pre">StateQuant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/quant.html#StateQuant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.quant.StateQuant" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.autograd.function.Function</span></code></p>
+<p>Wrapper function for state_quant</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.quant.StateQuant.backward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_output</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/quant.html#StateQuant.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.quant.StateQuant.backward" title="Permalink to this definition"></a></dt>
+<dd><p>Defines a formula for differentiating the operation with backward mode
+automatic differentiation (alias to the vjp function).</p>
+<p>This function is to be overridden by all subclasses.</p>
+<p>It must accept a context <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx</span></code> as the first argument, followed by
+as many outputs as the <a class="reference internal" href="#snntorch.functional.quant.StateQuant.forward" title="snntorch.functional.quant.StateQuant.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> returned (None will be passed in
+for non tensor outputs of the forward function),
+and it should return as many tensors, as there were inputs to
+<a class="reference internal" href="#snntorch.functional.quant.StateQuant.forward" title="snntorch.functional.quant.StateQuant.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a>. Each argument is the gradient w.r.t the given output,
+and each returned value should be the gradient w.r.t. the
+corresponding input. If an input is not a Tensor or is a Tensor not
+requiring grads, you can just pass None as a gradient for that input.</p>
+<p>The context can be used to retrieve tensors saved during the forward
+pass. It also has an attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx.needs_input_grad</span></code> as a tuple
+of booleans representing whether each input needs gradient. E.g.,
+<a class="reference internal" href="#snntorch.functional.quant.StateQuant.backward" title="snntorch.functional.quant.StateQuant.backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward()</span></code></a> will have <code class="docutils literal notranslate"><span class="pre">ctx.needs_input_grad[0]</span> <span class="pre">=</span> <span class="pre">True</span></code> if the
+first input to <a class="reference internal" href="#snntorch.functional.quant.StateQuant.forward" title="snntorch.functional.quant.StateQuant.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a> needs gradient computated w.r.t. the
+output.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.quant.StateQuant.forward">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/quant.html#StateQuant.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.quant.StateQuant.forward" title="Permalink to this definition"></a></dt>
+<dd><p>This function is to be overridden by all subclasses. There are two ways
+to define forward:</p>
+<p>Usage 1 (Combined forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>It must accept a context ctx as the first argument, followed by any
+number of arguments (tensors or other types).</p></li>
+<li><p>See <span class="xref std std-ref">combining-forward-context</span> for more details</p></li>
+</ul>
+<p>Usage 2 (Separate forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">setup_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The forward no longer accepts a ctx argument.</p></li>
+<li><p>Instead, you must also override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.setup_context()</span></code>
+staticmethod to handle setting up the <code class="docutils literal notranslate"><span class="pre">ctx</span></code> object.
+<code class="docutils literal notranslate"><span class="pre">output</span></code> is the output of the forward, <code class="docutils literal notranslate"><span class="pre">inputs</span></code> are a Tuple of inputs
+to the forward.</p></li>
+<li><p>See <span class="xref std std-ref">extending-autograd</span> for more details</p></li>
+</ul>
+<p>The context can be used to store arbitrary data that can be then
+retrieved during the backward pass. Tensors should not be stored
+directly on <cite>ctx</cite> (though this is not currently enforced for
+backward compatibility). Instead, tensors should be saved either with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_backward()</span></code> if they are intended to be used in
+<code class="docutils literal notranslate"><span class="pre">backward</span></code> (equivalently, <code class="docutils literal notranslate"><span class="pre">vjp</span></code>) or <code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_forward()</span></code>
+if they are intended to be used for in <code class="docutils literal notranslate"><span class="pre">jvp</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.functional.quant.state_quant">
+<span class="sig-prename descclassname"><span class="pre">snntorch.functional.quant.</span></span><span class="sig-name descname"><span class="pre">state_quant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thr_centered</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiplier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/quant.html#state_quant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.quant.state_quant" title="Permalink to this definition"></a></dt>
+<dd><p>Quantization-Aware Training with spiking neuron states.</p>
+<p><strong>Note: for weight quantization, we recommend using Brevitas or
+another pre-existing PyTorch-friendly library.</strong></p>
+<p>Uniform and non-uniform quantization can be applied in various
+modes by specifying <code class="docutils literal notranslate"><span class="pre">uniform=True</span></code>.</p>
+<p>Valid quantization levels can be centered about 0 or threshold
+by specifying <code class="docutils literal notranslate"><span class="pre">thr_centered=True</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">upper_limit</span></code> and <code class="docutils literal notranslate"><span class="pre">lower_limit</span></code> specify the proportion of how
+far valid levels go above and below the positive and negative threshold/
+E.g., upper_limit=0.2 means the maximum valid state is 20% higher
+than the value specified in <code class="docutils literal notranslate"><span class="pre">threshold</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch.functional</span> <span class="kn">import</span> <span class="n">quant</span>
+
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">thr</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="c1"># set the quantization parameters</span>
+<span class="n">q_lif</span> <span class="o">=</span> <span class="n">quant</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="n">num_bits</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">uniform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thr</span><span class="p">)</span>
+
+<span class="c1"># specifying state_quant applies state-quantization to the</span>
+<span class="n">hidden</span> <span class="n">state</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="n">automatically</span>
+<span class="n">lif</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">thr</span><span class="p">,</span> <span class="n">state_quant</span><span class="o">=</span><span class="n">q_lif</span><span class="p">)</span>
+
+<span class="n">rand_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mem</span> <span class="o">=</span> <span class="n">lif</span><span class="o">.</span><span class="n">init_leaky</span><span class="p">()</span>
+
+<span class="c1"># forward-pass for one step</span>
+<span class="n">spk</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">lif</span><span class="p">(</span><span class="n">rand_input</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note: Quantization-Aware training is focused on modelling a
+reduced precision network, but does not in of itself accelerate
+low-precision models.
+Hidden states are still represented as full precision values for
+compatibility with PyTorch.
+For accelerated performance or constrained-memory, the model should
+be exported to a downstream backend.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_bits</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bits to quantize state variables to,
+defaults to <code class="docutils literal notranslate"><span class="pre">8</span></code></p></li>
+<li><p><strong>uniform</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Applies uniform quantization if specified, non-uniform
+if unspecified, defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>thr_centered</strong> (<em>Bool</em><em>, </em><em>optional</em>) – For non-uniform quantization, specifies if valid
+states should be centered (densely clustered) around the threshold
+rather than at 0, defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Specifies the threshold, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
+<li><p><strong>lower_limit</strong> (<em>float</em><em>, </em><em>optional</em>) – Specifies how far below (-threshold) the lowest
+valid state can be, i.e., (-threshold - threshold*lower_limit),
+defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p><strong>upper_limit</strong> (<em>float</em><em>, </em><em>optional</em>) – Specifies how far above (threshold) the highest
+valid state can be, i.e., (threshold + threshold*upper_limit),
+defaults to <code class="docutils literal notranslate"><span class="pre">0.2</span></code></p></li>
+<li><p><strong>multiplier</strong> (<em>float</em><em>, </em><em>optional</em>) – For non-uniform distributions, specify the base
+of the exponential. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, an appropriate value is set
+internally based on <code class="docutils literal notranslate"><span class="pre">num_bits</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-snntorch.functional.probe">
+<span id="probe"></span><h2>Probe<a class="headerlink" href="#module-snntorch.functional.probe" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.probe.AttributeMonitor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.probe.</span></span><span class="sig-name descname"><span class="pre">AttributeMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">attribute_name:</span> <span class="pre">str</span></em>, <em class="sig-param"><span class="pre">pre_forward:</span> <span class="pre">bool</span></em>, <em class="sig-param"><span class="pre">net:</span> <span class="pre">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="pre">instance:</span> <span class="pre">Optional[Any]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">function_on_attribute:</span> <span class="pre">Callable</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">AttributeMonitor.&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#AttributeMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.AttributeMonitor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.probe.BaseMonitor" title="snntorch.functional.probe.BaseMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.probe.BaseMonitor</span></code></a></p>
+<p>A monitor to record the attribute (e.g. membrane potential) of a
+specific neuron layer (e.g. Leaky) in a network.
+The attribute name can be specified as the first argument of this function.
+All attribute data is recorded in <code class="docutils literal notranslate"><span class="pre">self.record</span></code> as data type ‘’list’’.
+Call <code class="docutils literal notranslate"><span class="pre">self.enable()</span></code> or <code class="docutils literal notranslate"><span class="pre">self.disable()</span></code> to enable or disable
+the monitor.
+Call <code class="docutils literal notranslate"><span class="pre">self.clear_recorded_data()</span></code> to clear recorded data.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch.functional</span> <span class="kn">import</span> <span class="n">probe</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_seq</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x_seq</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>
+
+<span class="n">monitor</span> <span class="o">=</span> <span class="n">probe</span><span class="o">.</span><span class="n">AttributeMonitor</span><span class="p">(</span><span class="s1">&#39;mem&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">net</span><span class="p">,</span>
+<span class="n">instance</span><span class="o">=</span><span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">())</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.records=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">records</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor[0]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.monitored_layers=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitored_layers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;monitor[&#39;lif1&#39;]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="s1">&#39;lif1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute_name</strong> – Attribute’s name of probed neuron layer
+(e.g., mem, syn, etc.)</p></li>
+<li><p><strong>pre_forward</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, record the attribute value before
+the forward pass, otherwise record the value after forward pass.</p></li>
+<li><p><strong>net</strong> (<em>nn.Module</em>) – Network model (either wrapped in Sequential container or
+as a class)</p></li>
+<li><p><strong>instance</strong> (<em>Any</em><em> or </em><em>tuple</em>) – Instance of modules to be monitored. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+defaults to <code class="docutils literal notranslate"><span class="pre">type(net)</span></code></p></li>
+<li><p><strong>function_on_attribute</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function that is applied to the
+monitored modules’ attribute</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.AttributeMonitor.create_hook">
+<span class="sig-name descname"><span class="pre">create_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#AttributeMonitor.create_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.AttributeMonitor.create_hook" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.probe.BaseMonitor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.probe.</span></span><span class="sig-name descname"><span class="pre">BaseMonitor</span></span><a class="reference internal" href="_modules/snntorch/functional/probe.html#BaseMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.BaseMonitor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.BaseMonitor.clear_recorded_data">
+<span class="sig-name descname"><span class="pre">clear_recorded_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#BaseMonitor.clear_recorded_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.BaseMonitor.clear_recorded_data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.BaseMonitor.disable">
+<span class="sig-name descname"><span class="pre">disable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#BaseMonitor.disable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.BaseMonitor.disable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.BaseMonitor.enable">
+<span class="sig-name descname"><span class="pre">enable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#BaseMonitor.enable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.BaseMonitor.enable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.BaseMonitor.is_enable">
+<span class="sig-name descname"><span class="pre">is_enable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#BaseMonitor.is_enable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.BaseMonitor.is_enable" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.BaseMonitor.remove_hooks">
+<span class="sig-name descname"><span class="pre">remove_hooks</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#BaseMonitor.remove_hooks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.BaseMonitor.remove_hooks" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.probe.GradInputMonitor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.probe.</span></span><span class="sig-name descname"><span class="pre">GradInputMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">net:</span> <span class="pre">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="pre">instance:</span> <span class="pre">Optional[Any]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">function_on_grad_input:</span> <span class="pre">Callable</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">GradInputMonitor.&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#GradInputMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.GradInputMonitor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.probe.BaseMonitor" title="snntorch.functional.probe.BaseMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.probe.BaseMonitor</span></code></a></p>
+<p>A monitor to record the input gradient of each neuron layer
+(e.g. Leaky) in a network.
+All input gradient data is recorded in <code class="docutils literal notranslate"><span class="pre">self.record</span></code> as data type
+‘’list’’.
+Call <code class="docutils literal notranslate"><span class="pre">self.enable()</span></code> or <code class="docutils literal notranslate"><span class="pre">self.disable()</span></code> to enable or disable
+the monitor.
+Call <code class="docutils literal notranslate"><span class="pre">self.clear_recorded_data()</span></code> to clear recorded data.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch.functional</span> <span class="kn">import</span> <span class="n">probe</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_seq</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x_seq</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>
+
+<span class="n">monitor</span> <span class="o">=</span> <span class="n">probe</span><span class="o">.</span><span class="n">GradInputMonitor</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">())</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.records=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">records</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor[0]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.monitored_layers=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitored_layers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;monitor[&#39;lif1&#39;]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="s1">&#39;lif1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>nn.Module</em>) – Network model (either wrapped in Sequential container or
+as a class)</p></li>
+<li><p><strong>instance</strong> (<em>Any</em><em> or </em><em>tuple</em>) – Instance of modules to be monitored. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+defaults to <code class="docutils literal notranslate"><span class="pre">type(net)</span></code></p></li>
+<li><p><strong>function_on_grad_input</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function that is applied to the
+monitored modules’ gradients</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.GradInputMonitor.create_hook">
+<span class="sig-name descname"><span class="pre">create_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#GradInputMonitor.create_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.GradInputMonitor.create_hook" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.probe.GradOutputMonitor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.probe.</span></span><span class="sig-name descname"><span class="pre">GradOutputMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">net:</span> <span class="pre">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="pre">instance:</span> <span class="pre">Optional[Any]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">function_on_grad_output:</span> <span class="pre">Callable</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">GradOutputMonitor.&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#GradOutputMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.GradOutputMonitor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.probe.BaseMonitor" title="snntorch.functional.probe.BaseMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.probe.BaseMonitor</span></code></a></p>
+<p>A monitor to record the output gradient of each specific neuron layer
+(e.g. Leaky) in a network.
+All output gradient data is recorded in <code class="docutils literal notranslate"><span class="pre">self.record</span></code> as data type
+‘’list’’.
+Call <code class="docutils literal notranslate"><span class="pre">self.enable()</span></code> or <code class="docutils literal notranslate"><span class="pre">self.disable()</span></code> to enable or disable the
+monitor.
+Call <code class="docutils literal notranslate"><span class="pre">self.clear_recorded_data()</span></code> to clear recorded data.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch.functional</span> <span class="kn">import</span> <span class="n">probe</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_seq</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x_seq</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>
+
+<span class="n">mtor</span> <span class="o">=</span> <span class="n">probe</span><span class="o">.</span><span class="n">GradOutputMonitor</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">())</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mtor.records=</span><span class="si">{</span><span class="n">mtor</span><span class="o">.</span><span class="n">records</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mtor[0]=</span><span class="si">{</span><span class="n">mtor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;mtor.monitored_layers=</span><span class="si">{</span><span class="n">mtor</span><span class="o">.</span><span class="n">monitored_layers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;mtor[&#39;lif1&#39;]=</span><span class="si">{</span><span class="n">mtor</span><span class="p">[</span><span class="s1">&#39;lif1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>nn.Module</em>) – Network model (either wrapped in Sequential container
+or as a class)</p></li>
+<li><p><strong>instance</strong> (<em>Any</em><em> or </em><em>tuple</em>) – Instance of modules to be monitored. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+defaults to <code class="docutils literal notranslate"><span class="pre">type(net)</span></code></p></li>
+<li><p><strong>function_on_grad_output</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function that is applied to the
+monitored modules’ gradients</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.GradOutputMonitor.create_hook">
+<span class="sig-name descname"><span class="pre">create_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#GradOutputMonitor.create_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.GradOutputMonitor.create_hook" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.probe.InputMonitor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.probe.</span></span><span class="sig-name descname"><span class="pre">InputMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">net:</span> <span class="pre">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="pre">instance:</span> <span class="pre">Optional[Any]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">function_on_input:</span> <span class="pre">Callable</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">InputMonitor.&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#InputMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.InputMonitor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.probe.BaseMonitor" title="snntorch.functional.probe.BaseMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.probe.BaseMonitor</span></code></a></p>
+<p>A monitor to record the input of each neuron layer (e.g. Leaky)
+in a network.
+All input data is recorded in <code class="docutils literal notranslate"><span class="pre">self.record</span></code> as data type ‘’list’’.
+Call <code class="docutils literal notranslate"><span class="pre">self.enable()</span></code> or <code class="docutils literal notranslate"><span class="pre">self.disable()</span></code> to enable or disable
+the monitor.
+Call <code class="docutils literal notranslate"><span class="pre">self.clear_recorded_data()</span></code> to clear recorded data.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch.functional</span> <span class="kn">import</span> <span class="n">probe</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_seq</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x_seq</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>
+
+<span class="n">monitor</span> <span class="o">=</span> <span class="n">probe</span><span class="o">.</span><span class="n">InputMonitor</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">())</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.records=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">records</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor[0]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.monitored_layers=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitored_layers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;monitor[&#39;lif1&#39;]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="s1">&#39;lif1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>nn.Module</em>) – Network model (either wrapped in Sequential container
+or as a class)</p></li>
+<li><p><strong>instance</strong> (<em>Any</em><em> or </em><em>tuple</em>) – Instance of modules to be monitored. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+defaults to <code class="docutils literal notranslate"><span class="pre">type(net)</span></code></p></li>
+<li><p><strong>function_on_input</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function that is applied to the monitored
+modules’ input</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.InputMonitor.create_hook">
+<span class="sig-name descname"><span class="pre">create_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#InputMonitor.create_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.InputMonitor.create_hook" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="snntorch.functional.probe.OutputMonitor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.functional.probe.</span></span><span class="sig-name descname"><span class="pre">OutputMonitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">net:</span> <span class="pre">torch.nn.modules.module.Module</span></em>, <em class="sig-param"><span class="pre">instance:</span> <span class="pre">Optional[Any]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">function_on_output:</span> <span class="pre">Callable</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">OutputMonitor.&lt;lambda&gt;&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#OutputMonitor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.OutputMonitor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#snntorch.functional.probe.BaseMonitor" title="snntorch.functional.probe.BaseMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">snntorch.functional.probe.BaseMonitor</span></code></a></p>
+<p>A monitor to record the output spikes of each specific neuron layer
+(e.g. Leaky) in a network.
+All output data is recorded in <code class="docutils literal notranslate"><span class="pre">self.record</span></code> as data type ‘’list’’.
+Call <code class="docutils literal notranslate"><span class="pre">self.enable()</span></code> or <code class="docutils literal notranslate"><span class="pre">self.disable()</span></code> to enable or disable the
+monitor.
+Call <code class="docutils literal notranslate"><span class="pre">self.clear_recorded_data()</span></code> to clear recorded data.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch.functional</span> <span class="kn">import</span> <span class="n">probe</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+
+<span class="k">class</span> <span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_seq</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif1</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="n">x_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lif2</span><span class="p">(</span><span class="n">x_seq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x_seq</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>
+
+<span class="n">monitor</span> <span class="o">=</span> <span class="n">probe</span><span class="o">.</span><span class="n">OutputMonitor</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">instance</span><span class="o">=</span><span class="n">snntorch</span><span class="o">.</span><span class="n">Leaky</span><span class="p">())</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">]))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.records=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">records</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor[0]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;monitor.monitored_layers=</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitored_layers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;monitor[&#39;lif1&#39;]=</span><span class="si">{</span><span class="n">monitor</span><span class="p">[</span><span class="s1">&#39;lif1&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net</strong> (<em>nn.Module</em>) – Network model (either wrapped in Sequential container or
+as a class)</p></li>
+<li><p><strong>instance</strong> (<em>Any</em><em> or </em><em>tuple</em>) – Instance of modules to be monitored. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+defaults to <code class="docutils literal notranslate"><span class="pre">type(net)</span></code></p></li>
+<li><p><strong>function_on_output</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function that is applied to the monitored
+modules’ outputs</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.functional.probe.OutputMonitor.create_hook">
+<span class="sig-name descname"><span class="pre">create_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#OutputMonitor.create_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.OutputMonitor.create_hook" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.functional.probe.unpack_len1_tuple">
+<span class="sig-prename descclassname"><span class="pre">snntorch.functional.probe.</span></span><span class="sig-name descname"><span class="pre">unpack_len1_tuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/functional/probe.html#unpack_len1_tuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.functional.probe.unpack_len1_tuple" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="snntorch.backprop.html" class="btn btn-neutral float-left" title="snntorch.backprop" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="snntorch.spikegen.html" class="btn btn-neutral float-right" title="snntorch.spikegen" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

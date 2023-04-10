@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial 4 - 2nd Order Spiking Neuron Models &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial 5 - Training Spiking Neural Networks with snntorch" href="tutorial_5.html" />
+    <link rel="prev" title="Tutorial 3 - A Feedforward Spiking Neural Network" href="tutorial_3.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            snntorch
+              <img src="../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tutorial_1.html">Tutorial 1 - Spike Encoding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_2.html">Tutorial 2 - The Leaky Integrate-and-Fire Neuron</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_3.html">Tutorial 3 - A Feedforward Spiking Neural Network</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial 4 - 2nd Order Spiking Neuron Models</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#synaptic-conductance-based-lif-neuron-model">1. Synaptic Conductance-based LIF Neuron Model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#modeling-synaptic-current">1.1 Modeling Synaptic Current</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#synaptic-neuron-model-in-snntorch">1.2 Synaptic Neuron Model in snnTorch</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#st-order-vs-2nd-order-neurons">1.3 1st-Order vs. 2nd-Order Neurons</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#alpha-neuron-model-hacked-spike-response-model">2. Alpha Neuron Model (Hacked Spike Response Model)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#modelling-the-alpha-neuron-model">2.1 Modelling the Alpha Neuron Model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#practical-considerations">2.2 Practical Considerations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#further-reading">Further Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_5.html">Tutorial 5 - Training Spiking Neural Networks with snntorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_6.html">Tutorial 6 - Surrogate Gradient Descent in a Convolutional SNN</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_7.html">Tutorial 7 - Neuromorphic Datasets with Tonic + snnTorch</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_ipu_1.html">Accelerating snnTorch on IPUs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_pop.html">Population Coding in Spiking Neural Nets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_regression_1.html">Regression with SNNs: Part I</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial_regression_2.html">Regression with SNNs: Part II</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Tutorial 4 - 2nd Order Spiking Neuron Models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/tutorial_4.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tutorial-4-2nd-order-spiking-neuron-models">
+<h1>Tutorial 4 - 2nd Order Spiking Neuron Models<a class="headerlink" href="#tutorial-4-2nd-order-spiking-neuron-models" title="Permalink to this headline"></a></h1>
+<p>Tutorial written by Jason K. Eshraghian (<a class="reference external" href="https://www.ncg.ucsc.edu">www.ncg.ucsc.edu</a>)</p>
+<a class="reference external image-reference" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_4_advanced_neurons.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>
+<p>The snnTorch tutorial series is based on the following paper. If you find these resources or code useful in your work, please consider citing the following source:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/2109.12894">Jason K. Eshraghian, Max Ward, Emre Neftci, Xinxin Wang, Gregor Lenz, Girish
+Dwivedi, Mohammed Bennamoun, Doo Seok Jeong, and Wei D. Lu. “Training
+Spiking Neural Networks Using Lessons From Deep Learning”. arXiv preprint arXiv:2109.12894,
+September 2021.</a></p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<dl class="simple">
+<dt>This tutorial is a static non-editable version. Interactive, editable versions are available via the following links:</dt><dd><ul class="simple">
+<li><p><a class="reference external" href="https://colab.research.google.com/github/jeshraghian/snntorch/blob/master/examples/tutorial_4_advanced_neurons.ipynb">Google Colab</a></p></li>
+<li><p><a class="reference external" href="https://github.com/jeshraghian/snntorch/tree/master/examples">Local Notebook (download via GitHub)</a></p></li>
+</ul>
+</dd>
+</dl>
+</div>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline"></a></h2>
+<p>In this tutorial, you will:</p>
+<ul class="simple">
+<li><p>Learn about the more advanced leaky integrate-and-fire (LIF) neuron models available: <code class="docutils literal notranslate"><span class="pre">Synaptic</span></code> and <code class="docutils literal notranslate"><span class="pre">Alpha</span></code></p></li>
+</ul>
+<p>Install the latest PyPi distribution of snnTorch.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install snntorch
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">spikeplot</span> <span class="k">as</span> <span class="n">splt</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">spikegen</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+</section>
+<section id="synaptic-conductance-based-lif-neuron-model">
+<h2>1. Synaptic Conductance-based LIF Neuron Model<a class="headerlink" href="#synaptic-conductance-based-lif-neuron-model" title="Permalink to this headline"></a></h2>
+<p>The neuron models explored in previous tutorials assume that an input voltage
+spike leads to an instantaneous jump in synaptic current, which then
+contributes to the membrane potential. In reality, a spike will result
+in the <em>gradual</em> release of neurotransmitters from the pre-synaptic
+neuron to the post-synaptic neuron. The synaptic conductance-based LIF
+model accounts for the gradual temporal dynamics of input current.</p>
+<section id="modeling-synaptic-current">
+<h3>1.1 Modeling Synaptic Current<a class="headerlink" href="#modeling-synaptic-current" title="Permalink to this headline"></a></h3>
+<p>If a pre-synaptic neuron fires, the voltage spike is transmitted down
+the axon of the neuron. It triggers the vesicles to release
+neurotransmitters into the synaptic cleft. These activate the
+post-synaptic receptors, which directly influence the effective current
+that flows into the post-synaptic neuron. Shown below are two types of
+excitatory receptors, AMPA and NMDA.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_6_synaptic.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_6_synaptic.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_6_synaptic.png?raw=true" style="width: 600px;" /></a>
+<p>The simplest model of synaptic current assumes an increasing current on
+a very fast time-scale, followed by a relatively slow exponential decay,
+as seen in the AMPA receptor response above. This is very similar to the
+membrane potential dynamics of Lapicque’s model.</p>
+<p>The synaptic model has two exponentially decaying terms:
+<span class="math notranslate nohighlight">\(I_{\rm syn}(t)\)</span> and <span class="math notranslate nohighlight">\(U_{\rm mem}(t)\)</span>. The ratio between
+subsequent terms (i.e., decay rate) of <span class="math notranslate nohighlight">\(I_{\rm syn}(t)\)</span> is set to
+<span class="math notranslate nohighlight">\(\alpha\)</span>, and that of <span class="math notranslate nohighlight">\(U(t)\)</span> is set to <span class="math notranslate nohighlight">\(\beta\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\alpha = e^{-\Delta t/\tau_{\rm syn}}\]</div>
+<div class="math notranslate nohighlight">
+\[\beta = e^{-\Delta t/\tau_{\rm mem}}\]</div>
+<p>where the duration of a single time step is normalized to
+<span class="math notranslate nohighlight">\(\Delta t = 1\)</span> in future. <span class="math notranslate nohighlight">\(\tau_{\rm syn}\)</span> models the time
+constant of the synaptic current in an analogous way to how
+<span class="math notranslate nohighlight">\(\tau_{\rm mem}\)</span> models the time constant of the membrane
+potential. <span class="math notranslate nohighlight">\(\beta\)</span> is derived in the exact same way as the
+previous tutorial, with a similar approach to
+<span class="math notranslate nohighlight">\(\alpha\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[I_{\rm syn}[t+1]=\underbrace{\alpha I_{\rm syn}[t]}_\text{decay} + \underbrace{WX[t+1]}_\text{input}\]</div>
+<div class="math notranslate nohighlight">
+\[U[t+1] = \underbrace{\beta U[t]}_\text{decay} + \underbrace{I_{\rm syn}[t+1]}_\text{input} - \underbrace{R[t]}_\text{reset}\]</div>
+<p>The same conditions for spiking as the previous LIF neurons still hold:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}S_{\rm out}[t] = \begin{cases} 1, &amp;\text{if}~U[t] &gt; U_{\rm thr} \\
+0, &amp;\text{otherwise}\end{cases}\end{split}\]</div>
+</section>
+<section id="synaptic-neuron-model-in-snntorch">
+<h3>1.2 Synaptic Neuron Model in snnTorch<a class="headerlink" href="#synaptic-neuron-model-in-snntorch" title="Permalink to this headline"></a></h3>
+<p>The synaptic condutance-based neuron model combines the synaptic current
+dynamics with the passive membrane. It must be instantiated with two
+input arguments:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\alpha\)</span>: the decay rate of the synaptic current</p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta\)</span>: the decay rate of the membrane potential (as with Lapicque)</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Temporal dynamics</span>
+<span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.9</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">num_steps</span> <span class="o">=</span> <span class="mi">200</span>
+
+<span class="c1"># Initialize 2nd-order LIF neuron</span>
+<span class="n">lif1</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Synaptic</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using this neuron is the exact same as previous LIF neurons, but now
+with the addition of synaptic current <code class="docutils literal notranslate"><span class="pre">syn</span></code> as an input and output:</p>
+<p><strong>Inputs</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">spk_in</span></code>: each weighted input voltage spike <span class="math notranslate nohighlight">\(WX[t]\)</span> is sequentially passed in</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">syn</span></code>: synaptic current <span class="math notranslate nohighlight">\(I_{\rm syn}[t-1]\)</span> at the previous time step</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mem</span></code>: membrane potential <span class="math notranslate nohighlight">\(U[t-1]\)</span> at the previous time step</p></li>
+</ul>
+<p><strong>Outputs</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">spk_out</span></code>: output spike <span class="math notranslate nohighlight">\(S[t]\)</span> (‘1’ if there is a spike; ‘0’ if there is no spike)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">syn</span></code>: synaptic current <span class="math notranslate nohighlight">\(I_{\rm syn}[t]\)</span> at the present time step</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mem</span></code>: membrane potential <span class="math notranslate nohighlight">\(U[t]\)</span> at the present time step</p></li>
+</ul>
+<p>These all need to be of type <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>. Note that the neuron
+model has been time-shifted back one step without loss of generality.</p>
+<p>Apply a periodic spiking input to see how current and membrane evolve
+with time:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Periodic spiking input, spk_in = 0.2 V</span>
+<span class="n">w</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">spk_period</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">w</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">)),</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">spk_in</span> <span class="o">=</span> <span class="n">spk_period</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+
+<span class="c1"># Initialize hidden states and output</span>
+<span class="n">syn</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">lif1</span><span class="o">.</span><span class="n">init_synaptic</span><span class="p">()</span>
+<span class="n">spk_out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">syn_rec</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">mem_rec</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">spk_rec</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Simulate neurons</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+  <span class="n">spk_out</span><span class="p">,</span> <span class="n">syn</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">lif1</span><span class="p">(</span><span class="n">spk_in</span><span class="p">[</span><span class="n">step</span><span class="p">],</span> <span class="n">syn</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+  <span class="n">spk_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spk_out</span><span class="p">)</span>
+  <span class="n">syn_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">syn</span><span class="p">)</span>
+  <span class="n">mem_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+<span class="c1"># convert lists to tensors</span>
+<span class="n">spk_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">)</span>
+<span class="n">syn_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">syn_rec</span><span class="p">)</span>
+<span class="n">mem_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem_rec</span><span class="p">)</span>
+
+<span class="n">plot_spk_cur_mem_spk</span><span class="p">(</span><span class="n">spk_in</span><span class="p">,</span> <span class="n">syn_rec</span><span class="p">,</span> <span class="n">mem_rec</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">,</span>
+                     <span class="s2">&quot;Synaptic Conductance-based Neuron Model With Input Spikes&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial4/_static/syn_cond_spk.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial4/_static/syn_cond_spk.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial4/_static/syn_cond_spk.png?raw=true" style="width: 450px;" /></a>
+<p>This model also has the optional input arguments of <code class="docutils literal notranslate"><span class="pre">reset_mechanism</span></code>
+and <code class="docutils literal notranslate"><span class="pre">threshold</span></code> as described for Lapicque’s neuron model. In summary,
+each spike contributes a shifted exponential decay to the synaptic
+current <span class="math notranslate nohighlight">\(I_{\rm syn}\)</span>, which are all summed together. This current
+is then integrated by the passive membrane equation derived in
+<a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/index.html">Tutorial 2</a>, thus generating output spikes. An illustration of this
+process is provided below.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_7_stein.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_7_stein.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_7_stein.png?raw=true" style="width: 450px;" /></a>
+</section>
+<section id="st-order-vs-2nd-order-neurons">
+<h3>1.3 1st-Order vs. 2nd-Order Neurons<a class="headerlink" href="#st-order-vs-2nd-order-neurons" title="Permalink to this headline"></a></h3>
+<p>A natural question that arises is - <em>when do I want to use a 1st order
+LIF neuron and when should I use this 2nd order LIF neuron?</em> While this
+has not really been settled, my own experiments have given me some
+intuition that might be useful.</p>
+<p><strong>When 2nd-order neurons are better</strong></p>
+<ul class="simple">
+<li><p>If the temporal relations of your input data occur across long time-scales,</p></li>
+<li><p>or if the input spiking pattern is sparse</p></li>
+</ul>
+<p>By having two recurrent equations with two decay terms (<span class="math notranslate nohighlight">\(\alpha\)</span>
+and <span class="math notranslate nohighlight">\(\beta\)</span>), this neuron model is able to ‘sustain’ input spikes
+over a longer duration. This can be beneficial to retaining long-term
+relationships.</p>
+<p>An alternative use case might also be:</p>
+<ul class="simple">
+<li><p>When temporal codes matter</p></li>
+</ul>
+<p>If you care for the precise timing of a spike, it seems easier to
+control that for a 2nd-order neuron. In the <code class="docutils literal notranslate"><span class="pre">Leaky</span></code> model, a spike
+would be triggered in direct synchrony with the input. For 2nd-order
+models, the membrane potential is ‘smoothed out’ (i.e., the synaptic
+current model low-pass filters the membrane potential), which means one
+can use a finite rise time for <span class="math notranslate nohighlight">\(U[t]\)</span>. This is clear in the
+previous simulation, where the output spikes experience a delay with
+respect to the input spikes.</p>
+<p><strong>When 1st-order neurons are better</strong></p>
+<ul class="simple">
+<li><p>Any case that doesn’t fall into the above, and sometimes, the above cases.</p></li>
+</ul>
+<p>By having one less equation in 1st-order neuron models (such as
+<code class="docutils literal notranslate"><span class="pre">Leaky</span></code>), the backpropagation process is made a little simpler. Though
+having said that, the <code class="docutils literal notranslate"><span class="pre">Synaptic</span></code> model is functionally equivalent to
+the <code class="docutils literal notranslate"><span class="pre">Leaky</span></code> model for <span class="math notranslate nohighlight">\(\alpha=0.\)</span> In my own hyperparameter
+sweeps on simple datasets, the optimal results seem to push
+<span class="math notranslate nohighlight">\(\alpha\)</span> as close to 0 as possible. As data increases in
+complexity, <span class="math notranslate nohighlight">\(\alpha\)</span> may grow larger.</p>
+</section>
+</section>
+<section id="alpha-neuron-model-hacked-spike-response-model">
+<h2>2. Alpha Neuron Model (Hacked Spike Response Model)<a class="headerlink" href="#alpha-neuron-model-hacked-spike-response-model" title="Permalink to this headline"></a></h2>
+<p>A recursive version of the Spike Response Model (SRM), or the ‘Alpha’
+neuron, is also available, called using <code class="docutils literal notranslate"><span class="pre">snn.Alpha</span></code>. The neuron models
+thus far have all been based on the passive membrane model, using
+ordinary differential equations to describe their dynamics.</p>
+<p>The SRM family of models, on the other hand, is interpreted in terms of
+a filter. Upon the arrival of an input spike, this spike is convolved
+with the filter to give the membrane potential response. The form of
+this filter can be exponential, as is the case with Lapicque’s neuron,
+or they can be more complex such as a sum of exponentials. SRM models
+are appealing as they can arbitrarily add refractoriness, threshold
+adaptation, and any number of other features simply by embedding them
+into the filter.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/exp.gif?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/exp.gif?raw=true" class="align-right" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/exp.gif?raw=true" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/alpha.gif?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/alpha.gif?raw=true" class="align-right" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/alpha.gif?raw=true" style="width: 400px;" /></a>
+<section id="modelling-the-alpha-neuron-model">
+<h3>2.1 Modelling the Alpha Neuron Model<a class="headerlink" href="#modelling-the-alpha-neuron-model" title="Permalink to this headline"></a></h3>
+<p>Formally, this process is represented by:</p>
+<div class="math notranslate nohighlight">
+\[U_{\rm mem}(t) = \sum_i W(\epsilon * S_{\rm in})(t)\]</div>
+<p>where the incoming spikes <span class="math notranslate nohighlight">\(S_{\rm in}\)</span> are convolved with a spike
+response kernel <span class="math notranslate nohighlight">\(\epsilon( \cdot )\)</span>. The spike response is scaled
+by a synaptic weight, <span class="math notranslate nohighlight">\(W\)</span>. In top figure, the kernel
+is an exponentially decaying function and would be the equivalent of
+Lapicque’s 1st-order neuron model. On the bottom, the kernel is an alpha
+function:</p>
+<div class="math notranslate nohighlight">
+\[\epsilon(t) = \frac{t}{\tau}e^{1-t/\tau}\Theta(t)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\tau\)</span> is the time constant of the alpha kernel and
+<span class="math notranslate nohighlight">\(\Theta\)</span> is the Heaviside step function. Most kernel-based methods
+adopt the alpha function as it provides a time-delay that is useful for
+temporal codes that are concerned with specifying the exact spike time
+of a neuron.</p>
+<p>In snnTorch, the spike response model is not directly implemented as a
+filter. Instead, it is recast into a recursive form such that only the
+previous time step of values are required to calculate the next set of
+values. This reduces the memory required.</p>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_9_alpha.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_9_alpha.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial2/2_9_alpha.png?raw=true" style="width: 550px;" /></a>
+<p>As the membrane potential is now determined by the sum of two
+exponentials, each of these exponents has their own independent decay
+rate. <span class="math notranslate nohighlight">\(\alpha\)</span> defines the decay rate of the positive exponential,
+and <span class="math notranslate nohighlight">\(\beta\)</span> defines the decay rate of the negative exponential.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.7</span>
+
+<span class="c1"># initialize neuron</span>
+<span class="n">lif2</span> <span class="o">=</span> <span class="n">snn</span><span class="o">.</span><span class="n">Alpha</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using this neuron is the same as the previous neurons, but the sum of
+two exponential functions requires the synaptic current <code class="docutils literal notranslate"><span class="pre">syn</span></code> to be
+split into a <code class="docutils literal notranslate"><span class="pre">syn_exc</span></code> and <code class="docutils literal notranslate"><span class="pre">syn_inh</span></code> component:</p>
+<p><strong>Inputs</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">spk_in</span></code>: each weighted input voltage spike <span class="math notranslate nohighlight">\(WX[t]\)</span> is sequentially passed in</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">syn_exc</span></code>: excitatory post-synaptic current <span class="math notranslate nohighlight">\(I_{\rm syn-exc}[t-1]\)</span> at the previous time step</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">syn_inh</span></code>: inhibitory post-synaptic current <span class="math notranslate nohighlight">\(I_{\rm syn-inh}[t-1]\)</span> at the previous time step</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mem</span></code>: membrane potential <span class="math notranslate nohighlight">\(U_{\rm mem}[t-1]\)</span> at the present time <span class="math notranslate nohighlight">\(t\)</span> at the previous time step</p></li>
+</ul>
+<p><strong>Outputs</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">spk_out</span></code>: output spike <span class="math notranslate nohighlight">\(S_{\rm out}[t]\)</span> at the present time step (‘1’ if there is a spike; ‘0’ if there is no spike)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">syn_exc</span></code>: excitatory post-synaptic <span class="math notranslate nohighlight">\(I_{\rm syn-exc}[t]\)</span> at the present time step <span class="math notranslate nohighlight">\(t\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">syn_inh</span></code>: inhibitory post-synaptic current <span class="math notranslate nohighlight">\(I_{\rm syn-inh}[t]\)</span> at the present time step <span class="math notranslate nohighlight">\(t\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mem</span></code>: membrane potential <span class="math notranslate nohighlight">\(U_{\rm mem}[t]\)</span> at the present time step</p></li>
+</ul>
+<p>As with all other neuron models, these must be of type <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># input spike: initial spike, and then period spiking</span>
+<span class="n">w</span> <span class="o">=</span> <span class="mf">0.85</span>
+<span class="n">spk_in</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">89</span><span class="p">),</span>
+                     <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">)),</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">10</span><span class="p">))),</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># initialize parameters</span>
+<span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">lif2</span><span class="o">.</span><span class="n">init_alpha</span><span class="p">()</span>
+<span class="n">mem_rec</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">spk_rec</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># run simulation</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+  <span class="n">spk_out</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">lif2</span><span class="p">(</span><span class="n">spk_in</span><span class="p">[</span><span class="n">step</span><span class="p">],</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+  <span class="n">mem_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+  <span class="n">spk_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spk_out</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+<span class="c1"># convert lists to tensors</span>
+<span class="n">mem_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">mem_rec</span><span class="p">)</span>
+<span class="n">spk_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">)</span>
+
+<span class="n">plot_spk_mem_spk</span><span class="p">(</span><span class="n">spk_in</span><span class="p">,</span> <span class="n">mem_rec</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">,</span> <span class="s2">&quot;Alpha Neuron Model With Input Spikes&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial4/_static/alpha.png?raw=true"><img alt="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial4/_static/alpha.png?raw=true" class="align-center" src="https://github.com/jeshraghian/snntorch/blob/master/docs/_static/img/examples/tutorial4/_static/alpha.png?raw=true" style="width: 500px;" /></a>
+<p>As with the Lapicque and Synaptic models, the Alpha model also has
+options to modify the threshold and reset mechanism.</p>
+</section>
+<section id="practical-considerations">
+<h3>2.2 Practical Considerations<a class="headerlink" href="#practical-considerations" title="Permalink to this headline"></a></h3>
+<p>As mentioned for the Synaptic neuron, the more complex a model, the more
+complex the backpropagation process during training. In my own
+experiments, I have yet to find a case where the Alpha neuron
+outperforms the Synaptic and Leaky neuron models. It seems as though
+learning through a positive and negative exponential only makes the
+gradient calculation process more difficult, and offsets any potential
+benefits in more complex neuronal dynamics.</p>
+<p>However, when an SRM model is expressed as a time-varying kernel (rather
+than a recursive model as is done here), it seems to perform just as
+well as the simpler neuron models. As an example, see the following
+paper:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/1810.08646">Sumit Bam Shrestha and Garrick Orchard, “SLAYER: Spike layer error
+reassignment in time”, Proceedings of the 32nd International
+Conference on Neural Information Processing Systems, pp. 1419-1328,
+2018.</a></p>
+</div></blockquote>
+<p>The Alpha neuron has been included with the intent of providing an
+option for porting across SRM-based models over into snnTorch, although
+natively training them seems to not be too effective in snnTorch.</p>
+</section>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline"></a></h2>
+<p>We have covered all LIF neuron models available in snnTorch. As a quick
+summary:</p>
+<ul class="simple">
+<li><p><strong>Lapicque</strong>: a physically accurate model based directly on
+RC-circuit parameters</p></li>
+<li><p><strong>Leaky</strong>: a simplified 1st-order model</p></li>
+<li><p><strong>Synaptic</strong>: a 2nd-order model that accounts for synaptic current
+evolution</p></li>
+<li><p><strong>Alpha</strong>: a 2nd-order model where the membrane potential tracks an
+alpha function</p></li>
+</ul>
+<p>In general, <code class="docutils literal notranslate"><span class="pre">Leaky</span></code> and <code class="docutils literal notranslate"><span class="pre">Synaptic</span></code> seem to be the most useful for
+training a network. <code class="docutils literal notranslate"><span class="pre">Lapicque</span></code> is good for demonstrating physically
+precise models, while <code class="docutils literal notranslate"><span class="pre">Alpha</span></code> is only intended to capture the
+behaviour of SRM neurons.</p>
+<p>Building a network using these slighty more advanced neurons follows the
+exact same procedure as in <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/index.html">Tutorial 3</a>.</p>
+<p>If you like this project, please consider starring ⭐ the repo on GitHub as it is the easiest and best way to support it.</p>
+<p>For reference, the documentation <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.html">can be found
+here</a>.</p>
+</section>
+<section id="further-reading">
+<h2>Further Reading<a class="headerlink" href="#further-reading" title="Permalink to this headline"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/jeshraghian/snntorch">Check out the snnTorch GitHub project here.</a></p></li>
+<li><p><a class="reference external" href="https://snntorch.readthedocs.io/en/latest/snntorch.html">snnTorch
+documentation</a>
+of the Lapicque, Leaky, Synaptic, and Alpha models</p></li>
+<li><p><a class="reference external" href="https://neuronaldynamics.epfl.ch/index.html">Neuronal Dynamics: From single neurons to networks and models of
+cognition</a> by Wulfram
+Gerstner, Werner M. Kistler, Richard Naud and Liam Paninski.</p></li>
+<li><p><a class="reference external" href="https://mitpress.mit.edu/books/theoretical-neuroscience">Theoretical Neuroscience: Computational and Mathematical Modeling of
+Neural
+Systems</a>
+by Laurence F. Abbott and Peter Dayan</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial_3.html" class="btn btn-neutral float-left" title="Tutorial 3 - A Feedforward Spiking Neural Network" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tutorial_5.html" class="btn btn-neutral float-right" title="Tutorial 5 - Training Spiking Neural Networks with snntorch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&lt;no title&gt; &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contributing" href="../contributing.html" />
+    <link rel="prev" title="Regression with SNNs: Part II" href="tutorial_regression_2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            snntorch
+              <img src="../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">&lt;no title&gt;</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/tutorial_sae.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="cell markdown docutils container">
+<p>` &lt;<a class="reference external" href="https://github.com/jeshraghian/snntorch/">https://github.com/jeshraghian/snntorch/</a>&gt;`__</p>
+<p class="rubric" id="snntorch-spiking-autoencoder-sae-using-convolutional-spiking-neural-networks">snnTorch - Spiking Autoencoder (SAE) using Convolutional
+Spiking Neural Networks</p>
+<p class="rubric" id="tutorial-by-alon-loeffler-wwwalonloefflercom">Tutorial by Alon Loeffler (www.alonloeffler.com)</p>
+<p>*This tutorial is adapted from my original article published on
+Medium.com</p>
+<p>` &lt;<a class="reference external" href="https://github.com/jeshraghian/snntorch/">https://github.com/jeshraghian/snntorch/</a>&gt;`__
+` &lt;<a class="reference external" href="https://github.com/jeshraghian/snntorch/">https://github.com/jeshraghian/snntorch/</a>&gt;`__</p>
+</div>
+<div class="cell markdown docutils container">
+<p>For a comprehensive overview on how SNNs work, and what is going on
+under the hood, <a class="reference external" href="https://snntorch.readthedocs.io/en/latest/tutorials/index.html">then you might be interested in the snnTorch
+tutorial series available
+here.</a>
+The snnTorch tutorial series is based on the following paper. If you
+find these resources or code useful in your work, please consider
+citing the following source:</p>
+<blockquote>
+<div><p><a class="reference external" href="https://arxiv.org/abs/2109.12894">Jason K. Eshraghian, Max Ward, Emre Neftci, Xinxin Wang, Gregor
+Lenz, Girish Dwivedi, Mohammed Bennamoun, Doo Seok Jeong, and Wei
+D. Lu. “Training Spiking Neural Networks Using Lessons From Deep
+Learning”. arXiv preprint arXiv:2109.12894, September
+2021.</a></p>
+</div></blockquote>
+</div>
+<div class="cell markdown docutils container">
+<p>In this tutorial, you will learn how to use snnTorch to:</p>
+<ul class="simple">
+<li><p>Create a spiking Autoencoder</p></li>
+<li><p>Reconstruct MNIST images</p></li>
+</ul>
+<p>If running in Google Colab:</p>
+<ul class="simple">
+<li><p>You may connect to GPU by checking <code class="docutils literal notranslate"><span class="pre">Runtime</span></code> &gt;
+<code class="docutils literal notranslate"><span class="pre">Change</span> <span class="pre">runtime</span> <span class="pre">type</span></code> &gt; <code class="docutils literal notranslate"><span class="pre">Hardware</span> <span class="pre">accelerator:</span> <span class="pre">GPU</span></code></p></li>
+</ul>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="autoencoders">1. Autoencoders</p>
+<div class="line-block">
+<div class="line">An autoencoder is a neural network that is trained to reconstruct
+its input data. It consists of two main components: 1) An encoder</div>
+<div class="line">2) A decoder</div>
+</div>
+<p>The encoder takes in input data (e.g. an image) and maps it to a
+lower-dimensional latent space. For example an encoder might take in
+as input a 28 x 28 pixel MNIST image (784 pixels total), and extract
+the important features from the image while compressing it to a
+smaller dimensionality (e.g. 32 features). This compressed
+representation of the image is called the <em>latent representation</em>.</p>
+<p>The decoder maps the latent representation back to the original input
+space (i.e. from 32 features back to 784 pixels), and tries to
+reconstruct the original image from a small number of key features.</p>
+<center>
+   <figure>
+<img src='https://miro.medium.com/max/828/0*dHxZ5LCq5kEPltWH.webp' width="600">
+<figcaption> Example of a simple Autoencoder where x is the input data, z is the encoded latent space, and x' is the reconstructed inputs once z is decoded (source: Wikipedia). </figcaption>
+            </figure>
+</center><p>The goal of the autoencoder is to minimize the reconstruction error
+between the input data and the output of the decoder.</p>
+<p>This is achieved by training the model to minimize the reconstruction
+loss, which is typically defined as the mean squared error (MSE)
+between the input and the reconstructed output.</p>
+<center>
+   <figure>
+<img src='https://miro.medium.com/max/640/1*kjfms6RCnHVMLRSq75AD0Q.webp'>
+<figcaption> MSE loss equation. Here, $y$ would represent the original image (y true) and $\hat{y}$ would represent the reconstructed outputs (y pred) (source: Towards Data Science). </figcaption>
+            </figure>
+</center><p>Autoencoders are excellent tools for reducing noise in data by
+finding only the important parts of the data, and discarding
+everything else during the reconstruction process. This is
+effectively a dimensionality reduction tool.</p>
+</div>
+<div class="cell markdown docutils container">
+<p>In this tutorial (similar to tutorial 1), we will assume we have some
+non-spiking input data (i.e., the MNIST dataset) and that we want to
+encode it and reconstruct it. So let’s get started!</p>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="setting-up">2. Setting Up</p>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="installimport-packages-and-set-up-environment">2.1 Install/Import packages and set up environment</p>
+</div>
+<div class="cell markdown docutils container">
+<p>To start, we need to install snnTorch and its dependencies (note this
+tutorial assumes you have pytorch and torchvision already installed -
+these come preinstalled in Colab). You can do this by running the
+following command:</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>!pip install snntorch
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p>Next, let’s import the necessary modules and set up the SAE model.</p>
+<p>We can use pyTorch to define the encoder and decoder networks, and
+snnTorch to convert the neurons in the networks into leaky integrate
+and fire (LIF) neurons, which read in and output spikes.</p>
+<p>We will be using convolutional neural networks (CNN), covered in
+tutorial 6, for the basis of our encoder and decoder.</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">datasets</span><span class="p">,</span> <span class="n">transforms</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">utils</span> <span class="k">as</span> <span class="n">utls</span>
+
+<span class="kn">import</span> <span class="nn">snntorch</span> <span class="k">as</span> <span class="nn">snn</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">surrogate</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#Define the SAE model:</span>
+<span class="k">class</span> <span class="nc">SAE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">latent_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">latent_dim</span> <span class="c1">#dimensions of the encoded z-space data</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="building-the-autoencoder">3. Building the Autoencoder</p>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="dataloaders">3.1 DataLoaders</p>
+<p>We will be using the MNIST dataset</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># dataloader arguments</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">250</span>
+<span class="n">data_path</span><span class="o">=</span><span class="s1">&#39;/data/mnist&#39;</span>
+
+<span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a transform</span>
+<span class="n">input_size</span> <span class="o">=</span> <span class="mi">32</span> <span class="c1">#for the sake of this tutorial, we will be resizing the original MNIST from 28 to 32</span>
+
+<span class="n">transform</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">([</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">((</span><span class="n">input_size</span><span class="p">,</span> <span class="n">input_size</span><span class="p">)),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Grayscale</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">((</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))])</span>
+
+<span class="c1"># Load MNIST</span>
+
+<span class="c1"># Training data</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;dataset/&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">train_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Testing data</span>
+<span class="n">test_dataset</span> <span class="o">=</span> <span class="n">datasets</span><span class="o">.</span><span class="n">MNIST</span><span class="p">(</span><span class="n">root</span><span class="o">=</span><span class="s1">&#39;dataset/&#39;</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">test_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">test_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="the-encoder">3.2 The Encoder</p>
+<p>Let’s start building the sections of our autoencoder which we slowly
+combine together to the SAE model we defined above:</p>
+</div>
+<div class="cell markdown docutils container">
+<p>First, let’s add an encoder with three convolutional layers
+(<code class="docutils literal notranslate"><span class="pre">nn.Conv2d</span></code>), and one fully-connected linear output layer.</p>
+<ul class="simple">
+<li><p>We will use a kernel of size 3, with padding of 1 and stride of 2
+for the CNN hyperparameters.</p></li>
+<li><p>We also add a Batch Norm layer between convolutional layers. Since
+will be using the neuron membrane potential as outputs from each
+neuron, normalization will help our training process.</p></li>
+</ul>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Define the SAE model:</span>
+<span class="k">class</span> <span class="nc">SAE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">latent_dim</span> <span class="c1">#dimensions of the encoded z-space data</span>
+
+        <span class="c1"># Encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 1</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span> <span class="c1">#SNN TORCH LIF NEURON</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 2</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 3</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(</span><span class="n">start_dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_dim</span> <span class="o">=</span> <span class="mi">3</span><span class="p">),</span> <span class="c1">#Flatten convolutional output</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">),</span> <span class="c1"># Fully connected linear layer</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">)</span>
+                            <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="the-decoder">3.3 The Decoder</p>
+</div>
+<div class="cell markdown docutils container">
+<p>Before we write the decoder, there is one more small step required.
+When decoding the latent z-space data, we need to move from the
+flattened encoded representation (latent_dim) back to a tensor
+representation to use in transposed convolution.</p>
+<p>To do so, we need to run an additional fully-connected linear layer
+transforming the data back into a tensor of 128 x 4 x 4.</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Define the SAE model:</span>
+<span class="k">class</span> <span class="nc">SAE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">latent_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">latent_dim</span> <span class="c1">#dimensions of the encoded z-space data</span>
+
+        <span class="c1"># Encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 1</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span> <span class="c1">#SNN TORCH LIF NEURON</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 2</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 3</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(</span><span class="n">start_dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_dim</span> <span class="o">=</span> <span class="mi">3</span><span class="p">),</span> <span class="c1">#Flatten convolutional output</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">),</span> <span class="c1"># Fully connected linear layer</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">)</span>
+                            <span class="p">)</span>
+
+        <span class="c1"># From latent back to tensor for convolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linearNet</span><span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">latent_dim</span><span class="p">,</span><span class="mi">128</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p>Now we can write the decoder, with three transposed convolutional
+(<code class="docutils literal notranslate"><span class="pre">nn.ConvTranspose2d</span></code>) layers and one linear output layer. Although
+we converted the latent data back into tensor form for convolution,
+we still need to Unflatten it to a tensor of 128 x 4 x 4, as the
+input to the network is 1 dimensional. This is done using
+<code class="docutils literal notranslate"><span class="pre">nn.Unflatten</span></code> in the first line of the Decoder.</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Define the SAE model:</span>
+<span class="k">class</span> <span class="nc">SAE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">latent_dim</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">latent_dim</span> <span class="o">=</span> <span class="n">latent_dim</span> <span class="c1">#dimensions of the encoded z-space data</span>
+
+        <span class="c1"># Encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 1</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span> <span class="c1">#SNN TORCH LIF NEURON</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 2</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Conv Layer 3</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(</span><span class="n">start_dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_dim</span> <span class="o">=</span> <span class="mi">3</span><span class="p">),</span> <span class="c1">#Flatten convolutional output</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">128</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">),</span> <span class="c1"># Fully connected linear layer</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">)</span>
+                            <span class="p">)</span>
+
+        <span class="c1"># From latent back to tensor for convolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linearNet</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">latent_dim</span><span class="p">,</span><span class="mi">128</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">))</span>
+        <span class="c1"># Decoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Unflatten</span><span class="p">(</span><span class="mi">1</span><span class="p">,(</span><span class="mi">128</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)),</span> <span class="c1">#Unflatten data from 1 dim to tensor of 128 x 4 x 4</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span> <span class="c1">#make large so membrane can be trained</span>
+                            <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p>One important thing to note is in the final Leaky layer, our spiking
+threshold (<code class="docutils literal notranslate"><span class="pre">thresh</span></code>) is set extremely high. This is a neat trick in
+snnTorch, which allows the neuron membrane in the final layer to
+continuously be updated, without ever reaching a spiking threshold.</p>
+<p>The output of each Leaky Neuron will consist of a tensor of spikes (0
+or 1) and a tensor of neuron membrane potential (negative or positive
+real numbers). snnTorch allows us to use either the spikes or
+membrane potential of each neuron in training. We will be using the
+membrane potential output from the final layer for the image
+reconstruction.</p>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="forward-function">3.4 Forward Function</p>
+<p>Finally, let’s write the forward, encode and decode functions, before
+putting it all together</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">)</span> <span class="c1">#need to reset the hidden states of LIF</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">)</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linearNet</span><span class="p">)</span>
+
+    <span class="c1">#encode</span>
+    <span class="n">spk_mem</span><span class="o">=</span><span class="p">[];</span><span class="n">spk_rec</span><span class="o">=</span><span class="p">[];</span><span class="n">encoded_x</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span> <span class="c1">#for t in time</span>
+        <span class="n">spk_x</span><span class="p">,</span><span class="n">mem_x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1">#Output spike trains and neuron membrane states</span>
+        <span class="n">spk_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spk_x</span><span class="p">)</span>
+        <span class="n">spk_mem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mem_x</span><span class="p">)</span>
+    <span class="n">spk_rec</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># stack spikes in second tensor dimension</span>
+    <span class="n">spk_mem</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_mem</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># stack membranes in second tensor dimension</span>
+
+    <span class="c1">#decode</span>
+    <span class="n">spk_mem2</span><span class="o">=</span><span class="p">[];</span><span class="n">spk_rec2</span><span class="o">=</span><span class="p">[];</span><span class="n">decoded_x</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span> <span class="c1">#for t in time</span>
+        <span class="n">x_recon</span><span class="p">,</span><span class="n">x_mem_recon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">step</span><span class="p">])</span>
+        <span class="n">spk_rec2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_recon</span><span class="p">)</span>
+        <span class="n">spk_mem2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_mem_recon</span><span class="p">)</span>
+    <span class="n">spk_rec2</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec2</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">spk_mem2</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_mem2</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">spk_mem2</span><span class="p">[:,:,:,:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#return the membrane potential of the output neuron at t = -1 (last t)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">spk_latent_x</span><span class="p">,</span><span class="n">mem_latent_x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spk_latent_x</span><span class="p">,</span><span class="n">mem_latent_x</span>
+
+<span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">spk_x</span><span class="p">,</span><span class="n">mem_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">latentToConv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1">#convert latent dimension back to total size of features in encoder final layer</span>
+    <span class="n">spk_x2</span><span class="p">,</span><span class="n">mem_x2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">spk_x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spk_x2</span><span class="p">,</span><span class="n">mem_x2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p>There are a couple of key things to notice here:</p>
+<p>1) At the beginning of each call of our forward function, we need to
+reset the hidden weights of each LIF neuron. If we do not do this, we
+will get weird gradient errors from pytorch when we try to backprop.
+To do so we use <code class="docutils literal notranslate"><span class="pre">utils.reset</span></code>.</p>
+<p>2) In the forward function, when we call the encode and decode
+functions, we do so in a loop. This is because we are converting
+static images into spike trains, as explained previously. Spike
+trains need a time, t, during which spiking can occur or not occur.
+Therefore, we encode and decode the original image <span class="math notranslate nohighlight">\(t\)</span> (or
+<code class="docutils literal notranslate"><span class="pre">num_steps</span></code>) times, to create a latent representation, <span class="math notranslate nohighlight">\(z\)</span>.</p>
+</div>
+<div class="cell markdown docutils container">
+<p>For example, converting a sample digit 7 from the MNIST dataset into
+a spike-train with a latent dimension of 32 and t = 50, might look
+like this: Spike-Train of sample MNIST digit 7 after encoding. Other
+instances of 7 will have slightly different spike-trains, and
+different digits will have even more different spike-trains.</p>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="putting-it-all-together">3.5 Putting it all together:</p>
+<p>Our final, complete SAE class should look like this:</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">SAE</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1">#Encoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">Conv2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">128</span><span class="p">),</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(</span><span class="n">start_dim</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end_dim</span> <span class="o">=</span> <span class="mi">3</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">2048</span><span class="p">,</span> <span class="n">latent_dim</span><span class="p">),</span> <span class="c1">#this needs to be the final layer output size (channels * pixels * pixels)</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">)</span>
+                          <span class="p">)</span>
+       <span class="c1"># From latent back to tensor for convolution</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linearNet</span><span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">latent_dim</span><span class="p">,</span><span class="mi">128</span><span class="o">*</span><span class="mi">4</span><span class="o">*</span><span class="mi">4</span><span class="p">),</span>
+                               <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">))</span>        <span class="c1">#Decoder</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">decoder</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Unflatten</span><span class="p">(</span><span class="mi">1</span><span class="p">,(</span><span class="mi">128</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">4</span><span class="p">)),</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">64</span><span class="p">),</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">BatchNorm2d</span><span class="p">(</span><span class="mi">32</span><span class="p">),</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="n">thresh</span><span class="p">),</span>
+                          <span class="n">nn</span><span class="o">.</span><span class="n">ConvTranspose2d</span><span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="n">padding</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">stride</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">),</span><span class="n">output_padding</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                          <span class="n">snn</span><span class="o">.</span><span class="n">Leaky</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">spike_grad</span><span class="o">=</span><span class="n">spike_grad</span><span class="p">,</span> <span class="n">init_hidden</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">threshold</span><span class="o">=</span><span class="mi">20000</span><span class="p">)</span> <span class="c1">#make large so membrane can be trained</span>
+                          <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span> <span class="c1">#Dimensions: [Batch,Channels,Width,Length]</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">)</span> <span class="c1">#need to reset the hidden states of LIF</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">)</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linearNet</span><span class="p">)</span>
+
+        <span class="c1">#encode</span>
+        <span class="n">spk_mem</span><span class="o">=</span><span class="p">[];</span><span class="n">spk_rec</span><span class="o">=</span><span class="p">[];</span><span class="n">encoded_x</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span> <span class="c1">#for t in time</span>
+            <span class="n">spk_x</span><span class="p">,</span><span class="n">mem_x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1">#Output spike trains and neuron membrane states</span>
+            <span class="n">spk_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spk_x</span><span class="p">)</span>
+            <span class="n">spk_mem</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mem_x</span><span class="p">)</span>
+        <span class="n">spk_rec</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">spk_mem</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_mem</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="c1">#Dimensions:[Batch,Channels,Width,Length, Time]</span>
+
+        <span class="c1">#decode</span>
+        <span class="n">spk_mem2</span><span class="o">=</span><span class="p">[];</span><span class="n">spk_rec2</span><span class="o">=</span><span class="p">[];</span><span class="n">decoded_x</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span> <span class="c1">#for t in time</span>
+            <span class="n">x_recon</span><span class="p">,</span><span class="n">x_mem_recon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="n">step</span><span class="p">])</span>
+            <span class="n">spk_rec2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_recon</span><span class="p">)</span>
+            <span class="n">spk_mem2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_mem_recon</span><span class="p">)</span>
+        <span class="n">spk_rec2</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_rec2</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">spk_mem2</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_mem2</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span><span class="c1">#Dimensions:[Batch,Channels,Width,Length, Time]</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">spk_mem2</span><span class="p">[:,:,:,:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#return the membrane potential of the output neuron at t = -1 (last t)</span>
+        <span class="k">return</span> <span class="n">out</span> <span class="c1">#Dimensions:[Batch,Channels,Width,Length]</span>
+
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">spk_latent_x</span><span class="p">,</span><span class="n">mem_latent_x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">encoder</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spk_latent_x</span><span class="p">,</span><span class="n">mem_latent_x</span>
+
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">spk_x</span><span class="p">,</span><span class="n">mem_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">linearNet</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1">#convert latent dimension back to total size of features in encoder final layer</span>
+        <span class="n">spk_x2</span><span class="p">,</span><span class="n">mem_x2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decoder</span><span class="p">(</span><span class="n">spk_x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">spk_x2</span><span class="p">,</span><span class="n">mem_x2</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="training-and-testing">4. Training and Testing</p>
+<p>Finally, we can move on to training our SAE, and testing its
+usefulness. We have already loaded the MNIST dataset, and split it
+into training and testing classes.</p>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="training-function">4.1 Training Function</p>
+<p>We define our training function, which takes in the network model,
+training dataset, optimizer and epoch number as inputs, and returns
+the loss value after running all batches of the current epoch.</p>
+<p>As discussed at the beginning, we will be using MSE loss to compare
+the reconstructed image (<code class="docutils literal notranslate"><span class="pre">x_recon</span></code>) with the original image
+(<code class="docutils literal notranslate"><span class="pre">real_img</span></code>)</p>
+<p>As always, to set up our gradients for backprop we use
+<code class="docutils literal notranslate"><span class="pre">opti.zero_grad()</span></code>, and then call <code class="docutils literal notranslate"><span class="pre">loss_val.backward()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">opti.step()</span></code> to perform backprop.</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Training</span>
+<span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">trainloader</span><span class="p">,</span> <span class="n">opti</span><span class="p">,</span> <span class="n">epoch</span><span class="p">):</span>
+
+    <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+    <span class="n">train_loss_hist</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">real_img</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trainloader</span><span class="p">):</span>
+        <span class="n">opti</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+        <span class="n">real_img</span> <span class="o">=</span> <span class="n">real_img</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1">#Pass data into network, and return reconstructed image from Membrane Potential at t = -1</span>
+        <span class="n">x_recon</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">real_img</span><span class="p">)</span> <span class="c1">#Dimensions passed in: [Batch_size,Input_size,Image_Width,Image_Length]</span>
+
+        <span class="c1">#Calculate loss</span>
+        <span class="n">loss_val</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">x_recon</span><span class="p">,</span> <span class="n">real_img</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Train[</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">max_epoch</span><span class="si">}</span><span class="s1">][</span><span class="si">{</span><span class="n">batch_idx</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">trainloader</span><span class="p">)</span><span class="si">}</span><span class="s1">] Loss: </span><span class="si">{</span><span class="n">loss_val</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">loss_val</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">opti</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+        <span class="c1">#Save reconstructed images every at the end of the epoch</span>
+        <span class="k">if</span> <span class="n">batch_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">trainloader</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># NOTE: you need to create training/ and testing/ folders in your chosen path</span>
+            <span class="n">utls</span><span class="o">.</span><span class="n">save_image</span><span class="p">((</span><span class="n">real_img</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;figures/training/epoch</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">_finalbatch_inputs.png&#39;</span><span class="p">)</span>
+            <span class="n">utls</span><span class="o">.</span><span class="n">save_image</span><span class="p">((</span><span class="n">x_recon</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;figures/training/epoch</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">_finalbatch_recon.png&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss_val</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="testing-function">4.2 Testing Function</p>
+<p>The testing function is nearly identifcal to the training function,
+except we do not backpropagate, therefore no gradients are required
+and we use <code class="docutils literal notranslate"><span class="pre">torch.no_grad()</span></code></p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#Testing</span>
+<span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">testloader</span><span class="p">,</span> <span class="n">opti</span><span class="p">,</span> <span class="n">epoch</span><span class="p">):</span>
+    <span class="n">network</span><span class="o">=</span><span class="n">network</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+    <span class="n">test_loss_hist</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span> <span class="c1">#no gradient this time</span>
+        <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">real_img</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">testloader</span><span class="p">):</span>
+            <span class="n">real_img</span> <span class="o">=</span> <span class="n">real_img</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span><span class="c1">#</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">x_recon</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">real_img</span><span class="p">)</span>
+
+            <span class="n">loss_val</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">x_recon</span><span class="p">,</span> <span class="n">real_img</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Test[</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">max_epoch</span><span class="si">}</span><span class="s1">][</span><span class="si">{</span><span class="n">batch_idx</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">testloader</span><span class="p">)</span><span class="si">}</span><span class="s1">]  Loss: </span><span class="si">{</span><span class="n">loss_val</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span><span class="c1">#, RECONS: {recons_meter.avg}, DISTANCE: {dist_meter.avg}&#39;)</span>
+
+            <span class="k">if</span> <span class="n">batch_idx</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">testloader</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">utls</span><span class="o">.</span><span class="n">save_image</span><span class="p">((</span><span class="n">real_img</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;figures/testing/epoch</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">_finalbatch_inputs.png&#39;</span><span class="p">)</span>
+                <span class="n">utls</span><span class="o">.</span><span class="n">save_image</span><span class="p">((</span><span class="n">x_recon</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;figures/testing/epoch</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1">_finalbatch_recons.png&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">loss_val</span>
+</pre></div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p>There are a couple of ways to calculate loss with spiking neural
+networks. Here, we are simply taking the membrane potential of the
+final fully-connected layer of neurons at the last time step
+(<span class="math notranslate nohighlight">\(t = 5\)</span>).</p>
+<p>Therefore, we only need to compare each original image with its
+corresponding decoded, reconstructed image once per epoch. We can
+also return the membrane potentials at each time step, and create t
+different versions of the reconstructed image, and then compare each
+of them with the original image and take the average loss. For those
+of you interested in this, you can replace the loss function above
+with something like this:</p>
+<p>(<em>note this will fail to run as we have not defined any of the
+variables yet, it is just here for illustrative purposes</em>)</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">train_loss_hist</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">loss_val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+    <span class="n">loss_val</span> <span class="o">+=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">x_recon</span><span class="p">,</span> <span class="n">real_img</span><span class="p">)</span>
+<span class="n">train_loss_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss_val</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+<span class="n">avg_loss</span><span class="o">=</span><span class="n">loss_val</span><span class="o">/</span><span class="n">num_steps</span>
+</pre></div>
+</div>
+<div class="output error docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------------------------------</span>
+<span class="ne">NameError</span>                                 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">72</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
+      <span class="mi">2</span> <span class="n">loss_val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+      <span class="mi">3</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+<span class="o">----&gt;</span> <span class="mi">4</span>     <span class="n">loss_val</span> <span class="o">+=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">x_recon</span><span class="p">,</span> <span class="n">real_img</span><span class="p">)</span>
+      <span class="mi">5</span> <span class="n">train_loss_hist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss_val</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+      <span class="mi">6</span> <span class="n">avg_loss</span><span class="o">=</span><span class="n">loss_val</span><span class="o">/</span><span class="n">num_steps</span>
+
+<span class="ne">NameError</span><span class="p">:</span> <span class="n">name</span> <span class="s1">&#39;x_recon&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">defined</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p class="rubric" id="conclusion-running-the-sae">5. Conclusion: Running the SAE</p>
+<p>Now, finally, we can run our SAE model. Let’s define some parameters,
+and run training and testing</p>
+</div>
+<div class="cell markdown docutils container">
+<p>Let’s create directories where we can save our original and
+reconstructed images for training and testing:</p>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># create training/ and testing/ folders in your chosen path</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="s1">&#39;figures/training&#39;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;figures/training&#39;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="s1">&#39;figures/testing&#39;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;figures/testing&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell code docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># dataloader arguments</span>
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">250</span>
+<span class="n">input_size</span> <span class="o">=</span> <span class="mi">32</span> <span class="c1">#resize of mnist data (optional)</span>
+
+<span class="c1">#setup GPU</span>
+<span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float</span>
+<span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+<span class="c1"># neuron and simulation parameters</span>
+<span class="n">spike_grad</span> <span class="o">=</span> <span class="n">surrogate</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span><span class="c1"># alternate surrogate gradient fast_sigmoid(slope=25)</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1">#decay rate of neurons</span>
+<span class="n">num_steps</span><span class="o">=</span><span class="mi">5</span>
+<span class="n">latent_dim</span> <span class="o">=</span> <span class="mi">32</span> <span class="c1">#dimension of latent layer (how compressed we want the information)</span>
+<span class="n">thresh</span><span class="o">=</span><span class="mi">1</span><span class="c1">#spiking threshold (lower = more spikes are let through)</span>
+<span class="n">epochs</span><span class="o">=</span><span class="mi">10</span>
+<span class="n">max_epoch</span><span class="o">=</span><span class="n">epochs</span>
+
+<span class="c1">#Define Network and optimizer</span>
+<span class="n">net</span><span class="o">=</span><span class="n">SAE</span><span class="p">()</span>
+<span class="n">net</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+                            <span class="n">lr</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+                            <span class="n">betas</span><span class="o">=</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">),</span>
+                            <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.001</span><span class="p">)</span>
+
+<span class="c1">#Run training and testing</span>
+<span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="n">train_loss</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="n">train_loader</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="n">test_loss</span> <span class="o">=</span> <span class="n">test</span><span class="p">(</span><span class="n">net</span><span class="p">,</span><span class="n">test_loader</span><span class="p">,</span><span class="n">optimizer</span><span class="p">,</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="output stream stdout docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Train</span><span class="p">[</span><span class="mi">0</span><span class="o">/</span><span class="mi">10</span><span class="p">][</span><span class="mi">0</span><span class="o">/</span><span class="mi">240</span><span class="p">]</span> <span class="n">Loss</span><span class="p">:</span> <span class="mf">0.10109379142522812</span>
+<span class="n">Train</span><span class="p">[</span><span class="mi">0</span><span class="o">/</span><span class="mi">10</span><span class="p">][</span><span class="mi">1</span><span class="o">/</span><span class="mi">240</span><span class="p">]</span> <span class="n">Loss</span><span class="p">:</span> <span class="mf">0.10465191304683685</span>
+</pre></div>
+</div>
+</div>
+<div class="output stream stderr docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">KeyboardInterrupt</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell markdown docutils container">
+<p>After only 10 epochs, our training and testing reconstructed losses
+should be around 0.05, and our reconstructed images should look
+something like this:</p>
+</div>
+<div class="cell markdown docutils container">
+<p>Yes, the reconstructed images are a bit blurry, and the loss isn’t
+perfect, but from only 10 epochs, and only using the final membrane
+potential at <span class="math notranslate nohighlight">\(t = 5\)</span> for our reconstructed loss, it’s a pretty
+decent start!</p>
+</div>
+<div class="cell markdown docutils container">
+<p>Try increasing the number of epochs, or playing around with
+<code class="docutils literal notranslate"><span class="pre">thresh</span></code>, <code class="docutils literal notranslate"><span class="pre">num_steps</span></code> and <code class="docutils literal notranslate"><span class="pre">batch_size</span></code> to see if you can get
+better loss!</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tutorial_regression_2.html" class="btn btn-neutral float-left" title="Regression with SNNs: Part II" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../contributing.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

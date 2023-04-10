@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch._neurons.leaky &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch._neurons.leaky</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch._neurons.leaky</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.neurons</span> <span class="kn">import</span> <span class="n">_SpikeTensor</span><span class="p">,</span> <span class="n">_SpikeTorchConv</span><span class="p">,</span> <span class="n">LIF</span>
+
+
+<div class="viewcode-block" id="Leaky"><a class="viewcode-back" href="../../../snn.neurons_leaky.html#snntorch._neurons.leaky.Leaky">[docs]</a><span class="k">class</span> <span class="nc">Leaky</span><span class="p">(</span><span class="n">LIF</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    First-order leaky integrate-and-fire neuron model.</span>
+<span class="sd">    Input is assumed to be a current injection.</span>
+<span class="sd">    Membrane potential decays exponentially with rate beta.</span>
+<span class="sd">    For :math:`U[T] &gt; U_{\\rm thr} ⇒ S[T+1] = 1`.</span>
+
+<span class="sd">    If `reset_mechanism = &quot;subtract&quot;`, then :math:`U[t+1]` will have</span>
+<span class="sd">    `threshold` subtracted from it whenever the neuron emits a spike:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            U[t+1] = βU[t] + I_{\\rm in}[t+1] - RU_{\\rm thr}</span>
+
+<span class="sd">    If `reset_mechanism = &quot;zero&quot;`, then :math:`U[t+1]` will be set to `0`</span>
+<span class="sd">    whenever the neuron emits a spike:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            U[t+1] = βU[t] + I_{\\rm syn}[t+1] - R(βU[t] + I_{\\rm in}[t+1])</span>
+
+<span class="sd">    * :math:`I_{\\rm in}` - Input current</span>
+<span class="sd">    * :math:`U` - Membrane potential</span>
+<span class="sd">    * :math:`U_{\\rm thr}` - Membrane threshold</span>
+<span class="sd">    * :math:`R` - Reset mechanism: if active, :math:`R = 1`, otherwise \</span>
+<span class="sd">        :math:`R = 0`</span>
+<span class="sd">    * :math:`β` - Membrane potential decay rate</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import torch</span>
+<span class="sd">        import torch.nn as nn</span>
+<span class="sd">        import snntorch as snn</span>
+
+<span class="sd">        beta = 0.5</span>
+
+<span class="sd">        # Define Network</span>
+<span class="sd">        class Net(nn.Module):</span>
+<span class="sd">            def __init__(self):</span>
+<span class="sd">                super().__init__()</span>
+
+<span class="sd">                # initialize layers</span>
+<span class="sd">                self.fc1 = nn.Linear(num_inputs, num_hidden)</span>
+<span class="sd">                self.lif1 = snn.Leaky(beta=beta)</span>
+<span class="sd">                self.fc2 = nn.Linear(num_hidden, num_outputs)</span>
+<span class="sd">                self.lif2 = snn.Leaky(beta=beta)</span>
+
+<span class="sd">            def forward(self, x, mem1, spk1, mem2):</span>
+<span class="sd">                cur1 = self.fc1(x)</span>
+<span class="sd">                spk1, mem1 = self.lif1(cur1, mem1)</span>
+<span class="sd">                cur2 = self.fc2(spk1)</span>
+<span class="sd">                spk2, mem2 = self.lif2(cur2, mem2)</span>
+<span class="sd">                return mem1, spk1, mem2, spk2</span>
+
+
+<span class="sd">    :param beta: membrane potential decay rate. Clipped between 0 and 1</span>
+<span class="sd">        during the forward-pass. May be a single-valued tensor (i.e., equal</span>
+<span class="sd">        decay rate for all neurons in a layer), or multi-valued (one weight per</span>
+<span class="sd">        neuron).</span>
+<span class="sd">    :type beta: float or torch.tensor</span>
+
+<span class="sd">    :param threshold: Threshold for :math:`mem` to reach in order to</span>
+<span class="sd">        generate a spike `S=1`. Defaults to 1</span>
+<span class="sd">    :type threshold: float, optional</span>
+
+<span class="sd">    :param spike_grad: Surrogate gradient for the term dS/dU. Defaults to</span>
+<span class="sd">        None (corresponds to ATan surrogate gradient. See</span>
+<span class="sd">        `snntorch.surrogate` for more options)</span>
+<span class="sd">    :type spike_grad: surrogate gradient function from snntorch.surrogate,</span>
+<span class="sd">        optional</span>
+
+<span class="sd">    :param init_hidden: Instantiates state variables as instance variables.</span>
+<span class="sd">        Defaults to False</span>
+<span class="sd">    :type init_hidden: bool, optional</span>
+
+<span class="sd">    :param inhibition: If `True`, suppresses all spiking other than the</span>
+<span class="sd">        neuron with the highest state. Defaults to False</span>
+<span class="sd">    :type inhibition: bool, optional</span>
+
+<span class="sd">    :param learn_beta: Option to enable learnable beta. Defaults to False</span>
+<span class="sd">    :type learn_beta: bool, optional</span>
+
+<span class="sd">    :param learn_threshold: Option to enable learnable threshold. Defaults</span>
+<span class="sd">        to False</span>
+<span class="sd">    :type learn_threshold: bool, optional</span>
+
+<span class="sd">    :param reset_mechanism: Defines the reset mechanism applied to \</span>
+<span class="sd">    :math:`mem` each time the threshold is met. Reset-by-subtraction: \</span>
+<span class="sd">        &quot;subtract&quot;, reset-to-zero: &quot;zero&quot;, none: &quot;none&quot;. Defaults to &quot;subtract&quot;</span>
+<span class="sd">    :type reset_mechanism: str, optional</span>
+
+<span class="sd">    :param state_quant: If specified, hidden state :math:`mem` is quantized</span>
+<span class="sd">        to a valid state for the forward pass. Defaults to False</span>
+<span class="sd">    :type state_quant: quantization function from snntorch.quant, optional</span>
+
+<span class="sd">    :param output: If `True` as well as `init_hidden=True`, states are</span>
+<span class="sd">        returned when neuron is called. Defaults to False</span>
+<span class="sd">    :type output: bool, optional</span>
+
+
+<span class="sd">    Inputs: \\input_, mem_0</span>
+<span class="sd">        - **input_** of shape `(batch, input_size)`: tensor containing input</span>
+<span class="sd">        features</span>
+<span class="sd">        - **mem_0** of shape `(batch, input_size)`: tensor containing the</span>
+<span class="sd">        initial membrane potential for each element in the batch.</span>
+
+<span class="sd">    Outputs: spk, syn_1, mem_1</span>
+<span class="sd">        - **spk** of shape `(batch, input_size)`: tensor containing the</span>
+<span class="sd">        output spikes.</span>
+<span class="sd">        - **mem_1** of shape `(batch, input_size)`: tensor containing the</span>
+<span class="sd">        next membrane potential for each element in the batch</span>
+
+<span class="sd">    Learnable Parameters:</span>
+<span class="sd">        - **Leaky.beta** (torch.Tensor) - optional learnable weights must be</span>
+<span class="sd">        manually passed in, of shape `1` or (input_size).</span>
+<span class="sd">        - **Leaky.threshold** (torch.Tensor) - optional learnable thresholds</span>
+<span class="sd">        must be manually passed in, of shape `1` or`` (input_size).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">spike_grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">init_hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">inhibition</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_beta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">reset_mechanism</span><span class="o">=</span><span class="s2">&quot;subtract&quot;</span><span class="p">,</span>
+        <span class="n">state_quant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Leaky</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">beta</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="p">,</span>
+            <span class="n">spike_grad</span><span class="p">,</span>
+            <span class="n">init_hidden</span><span class="p">,</span>
+            <span class="n">inhibition</span><span class="p">,</span>
+            <span class="n">learn_beta</span><span class="p">,</span>
+            <span class="n">learn_threshold</span><span class="p">,</span>
+            <span class="n">reset_mechanism</span><span class="p">,</span>
+            <span class="n">state_quant</span><span class="p">,</span>
+            <span class="n">output</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_leaky</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Leaky.forward"><a class="viewcode-back" href="../../../snn.neurons_leaky.html#snntorch._neurons.leaky.Leaky.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">mem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span><span class="p">):</span>  <span class="c1"># only triggered on first-pass</span>
+            <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTorchConv</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span> <span class="n">input_</span><span class="o">=</span><span class="n">input_</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mem</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span>
+        <span class="p">):</span>  <span class="c1"># init_hidden case</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTorchConv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span> <span class="n">input_</span><span class="o">=</span><span class="n">input_</span><span class="p">)</span>
+
+        <span class="c1"># TO-DO: alternatively, we could do torch.exp(-1 /</span>
+        <span class="c1"># self.beta.clamp_min(0)),</span>
+        <span class="c1"># giving actual time constants instead of values in [0, 1] as</span>
+        <span class="c1"># initial beta</span>
+        <span class="c1"># beta = self.beta.clamp(0, 1)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_reset</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+            <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">:</span>
+                <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inhibition</span><span class="p">:</span>
+                <span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire_inhibition</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">mem</span><span class="p">)</span>  <span class="c1"># batch_size</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">spk</span><span class="p">,</span> <span class="n">mem</span>
+
+        <span class="c1"># intended for truncated-BPTT where instance variables are hidden</span>
+        <span class="c1"># states</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_leaky_forward_cases</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inhibition</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire_inhibition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>  <span class="c1"># read-out layer returns output+states</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># hidden layer e.g., in nn.Sequential, only returns output</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk</span></div>
+
+    <span class="k">def</span> <span class="nf">_base_state_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="n">base_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">mem</span> <span class="o">+</span> <span class="n">input_</span>
+        <span class="k">return</span> <span class="n">base_fn</span>
+
+    <span class="k">def</span> <span class="nf">_build_state_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># reset by subtraction</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span>
+                <span class="n">input_</span><span class="p">,</span> <span class="n">mem</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># reset to zero</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span>
+                <span class="n">input_</span><span class="p">,</span> <span class="n">mem</span>
+            <span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># no reset, pure integration</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_fn</span>
+
+    <span class="k">def</span> <span class="nf">_base_state_function_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="n">base_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">+</span> <span class="n">input_</span>
+        <span class="k">return</span> <span class="n">base_fn</span>
+
+    <span class="k">def</span> <span class="nf">_build_state_function_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># reset by subtraction</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+                <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># reset to zero</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># no reset, pure integration</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_fn</span>
+
+    <span class="k">def</span> <span class="nf">_leaky_forward_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;When `init_hidden=True`, Leaky expects 1 input argument.&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="Leaky.detach_hidden"><a class="viewcode-back" href="../../../snn.neurons_leaky.html#snntorch._neurons.leaky.Leaky.detach_hidden">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">detach_hidden</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the hidden states, detached from the current graph.</span>
+<span class="sd">        Intended for use in truncated backpropagation through time where</span>
+<span class="sd">        hidden state variables are instance variables.&quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">],</span> <span class="n">Leaky</span><span class="p">):</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">mem</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Leaky.reset_hidden"><a class="viewcode-back" href="../../../snn.neurons_leaky.html#snntorch._neurons.leaky.Leaky.reset_hidden">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reset_hidden</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Used to clear hidden state variables to zero.</span>
+<span class="sd">        Intended for use where hidden state variables are instance variables.</span>
+<span class="sd">        Assumes hidden states have a batch dimension already.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">],</span> <span class="n">Leaky</span><span class="p">):</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

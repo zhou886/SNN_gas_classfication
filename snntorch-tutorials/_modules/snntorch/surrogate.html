@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.surrogate &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch.surrogate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch.surrogate</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="c1"># Spike-gradient functions</span>
+
+<span class="c1"># slope = 25</span>
+<span class="c1"># &quot;&quot;&quot;``snntorch.surrogate.slope``</span>
+<span class="c1"># parameterizes the transition rate of the surrogate gradients.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="StraightThroughEstimator"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.StraightThroughEstimator">[docs]</a><span class="k">class</span> <span class="nc">StraightThroughEstimator</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Straight Through Estimator.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of fast sigmoid function.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                \\frac{∂S}{∂U}=1</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="StraightThroughEstimator.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.StraightThroughEstimator.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="StraightThroughEstimator.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.StraightThroughEstimator.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">grad_input</span></div></div>
+
+
+<div class="viewcode-block" id="straight_through_estimator"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.straight_through_estimator">[docs]</a><span class="k">def</span> <span class="nf">straight_through_estimator</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Straight Through Estimator surrogate gradient enclosed</span>
+<span class="sd">    with a parameterized slope.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">StraightThroughEstimator</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="Triangular"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.Triangular">[docs]</a><span class="k">class</span> <span class="nc">Triangular</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Triangular Surrogate Gradient.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of the triangular function.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                \\frac{∂S}{∂U}=\\begin{cases} U_{\\rm thr} &amp;</span>
+<span class="sd">                \\text{if U &lt; U$_{\\rm thr}$} \\\\</span>
+<span class="sd">                -U_{\\rm thr}  &amp; \\text{if U ≥ U$_{\\rm thr}$}</span>
+<span class="sd">                \\end{cases}</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Triangular.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.Triangular.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="Triangular.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.Triangular.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">input_</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">grad_input</span> <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="n">grad</span><span class="p">[</span><span class="n">input_</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">grad</span><span class="p">[</span><span class="n">input_</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="triangular"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.triangular">[docs]</a><span class="k">def</span> <span class="nf">triangular</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Triangular surrogate gradient enclosed with</span>
+<span class="sd">    a parameterized threshold.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Triangular</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="FastSigmoid"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.FastSigmoid">[docs]</a><span class="k">class</span> <span class="nc">FastSigmoid</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of fast sigmoid function.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                S&amp;≈\\frac{U}{1 + k|U|} \\\\</span>
+<span class="sd">                \\frac{∂S}{∂U}&amp;=\\frac{1}{(1+k|U|)^2}</span>
+
+<span class="sd">    :math:`k` defaults to 25, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.fast_sigmoid(slope=25)``.</span>
+
+<span class="sd">    Adapted from:</span>
+
+<span class="sd">    *F. Zenke, S. Ganguli (2018) SuperSpike: Supervised Learning in</span>
+<span class="sd">    Multilayer Spiking Neural Networks. Neural Computation, pp. 1514-1541.*&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FastSigmoid.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.FastSigmoid.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="FastSigmoid.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.FastSigmoid.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">input_</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">grad_input</span> <span class="o">/</span> <span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="fast_sigmoid"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.fast_sigmoid">[docs]</a><span class="k">def</span> <span class="nf">fast_sigmoid</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;FastSigmoid surrogate gradient enclosed with a parameterized slope.&quot;&quot;&quot;</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">FastSigmoid</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="ATan"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.ATan">[docs]</a><span class="k">class</span> <span class="nc">ATan</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of shifted arc-tan function.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                S&amp;≈\\frac{1}{π}\\text{arctan}(πU \\frac{α}{2}) \\\\</span>
+<span class="sd">                \\frac{∂S}{∂U}&amp;=\\frac{1}{π}\\frac{1}{(1+(πU\\frac{α}{2})^2)}</span>
+
+
+<span class="sd">    α defaults to 2, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.atan(alpha=2)``.</span>
+
+<span class="sd">    Adapted from:</span>
+
+<span class="sd">    *W. Fang, Z. Yu, Y. Chen, T. Masquelier, T. Huang,</span>
+<span class="sd">    Y. Tian (2021) Incorporating Learnable Membrane Time Constants</span>
+<span class="sd">    to Enhance Learning of Spiking Neural Networks. Proc. IEEE/CVF</span>
+<span class="sd">    Int. Conf. Computer Vision (ICCV), pp. 2661-2671.*&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ATan.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.ATan.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="ATan.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.ATan.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">input_</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">alpha</span>
+            <span class="o">/</span> <span class="mi">2</span>
+            <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">alpha</span> <span class="o">*</span> <span class="n">input_</span><span class="p">)</span><span class="o">.</span><span class="n">pow_</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="o">*</span> <span class="n">grad_input</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="atan"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.atan">[docs]</a><span class="k">def</span> <span class="nf">atan</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">2.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ArcTan surrogate gradient enclosed with a parameterized slope.&quot;&quot;&quot;</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ATan</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<span class="nd">@staticmethod</span>
+<span class="k">class</span> <span class="nc">Heaviside</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Default spiking function for neuron.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">        0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">        \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \\frac{∂S}{∂U}=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">        0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">        \\end{cases}</span>
+
+<span class="sd">    Although the backward pass is clearly not the analytical</span>
+<span class="sd">    solution of the forward pass, this assumption holds true</span>
+<span class="sd">    on the basis that a reset necessarily occurs after a spike</span>
+<span class="sd">    is generated when :math:`U ≥ U_{\\rm thr}`.&quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">out</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">grad_output</span> <span class="o">*</span> <span class="n">out</span>
+        <span class="k">return</span> <span class="n">grad</span>
+
+
+<div class="viewcode-block" id="heaviside"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.heaviside">[docs]</a><span class="k">def</span> <span class="nf">heaviside</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Heaviside surrogate gradient wrapper.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Heaviside</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="Sigmoid"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.Sigmoid">[docs]</a><span class="k">class</span> <span class="nc">Sigmoid</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of sigmoid function.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                S&amp;≈\\frac{1}{1 + {\\rm exp}(-kU)} \\\\</span>
+<span class="sd">                \\frac{∂S}{∂U}&amp;=\\frac{k</span>
+<span class="sd">                {\\rm exp}(-kU)}{[{\\rm exp}(-kU)+1]^2}</span>
+
+<span class="sd">    :math:`k` defaults to 25, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.sigmoid(slope=25)``.</span>
+
+
+<span class="sd">    Adapted from:</span>
+
+<span class="sd">    *F. Zenke, S. Ganguli (2018) SuperSpike: Supervised Learning</span>
+<span class="sd">    in Multilayer Spiking</span>
+<span class="sd">    Neural Networks. Neural Computation, pp. 1514-1541.*&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Sigmoid.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.Sigmoid.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="Sigmoid.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.Sigmoid.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">input_</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">grad_input</span>
+            <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span>
+            <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">*</span> <span class="n">input_</span><span class="p">)</span>
+            <span class="o">/</span> <span class="p">((</span><span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">*</span> <span class="n">input_</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="sigmoid"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.sigmoid">[docs]</a><span class="k">def</span> <span class="nf">sigmoid</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sigmoid surrogate gradient enclosed with a parameterized slope.&quot;&quot;&quot;</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Sigmoid</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="SpikeRateEscape"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SpikeRateEscape">[docs]</a><span class="k">class</span> <span class="nc">SpikeRateEscape</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of Boltzmann Distribution.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                \\frac{∂S}{∂U}=k{\\rm exp}(-β|U-1|)</span>
+
+<span class="sd">    :math:`β` defaults to 1, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.spike_rate_escape(beta=1)``.</span>
+<span class="sd">    :math:`k` defaults to 25, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.spike_rate_escape(slope=25)``.</span>
+
+
+<span class="sd">    Adapted from:</span>
+
+<span class="sd">    * Wulfram Gerstner and Werner M. Kistler,</span>
+<span class="sd">    Spiking neuron models: Single neurons, populations, plasticity.</span>
+<span class="sd">    Cambridge University Press, 2002.*&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SpikeRateEscape.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SpikeRateEscape.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="SpikeRateEscape.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SpikeRateEscape.backward">[docs]</a>    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">input_</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">grad_input</span>
+            <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span>
+            <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">ctx</span><span class="o">.</span><span class="n">beta</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">input_</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="spike_rate_escape"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.spike_rate_escape">[docs]</a><span class="k">def</span> <span class="nf">spike_rate_escape</span><span class="p">(</span><span class="n">beta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SpikeRateEscape surrogate gradient</span>
+<span class="sd">    enclosed with a parameterized slope.&quot;&quot;&quot;</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="n">beta</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SpikeRateEscape</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="StochasticSpikeOperator"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.StochasticSpikeOperator">[docs]</a><span class="k">class</span> <span class="nc">StochasticSpikeOperator</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">    **Forward pass:** Spike operator function.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} \\frac{U(t)}{U}</span>
+<span class="sd">            &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of spike operator,</span>
+<span class="sd">    where the subthreshold gradient is sampled from uniformly</span>
+<span class="sd">    distributed noise on the interval :math:`(𝒰\\sim[-0.5, 0.5)+μ) σ^2`,</span>
+<span class="sd">    where :math:`μ` is the mean and :math:`σ^2` is the variance.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S&amp;≈\\begin{cases} \\frac{U(t)}{U}\\Big{|}_{U(t)→U_{\\rm thr}}</span>
+<span class="sd">            &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            (𝒰\\sim[-0.5, 0.5) + μ) σ^2 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases} \\\\</span>
+<span class="sd">            \\frac{∂S}{∂U}&amp;=\\begin{cases} 1  &amp; \\text{if U ≥ U$_{\\rm thr}$}</span>
+<span class="sd">            \\\\</span>
+<span class="sd">            (𝒰\\sim[-0.5, 0.5) + μ) σ^2 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    :math:`μ` defaults to 0, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.SSO(mean=0)``.</span>
+
+<span class="sd">    :math:`σ^2` defaults to 0.2, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.SSO(variance=0.5)``.</span>
+
+<span class="sd">    The above defaults set the gradient to the following expression:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">                \\frac{∂S}{∂U}&amp;=\\begin{cases} 1</span>
+<span class="sd">                &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">                (𝒰\\sim[-0.1, 0.1) &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">                \\end{cases}</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="StochasticSpikeOperator.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.StochasticSpikeOperator.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">variance</span> <span class="o">=</span> <span class="n">variance</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="StochasticSpikeOperator.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.StochasticSpikeOperator.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">grad_input</span> <span class="o">*</span> <span class="n">out</span> <span class="o">+</span> <span class="p">(</span><span class="n">grad_input</span> <span class="o">*</span> <span class="p">(</span><span class="o">~</span><span class="n">out</span><span class="o">.</span><span class="n">bool</span><span class="p">())</span><span class="o">.</span><span class="n">float</span><span class="p">())</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand_like</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">ctx</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span> <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">variance</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="SSO"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SSO">[docs]</a><span class="k">def</span> <span class="nf">SSO</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Stochastic spike operator gradient enclosed with a parameterized mean</span>
+<span class="sd">    and variance.&quot;&quot;&quot;</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+    <span class="n">variance</span> <span class="o">=</span> <span class="n">variance</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">StochasticSpikeOperator</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="LeakySpikeOperator"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.LeakySpikeOperator">[docs]</a><span class="k">class</span> <span class="nc">LeakySpikeOperator</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">    **Forward pass:** Spike operator function.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} \\frac{U(t)}{U} &amp; \\text{if U ≥ U$_{\\rm thr}$}</span>
+<span class="sd">            \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Leaky gradient of spike operator, where</span>
+<span class="sd">    the subthreshold gradient is treated as a small constant slope.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                S&amp;≈\\begin{cases} \\frac{U(t)}{U}\\Big{|}_{U(t)→U_{\\rm thr}}</span>
+<span class="sd">                &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">                kU &amp; \\text{if U &lt; U$_{\\rm thr}$}\\end{cases} \\\\</span>
+<span class="sd">                \\frac{∂S}{∂U}&amp;=\\begin{cases} 1</span>
+<span class="sd">                &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">                k &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">                \\end{cases}</span>
+
+<span class="sd">    :math:`k` defaults to 0.1, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.LSO(slope=0.1)``.</span>
+
+<span class="sd">    The gradient is identical to that of a threshold-shifted Leaky ReLU.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LeakySpikeOperator.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.LeakySpikeOperator.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="LeakySpikeOperator.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.LeakySpikeOperator.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">out</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">grad_input</span> <span class="o">*</span> <span class="n">out</span> <span class="o">+</span> <span class="p">(</span><span class="o">~</span><span class="n">out</span><span class="o">.</span><span class="n">bool</span><span class="p">())</span><span class="o">.</span><span class="n">float</span><span class="p">()</span> <span class="o">*</span> <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">*</span> <span class="n">grad_input</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">grad</span></div></div>
+
+
+<div class="viewcode-block" id="LSO"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.LSO">[docs]</a><span class="k">def</span> <span class="nf">LSO</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Leaky spike operator gradient enclosed with a parameterized slope.&quot;&quot;&quot;</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">StochasticSpikeOperator</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">slope</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<div class="viewcode-block" id="SparseFastSigmoid"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SparseFastSigmoid">[docs]</a><span class="k">class</span> <span class="nc">SparseFastSigmoid</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Surrogate gradient of the Heaviside step function.</span>
+
+<span class="sd">    **Forward pass:** Heaviside step function shifted.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            S=\\begin{cases} 1 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="sd">            0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="sd">            \\end{cases}</span>
+
+<span class="sd">    **Backward pass:** Gradient of fast sigmoid function clipped below B.</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">                S&amp;≈\\frac{U}{1 + k|U|}H(U-B) \\\\</span>
+<span class="sd">                \\frac{∂S}{∂U}&amp;=\\begin{cases} \\frac{1}{(1+k|U|)^2}</span>
+<span class="sd">                &amp; \\text{\\rm if U &gt; B}</span>
+<span class="sd">                0 &amp; \\text{\\rm otherwise}</span>
+<span class="sd">                \\end{cases}</span>
+
+<span class="sd">    :math:`k` defaults to 25, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.SFS(slope=25)``.</span>
+<span class="sd">    :math:`B` defaults to 1, and can be modified by calling \</span>
+<span class="sd">        ``surrogate.SFS(B=1)``.</span>
+
+<span class="sd">    Adapted from:</span>
+
+<span class="sd">    *N. Perez-Nieves and D.F.M. Goodman (2021) Sparse Spiking</span>
+<span class="sd">    Gradient Descent. https://arxiv.org/pdf/2105.08810.pdf.*&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SparseFastSigmoid.forward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SparseFastSigmoid.forward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+<div class="viewcode-block" id="SparseFastSigmoid.backward"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SparseFastSigmoid.backward">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">input_</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="n">grad_input</span> <span class="o">=</span> <span class="n">grad_output</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">grad_input</span>
+            <span class="o">/</span> <span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">slope</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">input_</span> <span class="o">&gt;</span> <span class="n">ctx</span><span class="o">.</span><span class="n">B</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="SFS"><a class="viewcode-back" href="../../snntorch.surrogate.html#snntorch.surrogate.SFS">[docs]</a><span class="k">def</span> <span class="nf">SFS</span><span class="p">(</span><span class="n">slope</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">B</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;SparseFastSigmoid surrogate gradient enclosed with a</span>
+<span class="sd">    parameterized slope and sparsity threshold.&quot;&quot;&quot;</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">B</span>
+
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SparseFastSigmoid</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">slope</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">inner</span></div>
+
+
+<span class="c1"># class InverseSpikeOperator(torch.autograd.Function):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Surrogate gradient of the Heaviside step function.</span>
+
+<span class="c1">#     **Forward pass:** Spike operator function.</span>
+
+<span class="c1">#         .. math::</span>
+
+<span class="c1">#             S=\\begin{cases} \\frac{U(t)}{U} &amp; \\text{if U ≥</span>
+<span class="c1">#             U$_{\\rm thr}$} \\\\</span>
+<span class="c1">#             0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="c1">#             \\end{cases}</span>
+
+<span class="c1">#     **Backward pass:** Gradient of spike operator.</span>
+
+<span class="c1">#         .. math::</span>
+
+<span class="c1">#                 \\frac{∂S}{∂U}&amp;=\\begin{cases} \\frac{1}{U}</span>
+<span class="c1">#                 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="c1">#                 0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="c1">#                 \\end{cases}</span>
+
+<span class="c1">#     :math:`U_{\\rm thr}` defaults to 1, and can be modified by calling</span>
+<span class="c1">#     ``surrogate.spike_operator(threshold=1)``.</span>
+<span class="c1">#     .. warning:: ``threshold`` should match the threshold of the neuron,</span>
+<span class="c1">#     which defaults to 1 as well.</span>
+
+<span class="c1">#                 &quot;&quot;&quot;</span>
+
+<span class="c1">#     @staticmethod</span>
+<span class="c1">#     def forward(ctx, input_, threshold=1):</span>
+<span class="c1">#         out = (input_ &gt; 0).float()</span>
+<span class="c1">#         ctx.save_for_backward(input_, out)</span>
+<span class="c1">#         ctx.threshold = threshold</span>
+<span class="c1">#         return out</span>
+
+<span class="c1">#     @staticmethod</span>
+<span class="c1">#     def backward(ctx, grad_output):</span>
+<span class="c1">#         (input_, out) = ctx.saved_tensors</span>
+<span class="c1">#         grad_input = grad_output.clone()</span>
+<span class="c1">#         grad = (grad_input * out) / (input_ + ctx.threshold)</span>
+<span class="c1">#         return grad, None</span>
+
+
+<span class="c1"># def inverse_spike_operator(threshold=1):</span>
+<span class="c1">#     &quot;&quot;&quot;Spike operator gradient enclosed with a parameterized threshold.&quot;&quot;&quot;</span>
+<span class="c1">#     threshold = threshold</span>
+
+<span class="c1">#     def inner(x):</span>
+<span class="c1">#         return InverseSpikeOperator.apply(x, threshold)</span>
+
+<span class="c1">#     return inner</span>
+
+
+<span class="c1"># class InverseStochasticSpikeOperator(torch.autograd.Function):</span>
+<span class="c1">#     &quot;&quot;&quot;</span>
+<span class="c1">#     Surrogate gradient of the Heaviside step function.</span>
+
+<span class="c1">#     **Forward pass:** Spike operator function.</span>
+
+<span class="c1">#         .. math::</span>
+
+<span class="c1">#             S=\\begin{cases} \\frac{U(t)}{U}</span>
+<span class="c1">#             &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="c1">#             0 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="c1">#             \\end{cases}</span>
+
+<span class="c1">#     **Backward pass:** Gradient of spike operator,</span>
+<span class="c1">#     where the subthreshold gradient is sampled from</span>
+<span class="c1">#     uniformly distributed noise on the interval</span>
+<span class="c1">#     :math:`(𝒰\\sim[-0.5, 0.5)+μ) σ^2`,</span>
+<span class="c1">#     where :math:`μ` is the mean and :math:`σ^2` is the variance.</span>
+
+<span class="c1">#         .. math::</span>
+
+<span class="c1">#                 S&amp;≈\\begin{cases} \\frac{U(t)}{U}</span>
+<span class="c1">#                 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="c1">#                 (𝒰\\sim[-0.5, 0.5) + μ) σ^2</span>
+<span class="c1">#                 &amp; \\text{if U &lt; U$_{\\rm thr}$}\\end{cases} \\\\</span>
+<span class="c1">#                 \\frac{∂S}{∂U}&amp;=\\begin{cases} \\frac{1}{U}</span>
+<span class="c1">#                 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="c1">#                 (𝒰\\sim[-0.5, 0.5) + μ) σ^2</span>
+<span class="c1">#                 &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="c1">#                 \\end{cases}</span>
+
+<span class="c1">#     :math:`U_{\\rm thr}` defaults to 1, and can be modified by calling</span>
+<span class="c1">#     ``surrogate.SSO(threshold=1)``.</span>
+
+<span class="c1">#     :math:`μ` defaults to 0, and can be modified by calling</span>
+<span class="c1">#     ``surrogate.SSO(mean=0)``.</span>
+
+<span class="c1">#     :math:`σ^2` defaults to 0.2, and can be modified by calling</span>
+<span class="c1">#     ``surrogate.SSO(variance=0.5)``.</span>
+
+<span class="c1">#     The above defaults set the gradient to the following expression:</span>
+
+<span class="c1">#     .. math::</span>
+
+<span class="c1">#                 \\frac{∂S}{∂U}&amp;=\\begin{cases} \\frac{1}{U}</span>
+<span class="c1">#                 &amp; \\text{if U ≥ U$_{\\rm thr}$} \\\\</span>
+<span class="c1">#                 (𝒰\\sim[-0.1, 0.1) &amp; \\text{if U &lt; U$_{\\rm thr}$}</span>
+<span class="c1">#                 \\end{cases}</span>
+
+<span class="c1">#     .. warning:: ``threshold`` should match the threshold of the neuron,</span>
+<span class="c1">#     which defaults to 1 as well.</span>
+
+<span class="c1">#     &quot;&quot;&quot;</span>
+
+<span class="c1">#     @staticmethod</span>
+<span class="c1">#     def forward(ctx, input_, threshold=1, mean=0, variance=0.2):</span>
+<span class="c1">#         out = (input_ &gt; 0).float()</span>
+<span class="c1">#         ctx.save_for_backward(input_, out)</span>
+<span class="c1">#         ctx.threshold = threshold</span>
+<span class="c1">#         ctx.mean = mean</span>
+<span class="c1">#         ctx.variance = variance</span>
+<span class="c1">#         return out</span>
+
+<span class="c1">#     @staticmethod</span>
+<span class="c1">#     def backward(ctx, grad_output):</span>
+<span class="c1">#         (input_, out) = ctx.saved_tensors</span>
+<span class="c1">#         grad_input = grad_output.clone()</span>
+<span class="c1">#         grad = (grad_input * out) / (input_ + ctx.threshold) + (</span>
+<span class="c1">#             grad_input * (~out.bool()).float()</span>
+<span class="c1">#         ) * ((torch.rand_like(input_) - 0.5 + ctx.mean) * ctx.variance)</span>
+
+<span class="c1">#         return grad, None, None, None</span>
+
+
+<span class="c1"># def ISSO(threshold=1, mean=0, variance=0.2):</span>
+<span class="c1">#     &quot;&quot;&quot;Stochastic spike operator gradient enclosed with a parameterized</span>
+<span class="c1">#     threshold, mean and variance.&quot;&quot;&quot;</span>
+<span class="c1">#     threshold = threshold</span>
+<span class="c1">#     mean = mean</span>
+<span class="c1">#     variance = variance</span>
+
+<span class="c1">#     def inner(x):</span>
+<span class="c1">#         return InverseStochasticSpikeOperator.</span>
+<span class="c1">#         apply(x, threshold, mean, variance)</span>
+
+<span class="c1">#     return inner</span>
+
+
+<span class="c1"># piecewise linear func</span>
+<span class="c1"># tanh surrogate func</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

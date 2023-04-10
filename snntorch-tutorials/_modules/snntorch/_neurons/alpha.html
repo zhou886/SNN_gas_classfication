@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch._neurons.alpha &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch._neurons.alpha</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch._neurons.alpha</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+
+<span class="kn">from</span> <span class="nn">.neurons</span> <span class="kn">import</span> <span class="n">_SpikeTensor</span><span class="p">,</span> <span class="n">_SpikeTorchConv</span><span class="p">,</span> <span class="n">LIF</span>
+
+
+<div class="viewcode-block" id="Alpha"><a class="viewcode-back" href="../../../snn.neurons_alpha.html#snntorch._neurons.alpha.Alpha">[docs]</a><span class="k">class</span> <span class="nc">Alpha</span><span class="p">(</span><span class="n">LIF</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A variant of the leaky integrate and fire neuron where membrane</span>
+<span class="sd">    potential follows an alpha function.</span>
+<span class="sd">    The time course of the membrane potential response depends on a</span>
+<span class="sd">    combination of exponentials.</span>
+<span class="sd">    In general, this causes the change in membrane potential to</span>
+<span class="sd">    experience a delay with respect to an input spike.</span>
+<span class="sd">    For :math:`U[T] &gt; U_{\\rm thr} ⇒ S[T+1] = 1`.</span>
+
+<span class="sd">    .. warning:: For a positive input current to induce a positive membrane \</span>
+<span class="sd">    response, ensure :math:`α &gt; β`.</span>
+
+<span class="sd">    If `reset_mechanism = &quot;zero&quot;`, then :math:`I_{\\rm exc}, I_{\\rm inh}`</span>
+<span class="sd">    will both be set to `0` whenever the neuron emits a spike:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">            I_{\\rm exc}[t+1] = (αI_{\\rm exc}[t] + I_{\\rm in}[t+1]) -</span>
+<span class="sd">            R(αI_{\\rm exc}[t] + I_{\\rm in}[t+1]) \\\\</span>
+<span class="sd">            I_{\\rm inh}[t+1] = (βI_{\\rm inh}[t] - I_{\\rm in}[t+1]) -</span>
+<span class="sd">            R(βI_{\\rm inh}[t] - I_{\\rm in}[t+1]) \\\\</span>
+<span class="sd">            U[t+1] = τ_{\\rm α}(I_{\\rm exc}[t+1] + I_{\\rm inh}[t+1])</span>
+
+<span class="sd">    * :math:`I_{\\rm exc}` - Excitatory current</span>
+<span class="sd">    * :math:`I_{\\rm inh}` - Inhibitory current</span>
+<span class="sd">    * :math:`I_{\\rm in}` - Input current</span>
+<span class="sd">    * :math:`U` - Membrane potential</span>
+<span class="sd">    * :math:`U_{\\rm thr}` - Membrane threshold</span>
+<span class="sd">    * :math:`R` - Reset mechanism, :math:`R = 1` if spike occurs, otherwise \</span>
+<span class="sd">        :math:`R = 0`</span>
+<span class="sd">    * :math:`α` - Excitatory current decay rate</span>
+<span class="sd">    * :math:`β` - Inhibitory current decay rate</span>
+<span class="sd">    * :math:`τ_{\\rm α} = \\frac{log(α)}{log(β)} - log(α) + 1`</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import torch</span>
+<span class="sd">        import torch.nn as nn</span>
+<span class="sd">        import snntorch as snn</span>
+
+<span class="sd">        alpha = 0.9</span>
+<span class="sd">        beta = 0.8</span>
+
+<span class="sd">        # Define Network</span>
+<span class="sd">        class Net(nn.Module):</span>
+<span class="sd">            def __init__(self):</span>
+<span class="sd">                super().__init__()</span>
+
+<span class="sd">                # initialize layers</span>
+<span class="sd">                self.fc1 = nn.Linear(num_inputs, num_hidden)</span>
+<span class="sd">                self.lif1 = snn.Alpha(alpha=alpha, beta=beta)</span>
+<span class="sd">                self.fc2 = nn.Linear(num_hidden, num_outputs)</span>
+<span class="sd">                self.lif2 = snn.Alpha(alpha=alpha, beta=beta)</span>
+
+<span class="sd">            def forward(self, x, syn_exc1, syn_inh1, mem1, spk1, syn_exc2,</span>
+<span class="sd">            syn_inh2, mem2):</span>
+<span class="sd">                cur1 = self.fc1(x)</span>
+<span class="sd">                spk1, syn_exc1, syn_inh1, mem1 = self.lif1(cur1, syn_exc1,</span>
+<span class="sd">                syn_inh1, mem1)</span>
+<span class="sd">                cur2 = self.fc2(spk1)</span>
+<span class="sd">                spk2, syn_exc2, syn_inh2, mem2 = self.lif2(cur2, syn_exc2,</span>
+<span class="sd">                syn_inh2, mem2)</span>
+<span class="sd">                return syn_exc1, syn_inh1, mem1, spk1, syn_exc2, syn_inh2,</span>
+<span class="sd">                mem2, spk2</span>
+
+<span class="sd">        # Too many state variables which becomes cumbersome, so the</span>
+<span class="sd">        # following is also an option:</span>
+
+<span class="sd">        alpha = 0.9</span>
+<span class="sd">        beta = 0.8</span>
+
+<span class="sd">        net = nn.Sequential(nn.Linear(num_inputs, num_hidden),</span>
+<span class="sd">                            snn.Alpha(alpha=alpha, beta=beta,</span>
+<span class="sd">                            init_hidden=True),</span>
+<span class="sd">                            nn.Linear(num_hidden, num_outputs),</span>
+<span class="sd">                            snn.Alpha(alpha=alpha, beta=beta,</span>
+<span class="sd">                            init_hidden=True, output=True))</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">spike_grad</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">init_hidden</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">inhibition</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_alpha</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_beta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">learn_threshold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">reset_mechanism</span><span class="o">=</span><span class="s2">&quot;zero&quot;</span><span class="p">,</span>
+        <span class="n">state_quant</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Alpha</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">beta</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="p">,</span>
+            <span class="n">spike_grad</span><span class="p">,</span>
+            <span class="n">init_hidden</span><span class="p">,</span>
+            <span class="n">inhibition</span><span class="p">,</span>
+            <span class="n">learn_beta</span><span class="p">,</span>
+            <span class="n">learn_threshold</span><span class="p">,</span>
+            <span class="n">reset_mechanism</span><span class="p">,</span>
+            <span class="n">state_quant</span><span class="p">,</span>
+            <span class="n">output</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alpha_register_buffer</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">learn_alpha</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_alpha_cases</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_alpha</span><span class="p">()</span>
+
+        <span class="c1"># if reset_mechanism == &quot;subtract&quot;:</span>
+        <span class="c1">#     self.mem_residual = False</span>
+
+<div class="viewcode-block" id="Alpha.forward"><a class="viewcode-back" href="../../../snn.neurons_alpha.html#snntorch._neurons.alpha.Alpha.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">syn_inh</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mem</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">syn_exc</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">syn_inh</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span><span class="p">)</span>
+        <span class="p">):</span>  <span class="c1"># only triggered on first-pass</span>
+            <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTorchConv</span><span class="p">(</span>
+                <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">,</span> <span class="n">input_</span><span class="o">=</span><span class="n">input_</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mem</span> <span class="ow">is</span> <span class="kc">False</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span> <span class="s2">&quot;init_flag&quot;</span>
+        <span class="p">):</span>  <span class="c1"># init_hidden case</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTorchConv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span> <span class="n">input_</span><span class="o">=</span><span class="n">input_</span>
+            <span class="p">)</span>
+
+        <span class="c1"># if hidden states are passed externally</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_reset</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+            <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_state_function</span><span class="p">(</span>
+                <span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">:</span>
+                <span class="n">syn_exc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="n">syn_exc</span><span class="p">)</span>
+                <span class="n">syn_inh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="n">syn_inh</span><span class="p">)</span>
+                <span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inhibition</span><span class="p">:</span>
+                <span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire_inhibition</span><span class="p">(</span><span class="n">mem</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">spk</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span>
+
+        <span class="c1"># if hidden states and outputs are instance variables</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_hidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_alpha_forward_cases</span><span class="p">(</span><span class="n">mem</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem_reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_quant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inhibition</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire_inhibition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mem</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk</span></div>
+
+    <span class="k">def</span> <span class="nf">_base_state_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="n">base_fn_syn_exc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">syn_exc</span> <span class="o">+</span> <span class="n">input_</span>
+        <span class="n">base_fn_syn_inh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">syn_inh</span> <span class="o">-</span> <span class="n">input_</span>
+        <span class="n">tau_alpha</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="o">/</span> <span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">base_fn_mem</span> <span class="o">=</span> <span class="n">tau_alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">base_fn_syn_exc</span> <span class="o">+</span> <span class="n">base_fn_syn_inh</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base_fn_syn_exc</span><span class="p">,</span> <span class="n">base_fn_syn_inh</span><span class="p">,</span> <span class="n">base_fn_mem</span>
+
+    <span class="k">def</span> <span class="nf">_base_state_reset_sub_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">):</span>
+        <span class="n">syn_exc_reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="n">syn_inh_reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">syn_inh</span> <span class="o">-</span> <span class="n">input_</span>
+        <span class="n">mem_reset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">syn_exc_reset</span><span class="p">,</span> <span class="n">syn_inh_reset</span><span class="p">,</span> <span class="n">mem_reset</span>
+
+    <span class="k">def</span> <span class="nf">_build_state_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_reset_sub_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># reset to zero</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># no reset, pure integration</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">,</span> <span class="n">mem</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_fn</span>
+
+    <span class="k">def</span> <span class="nf">_base_state_function_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="n">base_fn_syn_exc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_exc</span> <span class="o">+</span> <span class="n">input_</span>
+        <span class="n">base_fn_syn_inh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span> <span class="o">-</span> <span class="n">input_</span>
+        <span class="n">tau_alpha</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="o">/</span> <span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="o">-</span> <span class="n">torch</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="n">base_fn_mem</span> <span class="o">=</span> <span class="n">tau_alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">base_fn_syn_exc</span> <span class="o">+</span> <span class="n">base_fn_syn_inh</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base_fn_syn_exc</span><span class="p">,</span> <span class="n">base_fn_syn_inh</span><span class="p">,</span> <span class="n">base_fn_mem</span>
+
+    <span class="k">def</span> <span class="nf">_base_state_reset_sub_function_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="n">syn_exc_reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="n">syn_inh_reset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span> <span class="o">-</span> <span class="n">input_</span>
+        <span class="n">mem_reset</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">syn_inh</span>
+        <span class="k">return</span> <span class="n">syn_exc_reset</span><span class="p">,</span> <span class="n">syn_inh_reset</span><span class="p">,</span> <span class="n">mem_reset</span>
+
+    <span class="k">def</span> <span class="nf">_build_state_function_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># reset by subtraction</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_reset_sub_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># reset to zero</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">reset_mechanism_val</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># no reset, pure integration</span>
+            <span class="n">state_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_state_function_hidden</span><span class="p">(</span><span class="n">input_</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state_fn</span>
+
+    <span class="k">def</span> <span class="nf">_alpha_register_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">learn_alpha</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">learn_alpha</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_alpha_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;alpha must be greater than beta.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;beta cannot be &#39;1&#39; otherwise ZeroDivisionError occurs: &quot;</span>
+                <span class="s2">&quot;tau_alpha = log(alpha)/log(beta) - log(alpha) + 1&quot;</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_alpha_forward_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem</span><span class="p">,</span> <span class="n">syn_exc</span><span class="p">,</span> <span class="n">syn_inh</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">syn_exc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">syn_inh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;When `init_hidden=True`, Alpha expects 1 input argument.&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="Alpha.detach_hidden"><a class="viewcode-back" href="../../../snn.neurons_alpha.html#snntorch._neurons.alpha.Alpha.detach_hidden">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">detach_hidden</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Used to detach hidden states from the current graph.</span>
+<span class="sd">        Intended for use in truncated backpropagation through</span>
+<span class="sd">        time where hidden state variables are instance variables.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">],</span> <span class="n">Alpha</span><span class="p">):</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">syn_exc</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">syn_inh</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">mem</span><span class="o">.</span><span class="n">detach_</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Alpha.reset_hidden"><a class="viewcode-back" href="../../../snn.neurons_alpha.html#snntorch._neurons.alpha.Alpha.reset_hidden">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">reset_hidden</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Used to clear hidden state variables to zero.</span>
+<span class="sd">        Intended for use where hidden state variables are instance</span>
+<span class="sd">        variables.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">],</span> <span class="n">Alpha</span><span class="p">):</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">syn_exc</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">syn_inh</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">instances</span><span class="p">[</span><span class="n">layer</span><span class="p">]</span><span class="o">.</span><span class="n">mem</span> <span class="o">=</span> <span class="n">_SpikeTensor</span><span class="p">(</span><span class="n">init_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.spikeplot &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="snntorch.spikevision" href="snntorch.spikevision.html" />
+    <link rel="prev" title="snntorch.spikegen" href="snntorch.spikegen.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            snntorch
+              <img src="_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">snntorch.spikeplot</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/snntorch.spikeplot.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="snntorch-spikeplot">
+<h1>snntorch.spikeplot<a class="headerlink" href="#snntorch-spikeplot" title="Permalink to this headline"></a></h1>
+<p><a class="reference internal" href="#module-snntorch.spikeplot" title="snntorch.spikeplot"><code class="xref py py-mod docutils literal notranslate"><span class="pre">snntorch.spikeplot</span></code></a> is deeply integrated with <cite>matplotlib.pyplot</cite> and <cite>celluloid</cite>.
+It serves to reduce the amount of boilerplate code required  to generate a variety of animations and plots.</p>
+<span class="target" id="module-snntorch.spikeplot"></span><dl class="py class">
+<dt class="sig sig-object py" id="snntorch.spikeplot.Camera">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">snntorch.spikeplot.</span></span><span class="sig-name descname"><span class="pre">Camera</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">matplotlib.figure.Figure</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikeplot.html#Camera"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikeplot.Camera" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Make animations easier.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.spikeplot.Camera.animate">
+<span class="sig-name descname"><span class="pre">animate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">matplotlib.animation.ArtistAnimation</span><a class="reference internal" href="_modules/snntorch/spikeplot.html#Camera.animate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikeplot.Camera.animate" title="Permalink to this definition"></a></dt>
+<dd><p>Animate the snapshots taken.
+Uses matplotlib.animation.ArtistAnimation
+Returns
+——-
+ArtistAnimation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="snntorch.spikeplot.Camera.snap">
+<span class="sig-name descname"><span class="pre">snap</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">matplotlib.artist.Artist</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/snntorch/spikeplot.html#Camera.snap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikeplot.Camera.snap" title="Permalink to this definition"></a></dt>
+<dd><p>Capture current state of the figure.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikeplot.animator">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikeplot.</span></span><span class="sig-name descname"><span class="pre">animator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">40</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'plasma'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikeplot.html#animator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikeplot.animator" title="Permalink to this definition"></a></dt>
+<dd><p>Generate an animation by looping through the first dimension of a
+sample of spiking data.
+Time must be the first dimension of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.spikeplot</span> <span class="k">as</span> <span class="nn">splt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1">#  spike_data contains 128 samples, each of 100 time steps in duration</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">spike_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">])</span>
+
+<span class="c1">#  Index into a single sample from a minibatch</span>
+<span class="n">spike_data_sample</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">])</span>
+
+<span class="c1">#  Plot</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">anim</span> <span class="o">=</span> <span class="n">splt</span><span class="o">.</span><span class="n">animator</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">anim</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+
+<span class="c1">#  Save as a gif</span>
+<span class="n">anim</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;spike_mnist.gif&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for a single sample across time steps of
+shape [num_steps x input_size]</p></li>
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figure</em>) – Top level container for all plot elements</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes._subplots.AxesSubplot</em>) – <p>Contains additional figure elements and sets the coordinate
+system. E.g.:</p>
+<blockquote>
+<div><p>fig, ax = plt.subplots(facecolor=’w’, figsize=(12, 7))</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>Number of time steps to plot. If not specified,
+the number of entries in the first dimension</p>
+<blockquote>
+<div><p>of <code class="docutils literal notranslate"><span class="pre">data</span></code> will automatically be used, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</div></blockquote>
+</p></li>
+<li><p><strong>interval</strong> (<em>int</em><em>, </em><em>optional</em>) – Delay between frames in milliseconds, defaults to <code class="docutils literal notranslate"><span class="pre">40</span></code></p></li>
+<li><p><strong>cmap</strong> (<em>string</em><em>, </em><em>optional</em>) – color map, defaults to <code class="docutils literal notranslate"><span class="pre">plasma</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>animation to be displayed using <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.show()</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>FuncAnimation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikeplot.raster">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikeplot.</span></span><span class="sig-name descname"><span class="pre">raster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikeplot.html#raster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikeplot.raster" title="Permalink to this definition"></a></dt>
+<dd><p>Generate a raster plot using <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.scatter</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.spikeplot</span> <span class="k">as</span> <span class="nn">splt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1">#  spike_data contains 128 samples, each of 100 time steps in duration</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">spike_data</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">])</span>
+
+<span class="c1">#  Index into a single sample from a minibatch</span>
+<span class="n">spike_data_sample</span> <span class="o">=</span> <span class="n">spike_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">])</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+
+<span class="c1">#  s: size of scatter points; c: color of scatter points</span>
+<span class="n">splt</span><span class="o">.</span><span class="n">raster</span><span class="p">(</span><span class="n">spike_data_sample</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Input Layer&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Time step&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Neuron Number&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikeplot.spike_count">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikeplot.</span></span><span class="sig-name descname"><span class="pre">spike_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gridshader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikeplot.html#spike_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikeplot.spike_count" title="Permalink to this definition"></a></dt>
+<dd><p>Generate horizontal bar plot for a single forward pass.
+Options to animate also available.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>import snntorch.spikeplot as splt
+import matplotlib.pyplot as plt
+from IPython.display import HTML
+
+num_steps = 25
+
+#  Use splt.spike_count to display behavior of output neurons for a
+single sample during feedforward
+
+#  spk_rec is a recording of output spikes across 25 time steps,
+using ``batch_size=128``
+print(spk_rec.size())
+&gt;&gt;&gt; torch.Size([25, 128, 10])
+
+#  We only need a single data sample
+spk_results = torch.stack(spk_rec, dim=0)[:, 0, :].to(&#39;cpu&#39;)
+print(spk_results.size())
+&gt;&gt;&gt; torch.Size([25, 10])
+
+fig, ax = plt.subplots(facecolor=&#39;w&#39;, figsize=(12, 7))
+labels=[&#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, &#39;4&#39;, &#39;5&#39;, &#39;6&#39;, &#39;7&#39;, &#39;8&#39;,&#39;9&#39;]
+
+#  Plot and save spike count histogram
+splt.spike_count(spk_results, fig, ax, labels, num_steps = num_steps,
+time_step=1e-3)
+plt.show()
+plt.savefig(&#39;hist2.png&#39;, dpi=300, bbox_inches=&#39;tight&#39;)
+
+# Animate and save spike count histogram
+anim = splt.spike_count(spk_results, fig, ax, labels, animate=True,
+interpolate=5, num_steps = num_steps, time_step=1e-3)
+HTML(anim.to_html5_video())
+anim.save(&quot;spike_bar.gif&quot;)
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Sample of spiking data across numerous time steps [num_steps
+x num_outputs]</p></li>
+<li><p><strong>fig</strong> (<em>matplotlib.figure.Figures</em>) – Top level container for all plot elements</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes._subplots.AxesSubplot</em>) – <p>Contains additional figure elements and sets the coordinate
+system.</p>
+<blockquote>
+<div><p>E.g., fig, ax = plt.subplots(facecolor=’w’, figsize=(12, 7))</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>labels</strong> (<em>list</em>) – List of strings of the names of the output labels.
+E.g., for MNIST, <code class="docutils literal notranslate"><span class="pre">labels</span> <span class="pre">=</span> <span class="pre">['0',</span> <span class="pre">'1',</span> <span class="pre">'2',</span> <span class="pre">...</span> <span class="pre">,</span> <span class="pre">'9']</span></code></p></li>
+<li><p><strong>num_steps</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>Number of time steps to plot. If not specified, the
+number of entries in the first dimension</p>
+<blockquote>
+<div><p>of <code class="docutils literal notranslate"><span class="pre">data</span></code> will automatically be used, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</div></blockquote>
+</p></li>
+<li><p><strong>animate</strong> (<em>Bool</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, return type matplotlib.animation.
+ArtistAnimation sequentially scanning across the</p>
+<blockquote>
+<div><p>range of time steps available in <code class="docutils literal notranslate"><span class="pre">data</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, display plot of the final step once all spikes have
+been counted, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</div></blockquote>
+</p></li>
+<li><p><strong>interpolate</strong> (<em>int</em><em>, </em><em>optional</em>) – <p>Can be increased to smooth the animation of the
+vertical time bar. The value passed is the</p>
+<blockquote>
+<div><p>interpolation factor:
+e.g., <code class="docutils literal notranslate"><span class="pre">interpolate=1</span></code> results in no additional interpolation.
+e.g., <code class="docutils literal notranslate"><span class="pre">interpolate=5</span></code> results in 4 additional frames for each
+time step, defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
+</div></blockquote>
+</p></li>
+<li><p><strong>gridshader</strong> (<em>Bool</em><em>, </em><em>optional</em>) – Applies shading to figure background to distinguish
+output classes, defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>interval</strong> (<em>int</em><em>, </em><em>optional</em>) – Delay between frames in milliseconds, defaults to <code class="docutils literal notranslate"><span class="pre">25</span></code></p></li>
+<li><p><strong>time_step</strong> (<em>int</em><em>, </em><em>optional</em>) – Duration of each time step in seconds.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, time-axis will be in terms of <code class="docutils literal notranslate"><span class="pre">num_steps</span></code>.
+Else, time-axis is scaled
+by the argument passed, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>animation to be displayed using <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.show()</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>FuncAnimation (if animate is <code class="docutils literal notranslate"><span class="pre">True</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="snntorch.spikeplot.traces">
+<span class="sig-prename descclassname"><span class="pre">snntorch.spikeplot.</span></span><span class="sig-name descname"><span class="pre">traces</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3,</span> <span class="pre">3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spk_height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">titles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/snntorch/spikeplot.html#traces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#snntorch.spikeplot.traces" title="Permalink to this definition"></a></dt>
+<dd><p>Plot an array of neuron traces (e.g., membrane potential or synaptic
+current).
+Optionally apply spikes to ride on the traces.
+<cite>traces</cite> was originally written by Friedemann Zenke.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">snntorch.spikeplot</span> <span class="k">as</span> <span class="nn">splt</span>
+
+<span class="c1">#  mem_rec contains the traces of 9 neuron membrane potentials across</span>
+<span class="mi">100</span> <span class="n">time</span> <span class="n">steps</span> <span class="ow">in</span> <span class="n">duration</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mem_rec</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+
+<span class="c1">#  Plot</span>
+<span class="n">traces</span><span class="p">(</span><span class="n">mem_rec</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>torch.Tensor</em>) – Data tensor for neuron traces across time steps of shape
+[num_steps x num_neurons]</p></li>
+<li><p><strong>spk</strong> (<em>torch.Tensor</em><em>, </em><em>optional</em>) – Data tensor for neuron traces across time steps of shape
+[num_steps x num_neurons], defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>dim</strong> (<em>tuple</em><em>, </em><em>optional</em>) – Dimensions of figure, defaults to <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">3)</span></code></p></li>
+<li><p><strong>spk_height</strong> (<em>float</em><em>, </em><em>optional</em>) – height of spike to plot, defaults to <code class="docutils literal notranslate"><span class="pre">5</span></code></p></li>
+<li><p><strong>titles</strong> (<em>list of strings</em><em>, </em><em>optional</em>) – Adds subplot titles, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="snntorch.spikegen.html" class="btn btn-neutral float-left" title="snntorch.spikegen" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="snntorch.spikevision.html" class="btn btn-neutral float-right" title="snntorch.spikevision" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>snntorch.functional.loss &mdash; snntorch 0.6.2 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/default.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            snntorch
+              <img src="../../../_static/snntorch_alpha_full.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.6.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.html">snntorch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.backprop.html">snntorch.backprop</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.functional.html">snntorch.functional</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikegen.html">snntorch.spikegen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikeplot.html">snntorch.spikeplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.spikevision.html">snntorch.spikevision</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.surrogate.html">snntorch.surrogate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../snntorch.utils.html">snntorch.utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../history.html">History</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">snntorch</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">snntorch.functional.loss</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for snntorch.functional.loss</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch._C</span> <span class="kn">import</span> <span class="n">Value</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">snntorch</span> <span class="kn">import</span> <span class="n">spikegen</span>
+
+<span class="c1">###############################################################</span>
+<span class="c1"># When adding new loss/reg functions, update criterion_dict   #</span>
+<span class="c1">#                and reg_dict in backprop.py                  #</span>
+<span class="c1">###############################################################</span>
+
+
+<span class="n">dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float</span>
+
+
+<div class="viewcode-block" id="LossFunctions"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.LossFunctions">[docs]</a><span class="k">class</span> <span class="nc">LossFunctions</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_prediction_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_out</span><span class="p">):</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">device</span>
+
+        <span class="n">num_steps</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">num_outputs</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">device</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">num_outputs</span>
+
+    <span class="k">def</span> <span class="nf">_population_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_out</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Count up spikes sequentially from output classes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">num_classes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;``num_classes`` must be specified if &quot;</span>
+                <span class="s2">&quot;``population_code=True``.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_outputs</span> <span class="o">%</span> <span class="n">num_classes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;``num_outputs </span><span class="si">{</span><span class="n">num_outputs</span><span class="si">}</span><span class="s2"> must be a factor &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;of num_classes </span><span class="si">{</span><span class="n">num_classes</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">device</span>
+        <span class="n">pop_code</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">spk_out</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="n">num_classes</span><span class="p">]))</span><span class="o">.</span><span class="n">to</span><span class="p">(</span>
+            <span class="n">device</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_classes</span><span class="p">):</span>
+            <span class="n">pop_code</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">spk_out</span><span class="p">[</span>
+                    <span class="p">:,</span>
+                    <span class="p">:,</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">num_outputs</span> <span class="o">*</span> <span class="n">idx</span> <span class="o">/</span> <span class="n">num_classes</span><span class="p">)</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span>
+                        <span class="n">num_outputs</span> <span class="o">*</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">num_classes</span>
+                    <span class="p">),</span>
+                <span class="p">]</span>
+                <span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pop_code</span></div>
+
+
+<div class="viewcode-block" id="ce_rate_loss"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.ce_rate_loss">[docs]</a><span class="k">class</span> <span class="nc">ce_rate_loss</span><span class="p">(</span><span class="n">LossFunctions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cross Entropy Spike Rate Loss.</span>
+<span class="sd">    When called, the spikes at each time step are sequentially passed</span>
+<span class="sd">    through the Cross Entropy Loss function.</span>
+<span class="sd">    This criterion combines log_softmax and NLLLoss in a single function.</span>
+<span class="sd">    The losses are accumulated over time steps to give the final loss.</span>
+<span class="sd">    The Cross Entropy Loss encourages the correct class to fire at all</span>
+<span class="sd">    time steps, and aims to suppress incorrect classes from firing.</span>
+
+<span class="sd">    The Cross Entropy Rate Loss applies the Cross Entropy function at</span>
+<span class="sd">    every time step. In contrast, the Cross Entropy Count Loss accumulates</span>
+<span class="sd">    spikes first, and applies Cross Entropy Loss only once.</span>
+
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.functional as SF</span>
+
+<span class="sd">        loss_fn = SF.ce_rate_loss()</span>
+<span class="sd">        loss = loss_fn(outputs, targets)</span>
+
+<span class="sd">    :return: Loss</span>
+<span class="sd">    :rtype: torch.Tensor (single element)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;ce_rate_loss&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">device</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_check</span><span class="p">(</span><span class="n">spk_out</span><span class="p">)</span>
+        <span class="n">log_softmax_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LogSoftmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">NLLLoss</span><span class="p">()</span>
+
+        <span class="n">log_p_y</span> <span class="o">=</span> <span class="n">log_softmax_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+            <span class="n">loss</span> <span class="o">+=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">log_p_y</span><span class="p">[</span><span class="n">step</span><span class="p">],</span> <span class="n">targets</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loss</span> <span class="o">/</span> <span class="n">num_steps</span></div>
+
+
+<div class="viewcode-block" id="ce_count_loss"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.ce_count_loss">[docs]</a><span class="k">class</span> <span class="nc">ce_count_loss</span><span class="p">(</span><span class="n">LossFunctions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cross Entropy Spike Count Loss.</span>
+
+<span class="sd">    The spikes at each time step [num_steps x batch_size x num_outputs]</span>
+<span class="sd">    are accumulated and then passed through the Cross Entropy Loss function.</span>
+<span class="sd">    This criterion combines log_softmax and NLLLoss in a single function.</span>
+<span class="sd">    The Cross Entropy Loss encourages the correct class to fire at all</span>
+<span class="sd">    time steps, and aims to suppress incorrect classes from firing.</span>
+
+<span class="sd">    The Cross Entropy Count Loss accumulates spikes first, and applies</span>
+<span class="sd">    Cross Entropy Loss only once.</span>
+<span class="sd">    In contrast, the Cross Entropy Rate Loss applies the Cross Entropy</span>
+<span class="sd">    function at every time step.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.functional as SF</span>
+
+<span class="sd">        # if not using population codes (i.e., more output neurons than</span>
+<span class="sd">        there are classes)</span>
+<span class="sd">        loss_fn = ce_count_loss()</span>
+<span class="sd">        loss = loss_fn(spk_out, targets)</span>
+
+<span class="sd">        # if using population codes; e.g., 200 output neurons, 10 output</span>
+<span class="sd">        classes --&gt; 20 output neurons p/class</span>
+<span class="sd">        loss_fn = ce_count_loss(population_code=True, num_classes=10)</span>
+<span class="sd">        loss = loss_fn(spk_out, targets)</span>
+
+<span class="sd">    :param population_code: Specify if a population code is applied, i.e.,</span>
+<span class="sd">        the number of outputs is greater than the number of classes. Defaults</span>
+<span class="sd">        to ``False``</span>
+<span class="sd">    :type population_code: bool, optional</span>
+
+<span class="sd">    :param num_classes: Number of output classes must be specified if</span>
+<span class="sd">        ``population_code=True``. Must be a factor of the number of output</span>
+<span class="sd">        neurons if population code is enabled. Defaults to ``False``</span>
+<span class="sd">    :type num_classes: int, optional</span>
+
+<span class="sd">    :return: Loss</span>
+<span class="sd">    :rtype: torch.Tensor (single element)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">population_code</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population_code</span> <span class="o">=</span> <span class="n">population_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">num_classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;ce_count_loss&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">log_softmax_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LogSoftmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">NLLLoss</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">population_code</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">num_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_check</span><span class="p">(</span><span class="n">spk_out</span><span class="p">)</span>
+            <span class="n">spike_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_population_code</span><span class="p">(</span>
+                <span class="n">spk_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_outputs</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spike_count</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># B x C</span>
+        <span class="n">log_p_y</span> <span class="o">=</span> <span class="n">log_softmax_fn</span><span class="p">(</span><span class="n">spike_count</span><span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">log_p_y</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="ce_max_membrane_loss"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.ce_max_membrane_loss">[docs]</a><span class="k">class</span> <span class="nc">ce_max_membrane_loss</span><span class="p">(</span><span class="n">LossFunctions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cross Entropy Max Membrane Loss.</span>
+<span class="sd">    When called, the maximum membrane potential value for each output</span>
+<span class="sd">    neuron is sampled and passed through the Cross Entropy Loss Function.</span>
+<span class="sd">    This criterion combines log_softmax and NLLLoss in a single function.</span>
+<span class="sd">    The Cross Entropy Loss encourages the maximum membrane potential of</span>
+<span class="sd">    the correct class to increase, while suppressing the maximum membrane</span>
+<span class="sd">    potential of incorrect classes.</span>
+<span class="sd">    This function is adopted from SpyTorch by Friedemann Zenke.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.functional as SF</span>
+
+<span class="sd">        loss_fn = SF.ce_max_membrane_loss()</span>
+<span class="sd">        loss = loss_fn(outputs, targets)</span>
+
+<span class="sd">    :param mem_out: The output tensor of the SNN&#39;s membrane potential,</span>
+<span class="sd">        of the dimension timestep * batch_size * num_output_neurons</span>
+<span class="sd">    :type mem_out: torch.Tensor</span>
+<span class="sd">    :param targets: The tensor containing the targets of the current</span>
+<span class="sd">        mini-batch, of the dimension batch_size</span>
+<span class="sd">    :type targets: torch.Tensor</span>
+
+<span class="sd">    :return: Loss</span>
+<span class="sd">    :rtype: torch.Tensor (single element)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;ce_max_membrane_loss&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">log_softmax_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LogSoftmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">NLLLoss</span><span class="p">()</span>
+
+        <span class="n">max_mem_out</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">mem_out</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">log_p_y</span> <span class="o">=</span> <span class="n">log_softmax_fn</span><span class="p">(</span><span class="n">max_mem_out</span><span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">log_p_y</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="mse_count_loss"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.mse_count_loss">[docs]</a><span class="k">class</span> <span class="nc">mse_count_loss</span><span class="p">(</span><span class="n">LossFunctions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mean Square Error Spike Count Loss.</span>
+<span class="sd">    When called, the total spike count is accumulated over time for</span>
+<span class="sd">    each neuron.</span>
+<span class="sd">    The target spike count for correct classes is set to</span>
+<span class="sd">    (num_steps * correct_rate), and for incorrect classes</span>
+<span class="sd">    (num_steps * incorrect_rate).</span>
+<span class="sd">    The spike counts and target spike counts are then applied to a</span>
+<span class="sd">     Mean Square Error Loss Function.</span>
+<span class="sd">    This function is adopted from SLAYER by Sumit Bam Shrestha and</span>
+<span class="sd">    Garrick Orchard.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.functional as SF</span>
+
+<span class="sd">        loss_fn = SF.mse_count_loss(correct_rate=0.75, incorrect_rate=0.25)</span>
+<span class="sd">        loss = loss_fn(outputs, targets)</span>
+
+
+<span class="sd">    :param correct_rate: Firing frequency of correct class as a ratio, e.g.,</span>
+<span class="sd">        ``1`` promotes firing at every step; ``0.5`` promotes firing at 50% of</span>
+<span class="sd">        steps, ``0`` discourages any firing, defaults to ``1``</span>
+<span class="sd">    :type correct_rate: float, optional</span>
+
+<span class="sd">    :param incorrect_rate: Firing frequency of incorrect class(es) as a</span>
+<span class="sd">        ratio, e.g., ``1`` promotes firing at every step; ``0.5`` promotes</span>
+<span class="sd">        firing at 50% of steps, ``0`` discourages any firing, defaults to ``1``</span>
+<span class="sd">    :type incorrect_rate: float, optional</span>
+
+<span class="sd">    :param population_code: Specify if a population code is applied, i.e., the</span>
+<span class="sd">        number of outputs is greater than the number of classes. Defaults to</span>
+<span class="sd">        ``False``</span>
+<span class="sd">    :type population_code: bool, optional</span>
+
+<span class="sd">    :param num_classes: Number of output classes must be specified if</span>
+<span class="sd">        ``population_code=True``. Must be a factor of the number of output</span>
+<span class="sd">        neurons if population code is enabled. Defaults to ``False``</span>
+<span class="sd">    :type num_classes: int, optional</span>
+
+<span class="sd">    :return: Loss</span>
+<span class="sd">    :rtype: torch.Tensor (single element)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">correct_rate</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">incorrect_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">population_code</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">num_classes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correct_rate</span> <span class="o">=</span> <span class="n">correct_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">incorrect_rate</span> <span class="o">=</span> <span class="n">incorrect_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population_code</span> <span class="o">=</span> <span class="n">population_code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">num_classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;mse_count_loss&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">num_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_check</span><span class="p">(</span><span class="n">spk_out</span><span class="p">)</span>
+        <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">population_code</span><span class="p">:</span>
+
+            <span class="c1"># generate ideal spike-count in C sized vector</span>
+            <span class="n">on_target</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_rate</span><span class="p">)</span>
+            <span class="n">off_target</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_steps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">incorrect_rate</span><span class="p">)</span>
+            <span class="n">spike_count_target</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">targets_convert</span><span class="p">(</span>
+                <span class="n">targets</span><span class="p">,</span>
+                <span class="n">num_classes</span><span class="o">=</span><span class="n">num_outputs</span><span class="p">,</span>
+                <span class="n">on_target</span><span class="o">=</span><span class="n">on_target</span><span class="p">,</span>
+                <span class="n">off_target</span><span class="o">=</span><span class="n">off_target</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">spike_count</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># B x C</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">on_target</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">num_steps</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">correct_rate</span>
+                <span class="o">*</span> <span class="p">(</span><span class="n">num_outputs</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">off_target</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+                <span class="n">num_steps</span>
+                <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">incorrect_rate</span>
+                <span class="o">*</span> <span class="p">(</span><span class="n">num_outputs</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">spike_count_target</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">targets_convert</span><span class="p">(</span>
+                <span class="n">targets</span><span class="p">,</span>
+                <span class="n">num_classes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span>
+                <span class="n">on_target</span><span class="o">=</span><span class="n">on_target</span><span class="p">,</span>
+                <span class="n">off_target</span><span class="o">=</span><span class="n">off_target</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">spike_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_population_code</span><span class="p">(</span>
+                <span class="n">spk_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span><span class="p">,</span> <span class="n">num_outputs</span>
+            <span class="p">)</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">spike_count</span><span class="p">,</span> <span class="n">spike_count_target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss</span> <span class="o">/</span> <span class="n">num_steps</span></div>
+
+
+<div class="viewcode-block" id="mse_membrane_loss"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.mse_membrane_loss">[docs]</a><span class="k">class</span> <span class="nc">mse_membrane_loss</span><span class="p">(</span><span class="n">LossFunctions</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mean Square Error Membrane Loss.</span>
+<span class="sd">    When called, pass the output membrane of shape [num_steps x batch_size x</span>
+<span class="sd">    num_outputs] and the target tensor of membrane potential.</span>
+<span class="sd">    The membrane potential and target are then applied to a Mean Square Error</span>
+<span class="sd">    Loss Function.</span>
+<span class="sd">    This function is adopted from Spike-Op by Jason K. Eshraghian.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import snntorch.functional as SF</span>
+
+<span class="sd">        # if targets are the same at each time-step</span>
+<span class="sd">        loss_fn = mse_membrane_loss(time_var_targets=False)</span>
+<span class="sd">        loss = loss_fn(outputs, targets)</span>
+
+<span class="sd">        # if targets are time-varying</span>
+<span class="sd">        loss_fn = mse_membrane_loss(time_var_targets=True)</span>
+<span class="sd">        loss = loss_fn(outputs, targets)</span>
+
+<span class="sd">    :param time_var_targets: Specifies whether the targets are time-varying,</span>
+<span class="sd">        defaults to ``False``</span>
+<span class="sd">    :type correct_rate: bool, optional</span>
+
+<span class="sd">    :param on_target: Specify target membrane potential for correct class,</span>
+<span class="sd">        defaults to ``1``</span>
+<span class="sd">    :type on_target: float, optional</span>
+
+<span class="sd">    :param off_target: Specify target membrane potential for incorrect class,</span>
+<span class="sd">        defaults to ``0``</span>
+<span class="sd">    :type off_target: float, optional</span>
+
+<span class="sd">    :return: Loss</span>
+<span class="sd">    :rtype: torch.Tensor (single element)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#  to-do: add **kwargs to modify other keyword args in</span>
+    <span class="c1">#  spikegen.targets_convert</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_var_targets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">on_target</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">off_target</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_var_targets</span> <span class="o">=</span> <span class="n">time_var_targets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_target</span> <span class="o">=</span> <span class="n">on_target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">off_target</span> <span class="o">=</span> <span class="n">off_target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;mse_membrane_loss&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">device</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">num_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_check</span><span class="p">(</span><span class="n">mem_out</span><span class="p">)</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">targets_convert</span><span class="p">(</span>
+            <span class="n">targets</span><span class="p">,</span>
+            <span class="n">num_classes</span><span class="o">=</span><span class="n">num_outputs</span><span class="p">,</span>
+            <span class="n">on_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">on_target</span><span class="p">,</span>
+            <span class="n">off_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">off_target</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_var_targets</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+                <span class="n">loss</span> <span class="o">+=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">mem_out</span><span class="p">[</span><span class="n">step</span><span class="p">],</span> <span class="n">targets</span><span class="p">[</span><span class="n">step</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_steps</span><span class="p">):</span>
+                <span class="n">loss</span> <span class="o">+=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">mem_out</span><span class="p">[</span><span class="n">step</span><span class="p">],</span> <span class="n">targets</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">loss</span> <span class="o">/</span> <span class="n">num_steps</span></div>
+
+
+<span class="c1"># Uses a sign estimator - approximates leaky as gradient is undefined.</span>
+<span class="c1"># for neurons with defined gradients, this leads to an approximation.</span>
+
+<span class="c1"># Use labels by default unless target_is_time = True</span>
+<div class="viewcode-block" id="SpikeTime"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime">[docs]</a><span class="k">class</span> <span class="nc">SpikeTime</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Used by ce_temporal_loss and mse_temporal_loss to convert spike</span>
+<span class="sd">    outputs into spike times.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_is_time</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">on_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">off_target</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">multi_spike</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SpikeTime</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_is_time</span> <span class="o">=</span> <span class="n">target_is_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="o">=</span> <span class="n">tolerance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tolerance_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Tolerance</span><span class="o">.</span><span class="n">apply</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multi_spike</span> <span class="o">=</span> <span class="n">multi_spike</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_is_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_target</span> <span class="o">=</span> <span class="n">on_target</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">off_target</span> <span class="o">=</span> <span class="n">off_target</span>  <span class="c1"># override this with final step</span>
+
+        <span class="c1"># function used to extract the first F spike times. If</span>
+        <span class="c1"># multi_spike=False, F=1.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_spike</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_spike_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MultiSpike</span><span class="o">.</span><span class="n">apply</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_spike_fn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">FirstSpike</span><span class="o">.</span><span class="n">apply</span>
+
+    <span class="c1"># spiking output from final layer is a recording: T x B x N</span>
+    <span class="c1"># targets can either be labels or spike times</span>
+<div class="viewcode-block" id="SpikeTime.forward"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_out</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">num_outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prediction_check</span><span class="p">(</span><span class="n">spk_out</span><span class="p">)</span>
+
+        <span class="c1"># convert labels to spike times</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_is_time</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labels_to_spike_times</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">)</span>
+
+        <span class="c1"># convert negative spike times to time steps: -1 --&gt;</span>
+        <span class="c1"># ( num_steps+ (-1) )</span>
+        <span class="n">targets</span><span class="p">[</span><span class="n">targets</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">targets</span><span class="p">[</span><span class="n">targets</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># now operating in the spike-time domain rather than with labels</span>
+        <span class="c1"># Consider merging multi-spike and single-spike?</span>
+        <span class="c1"># single-spike is faster, so keep them separate for now.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_spike</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">spk_time_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_spike_fn</span><span class="p">(</span>
+                <span class="n">spk_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spike_count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span>
+            <span class="p">)</span>  <span class="c1"># spk_time_final here means the first spike time</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">spk_time_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_spike_fn</span><span class="p">(</span><span class="n">spk_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># next need to check how tolerance copes with multi-spikes</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="p">:</span>
+            <span class="n">spk_time_final</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance_fn</span><span class="p">(</span>
+                <span class="n">spk_time_final</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">spk_time_final</span><span class="p">,</span> <span class="n">targets</span></div>
+
+    <span class="k">def</span> <span class="nf">_prediction_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_out</span><span class="p">):</span>
+        <span class="c1"># device = &quot;cpu&quot;</span>
+        <span class="c1"># if spk_out.is_cuda:</span>
+        <span class="c1">#     device = &quot;cuda&quot;</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">device</span>
+
+        <span class="n">num_steps</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">num_outputs</span> <span class="o">=</span> <span class="n">spk_out</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">device</span><span class="p">,</span> <span class="n">num_steps</span><span class="p">,</span> <span class="n">num_outputs</span>
+
+<div class="viewcode-block" id="SpikeTime.FirstSpike"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.FirstSpike">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">class</span> <span class="nc">FirstSpike</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert spk_rec of 1/0s [TxBxN] --&gt; first spike time [BxN].</span>
+<span class="sd">        Linearize df/dS=-1 if spike, 0 if no spike.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SpikeTime.FirstSpike.forward"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.FirstSpike.forward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;Convert spk_rec of 1/0s [TxBxN] --&gt; spk_time [TxBxN].</span>
+<span class="sd">            0&#39;s indicate no spike --&gt; +1 is first time step.</span>
+<span class="sd">            Transpose accounts for broadcasting along final dimension</span>
+<span class="sd">            (i.e., multiply along T).&quot;&quot;&quot;</span>
+            <span class="n">spk_time</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">spk_rec</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">*</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">spk_rec</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="sd">&quot;&quot;&quot;extact first spike time. Will be used to pass into loss</span>
+<span class="sd">            function.&quot;&quot;&quot;</span>
+            <span class="n">first_spike_time</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">spk_time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spk_time</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+                <span class="n">first_spike_time</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="n">spk_time</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">*</span> <span class="o">~</span><span class="n">first_spike_time</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
+                <span class="p">)</span>  <span class="c1"># mask out subsequent spikes</span>
+
+            <span class="sd">&quot;&quot;&quot;override element 0 (no spike) with shadow spike @ final time</span>
+<span class="sd">            step, then offset by -1</span>
+<span class="sd">            s.t. first_spike is at t=0.&quot;&quot;&quot;</span>
+            <span class="n">first_spike_time</span> <span class="o">+=</span> <span class="o">~</span><span class="n">first_spike_time</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="n">spk_time</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">first_spike_time</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># fix offset</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">first_spike_time</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">first_spike_time</span></div>
+
+<div class="viewcode-block" id="SpikeTime.FirstSpike.backward"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.FirstSpike.backward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">first_spike_time</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+            <span class="n">spk_time_grad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">)</span>  <span class="c1"># T x B x N</span>
+
+            <span class="sd">&quot;&quot;&quot;spike extraction step/indexing @ each step is</span>
+<span class="sd">            non-differentiable.</span>
+<span class="sd">            Apply sign estimator by substituting gradient for -1 ONLY at</span>
+<span class="sd">            first spike time.&quot;&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_spike_time</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">first_spike_time</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+                    <span class="n">spk_time_grad</span><span class="p">[</span><span class="n">first_spike_time</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="o">-</span><span class="n">grad_output</span> <span class="o">*</span> <span class="n">spk_time_grad</span>
+            <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+<div class="viewcode-block" id="SpikeTime.MultiSpike"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.MultiSpike">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">class</span> <span class="nc">MultiSpike</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert spk_rec of 1/0s [TxBxN] --&gt; first F spike times [FxBxN].</span>
+<span class="sd">        Linearize df/dS=-1 if spike, 0 if no spike.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SpikeTime.MultiSpike.forward"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.MultiSpike.forward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">,</span> <span class="n">spk_count</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">):</span>
+            <span class="n">spk_rec_tmp</span> <span class="o">=</span> <span class="n">spk_rec</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="n">spk_time_rec</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spk_count</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;Convert spk_rec of 1/0s [TxBxN] --&gt; spk_time [TxBxN].</span>
+<span class="sd">                0&#39;s indicate no spike --&gt; +1 is first time step.</span>
+<span class="sd">                Transpose accounts for broadcasting along final dimension</span>
+<span class="sd">                (i.e., multiply along T).&quot;&quot;&quot;</span>
+                <span class="n">spk_time</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">spk_rec_tmp</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="p">(</span>
+                        <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">spk_rec_tmp</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                        <span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+                        <span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="sd">&quot;&quot;&quot;extact n-th spike time (n=step) up to F.&quot;&quot;&quot;</span>
+                <span class="n">nth_spike_time</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">spk_time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spk_time</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+                    <span class="n">nth_spike_time</span> <span class="o">+=</span> <span class="p">(</span>
+                        <span class="n">spk_time</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">*</span> <span class="o">~</span><span class="n">nth_spike_time</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
+                    <span class="p">)</span>  <span class="c1"># mask out subsequent spikes</span>
+
+                <span class="sd">&quot;&quot;&quot;override element 0 (no spike) with shadow spike @ final</span>
+<span class="sd">                time step, then offset by -1</span>
+<span class="sd">                s.t. first_spike is at t=0.&quot;&quot;&quot;</span>
+                <span class="n">nth_spike_time</span> <span class="o">+=</span> <span class="o">~</span><span class="n">nth_spike_time</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span>
+                    <span class="n">spk_time</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="p">)</span>  <span class="c1"># populate non-spiking with total size</span>
+                <span class="n">nth_spike_time</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># fix offset</span>
+                <span class="n">spk_time_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nth_spike_time</span><span class="p">)</span>
+
+                <span class="sd">&quot;&quot;&quot;before looping, eliminate n-th spike. this avoids double</span>
+<span class="sd">                counting spikes.&quot;&quot;&quot;</span>
+                <span class="n">spk_rec_tmp</span><span class="p">[</span><span class="n">nth_spike_time</span><span class="o">.</span><span class="n">long</span><span class="p">()]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="sd">&quot;&quot;&quot;Pass this into loss function.&quot;&quot;&quot;</span>
+            <span class="n">spk_time_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">spk_time_rec</span><span class="p">)</span>
+
+            <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">spk_time_rec</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">spk_time_rec</span></div>
+
+<div class="viewcode-block" id="SpikeTime.MultiSpike.backward"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.MultiSpike.backward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">spk_time_final</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+            <span class="n">spk_time_grad</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">spk_rec</span><span class="p">)</span>  <span class="c1"># T x B x N</span>
+
+            <span class="sd">&quot;&quot;&quot;spike extraction step/indexing @ each step is</span>
+<span class="sd">            non-differentiable.</span>
+<span class="sd">            Apply sign estimator by substituting gradient for -1 ONLY at</span>
+<span class="sd">            F-th spike time.&quot;&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spk_time_final</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spk_time_final</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spk_time_final</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">2</span><span class="p">)):</span>
+                        <span class="n">spk_time_grad</span><span class="p">[</span>
+                            <span class="n">spk_time_final</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="p">(),</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span>
+                        <span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">grad_output</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">spk_time_grad</span>
+            <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+<div class="viewcode-block" id="SpikeTime.Tolerance"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.Tolerance">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">class</span> <span class="nc">Tolerance</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If spike time is &#39;close enough&#39; to target spike within tolerance,</span>
+<span class="sd">        set the time to target for loss calc only.&quot;&quot;&quot;</span>
+
+        <span class="c1"># TO-DO: remove ctx?</span>
+<div class="viewcode-block" id="SpikeTime.Tolerance.forward"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.Tolerance.forward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">spk_time</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">):</span>
+            <span class="n">spk_time_clone</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">spk_time</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+            <span class="p">)</span>  <span class="c1"># spk_time_clone: BxN (FxBxN for multi-spike); target: TxBxN</span>
+            <span class="n">spk_time_clone</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">spk_time</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">torch</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">spk_time</span><span class="p">)</span> <span class="o">*</span> <span class="n">target</span>
+            <span class="p">)[</span><span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">spk_time</span> <span class="o">-</span> <span class="n">target</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">spk_time_clone</span></div>
+
+<div class="viewcode-block" id="SpikeTime.Tolerance.backward"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.Tolerance.backward">[docs]</a>        <span class="nd">@staticmethod</span>
+        <span class="k">def</span> <span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">grad_output</span><span class="p">):</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">grad_output</span>
+            <span class="k">return</span> <span class="n">grad</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div></div>
+
+<div class="viewcode-block" id="SpikeTime.labels_to_spike_times"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.labels_to_spike_times">[docs]</a>    <span class="k">def</span> <span class="nf">labels_to_spike_times</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert index labels [B] into spike times.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_spike</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_to_single_spike</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">)</span>
+
+        <span class="c1"># pass in labels --&gt; output multiple spikes</span>
+        <span class="c1"># assumes on_target &amp; off_target are iterable</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_to_multi_spike</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">targets</span></div>
+
+<div class="viewcode-block" id="SpikeTime.label_to_single_spike"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.label_to_single_spike">[docs]</a>    <span class="k">def</span> <span class="nf">label_to_single_spike</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert labels from neuron index (dim: B) to first spike time</span>
+<span class="sd">        (dim: B x N).&quot;&quot;&quot;</span>
+
+        <span class="c1"># guess: i designed this code with on_target &gt;&gt; off_target in mind</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">targets_convert</span><span class="p">(</span>
+            <span class="n">targets</span><span class="p">,</span>
+            <span class="n">num_classes</span><span class="o">=</span><span class="n">num_outputs</span><span class="p">,</span>
+            <span class="n">on_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">on_target</span><span class="p">,</span>
+            <span class="n">off_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">off_target</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">targets</span></div>
+
+<div class="viewcode-block" id="SpikeTime.label_to_multi_spike"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.SpikeTime.label_to_multi_spike">[docs]</a>    <span class="k">def</span> <span class="nf">label_to_multi_spike</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">num_outputs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert labels from neuron index (dim: B) to multiple spike times</span>
+<span class="sd">        (dim: F x B x N).</span>
+<span class="sd">        F is the number of spikes per neuron. Assumes target is iterable</span>
+<span class="sd">        along F.&quot;&quot;&quot;</span>
+
+        <span class="n">num_spikes_on</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_target</span><span class="p">)</span>
+        <span class="n">num_spikes_off</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">off_target</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_spikes_on</span> <span class="o">!=</span> <span class="n">num_spikes_off</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`on_target` (length: </span><span class="si">{</span><span class="n">num_spikes_on</span><span class="si">}</span><span class="s2">) must have the same &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;length as `off_target` (length: </span><span class="si">{</span><span class="n">num_spikes_off</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># iterate through each spike</span>
+        <span class="n">targets_rec</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_spikes_on</span><span class="p">):</span>
+            <span class="n">target_step</span> <span class="o">=</span> <span class="n">spikegen</span><span class="o">.</span><span class="n">targets_convert</span><span class="p">(</span>
+                <span class="n">targets</span><span class="p">,</span>
+                <span class="n">num_classes</span><span class="o">=</span><span class="n">num_outputs</span><span class="p">,</span>
+                <span class="n">on_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">on_target</span><span class="p">[</span><span class="n">step</span><span class="p">],</span>
+                <span class="n">off_target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">off_target</span><span class="p">[</span><span class="n">step</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">targets_rec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target_step</span><span class="p">)</span>
+        <span class="n">targets_rec</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">targets_rec</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">targets_rec</span></div></div>
+
+
+<div class="viewcode-block" id="mse_temporal_loss"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.mse_temporal_loss">[docs]</a><span class="k">class</span> <span class="nc">mse_temporal_loss</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Mean Square Error Temporal Loss.</span>
+
+<span class="sd">    The first spike time of each output neuron [batch_size x num_outputs] is</span>
+<span class="sd">    measured against the desired spike time with the Mean Square Error Loss</span>
+<span class="sd">    Function.</span>
+<span class="sd">    Note that the derivative of each spike time with respect to the spike</span>
+<span class="sd">    df/dU is non-differentiable for most neuron classes, and is set to a sign</span>
+<span class="sd">    estimator of -1.</span>
+<span class="sd">    I.e., increasing membrane potential causes a proportionately earlier</span>
+<span class="sd">    firing time.</span>
+
+<span class="sd">    The Mean Square Error Temporal Loss can account for multiple spikes by</span>
+<span class="sd">    setting ``multi_spike=True``.</span>
+<span class="sd">    If the actual spike time is close enough to the target spike time within</span>
+<span class="sd">    a given tolerance, e.g., ``tolerance = 5`` time steps, then it does not</span>
+<span class="sd">    contribute to the loss.</span>
+
+<span class="sd">    Index labels are passed as the target by default.</span>
+<span class="sd">    To enable passing in the spike time(s) for output neuron(s), set</span>
+<span class="sd">    ``target_is_time=True``.</span>
+
+<span class="sd">    Note: After spike times with specified targets, no penalty is applied</span>
+<span class="sd">    for subsequent spiking.</span>
+<span class="sd">    To eliminate later spikes, an additional target should be applied.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import torch</span>
+<span class="sd">        import snntorch.functional as SF</span>
+
+<span class="sd">        # default takes in idx labels as targets</span>
+<span class="sd">        # correct classes aimed to fire by default at t=0, incorrect at t=-1</span>
+<span class="sd">        (final time step)</span>
+<span class="sd">        loss_fn = mse_temporal_loss()</span>
+<span class="sd">        loss = loss_fn(spk_out, targets)</span>
+
+<span class="sd">        # as above, but correct class fire @ t=5, incorrect at t=100 with a</span>
+<span class="sd">        tolerance of 2 steps</span>
+<span class="sd">        loss_fn = mse_temporal_loss(on_target=5, off_target=100, tolerance=2)</span>
+<span class="sd">        loss = loss_fn(spk_out, targets)</span>
+
+<span class="sd">        # as above with multiple spike time targets</span>
+<span class="sd">        on_target = torch.tensor(5, 10)</span>
+<span class="sd">        off_target = torch.tensor(100, 105)</span>
+<span class="sd">        loss_fn = mse_temporal_loss(on_target=on_target,</span>
+<span class="sd">        off_target=off_target, tolerance=2)</span>
+<span class="sd">        loss = loss_fn(spk_out, targets)</span>
+
+<span class="sd">        # specify first spike time for 5 neurons individually, zero tolerance</span>
+<span class="sd">        target = torch.tensor(5, 10, 15, 20, 25)</span>
+<span class="sd">        loss_fn = mse_temporal_loss(target_is_time=True)</span>
+<span class="sd">        loss = loss_fn(spk_out, target)</span>
+
+
+<span class="sd">    :param target_is_time: Specify if target is specified as spike times</span>
+<span class="sd">        (True) or as neuron indexes (False). Defaults to ``False``</span>
+<span class="sd">    :type target_is_time: bool, optional</span>
+
+<span class="sd">    :param on_target: Spike time for correct classes</span>
+<span class="sd">        (only if target_is_time=False). Defaults to ``0``</span>
+<span class="sd">    :type on_target: int</span>
+<span class="sd">        (or interable over multiple int if ``multi_spike=True``), optional</span>
+
+<span class="sd">    :param off_target: Spike time for incorrect classes</span>
+<span class="sd">        (only if target_is_time=False).</span>
+<span class="sd">        Defaults to ``-1``, i.e., final time step</span>
+<span class="sd">    :type off_target: int (or interable over multiple int if</span>
+<span class="sd">        ``multi_spike=True``), optional</span>
+
+<span class="sd">    :param tolerance: If the distance between the spike time and target is</span>
+<span class="sd">        less than the specified tolerance, then it does not contribute to the</span>
+<span class="sd">        loss. Defaults to ``0``.</span>
+<span class="sd">    :type tolerance: int, optional</span>
+
+<span class="sd">    :param multi_spike: Specify if multiple spikes in target. Defaults to</span>
+<span class="sd">        ``False``</span>
+<span class="sd">    :type multi_spike: bool, optional</span>
+
+<span class="sd">    :return: Loss</span>
+<span class="sd">    :rtype: torch.Tensor (single element)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_is_time</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">on_target</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">off_target</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">multi_spike</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">mse_temporal_loss</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spk_time_fn</span> <span class="o">=</span> <span class="n">SpikeTime</span><span class="p">(</span>
+            <span class="n">target_is_time</span><span class="p">,</span> <span class="n">on_target</span><span class="p">,</span> <span class="n">off_target</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">multi_spike</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;mse_temporal_loss&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">spk_time</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk_time_fn</span><span class="p">(</span>
+            <span class="n">spk_rec</span><span class="p">,</span> <span class="n">targets</span>
+        <span class="p">)</span>  <span class="c1"># return encoded targets</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span>
+            <span class="n">spk_time</span> <span class="o">/</span> <span class="n">spk_rec</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">targets</span> <span class="o">/</span> <span class="n">spk_rec</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>  <span class="c1"># spk_time_final: num_spikes x B x Nc. # Same with targets.</span>
+
+        <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="ce_temporal_loss"><a class="viewcode-back" href="../../../snntorch.functional.html#snntorch.functional.loss.ce_temporal_loss">[docs]</a><span class="k">class</span> <span class="nc">ce_temporal_loss</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Cross Entropy Temporal Loss.</span>
+
+<span class="sd">    The cross entropy loss of an &#39;inverted&#39; first spike time of each output</span>
+<span class="sd">    neuron [batch_size x num_outputs] is calculated.</span>
+<span class="sd">    The &#39;inversion&#39; is applied such that maximizing the value of the correct</span>
+<span class="sd">    class decreases the first spike time (i.e., earlier spike).</span>
+
+<span class="sd">    Options for inversion include: ``inverse=&#39;negate&#39;`` which applies</span>
+<span class="sd">    (-1 * output), or ``inverse=&#39;reciprocal&#39;`` which takes (1/output).</span>
+
+<span class="sd">    Note that the derivative of each spike time with respect to the spike</span>
+<span class="sd">    df/dU is non-differentiable for most neuron classes, and is set to a</span>
+<span class="sd">    sign estimator of -1.</span>
+<span class="sd">    I.e., increasing membrane potential causes a proportionately earlier</span>
+<span class="sd">    firing time.</span>
+
+<span class="sd">    Index labels are passed as the target. To specify the exact spike time,</span>
+<span class="sd">    use ``mse_temporal_loss`` instead.</span>
+
+<span class="sd">    Note: After spike times with specified targets, no penalty is applied</span>
+<span class="sd">    for subsequent spiking.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        import torch</span>
+<span class="sd">        import snntorch.functional as SF</span>
+
+<span class="sd">        # correct classes aimed to fire by default at t=0, incorrect at</span>
+<span class="sd">        final step</span>
+<span class="sd">        loss_fn = ce_temporal_loss()</span>
+<span class="sd">        loss = loss_fn(spk_out, targets)</span>
+
+<span class="sd">    :param inverse: Specify how to invert output before taking cross</span>
+<span class="sd">        entropy. Either scale by (-1 * x) with ``inverse=&#39;negate&#39;`` or take the</span>
+<span class="sd">        reciprocal (1/x) with ``inverse=&#39;reciprocal&#39;``. Defaults to ``negate``</span>
+<span class="sd">    :type inverse: str, optional</span>
+
+<span class="sd">    :return: Loss</span>
+<span class="sd">    :rtype: torch.Tensor (single element)</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="s2">&quot;negate&quot;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ce_temporal_loss</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spk_time_fn</span> <span class="o">=</span> <span class="n">SpikeTime</span><span class="p">(</span><span class="n">target_is_time</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span> <span class="o">=</span> <span class="n">inverse</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ce_temporal_cases</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="s2">&quot;ce_temporal_loss&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spk_rec</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
+        <span class="n">spk_time</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spk_time_fn</span><span class="p">(</span>
+            <span class="n">spk_rec</span><span class="p">,</span> <span class="n">targets</span>
+        <span class="p">)</span>  <span class="c1"># return encoded targets</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span> <span class="o">==</span> <span class="s2">&quot;negate&quot;</span><span class="p">:</span>
+            <span class="n">spk_time</span> <span class="o">=</span> <span class="o">-</span><span class="n">spk_time</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span> <span class="o">==</span> <span class="s2">&quot;reciprocal&quot;</span><span class="p">:</span>
+            <span class="n">spk_time</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">spk_time</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># loss = self.loss_fn(</span>
+        <span class="c1">#     spk_time / spk_rec.size(0), targets / spk_rec.size(0)</span>
+        <span class="c1"># )  # spk_time_final: num_spikes x B x Nc. # Same with targets.</span>
+
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span>
+            <span class="n">spk_time</span><span class="p">,</span> <span class="n">targets</span>
+        <span class="p">)</span>  <span class="c1"># spk_time_final: num_spikes x B x Nc. # Same with targets.</span>
+
+        <span class="k">return</span> <span class="n">loss</span>
+
+    <span class="k">def</span> <span class="nf">_ce_temporal_cases</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span> <span class="o">!=</span> <span class="s2">&quot;negate&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span> <span class="o">!=</span> <span class="s2">&quot;reciprocal&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;`inverse` must be of type string containing either &quot;negate&quot; &#39;</span>
+                <span class="s1">&#39;or &quot;reciprocal&quot;.&#39;</span>
+            <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Jason K. Eshraghian.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

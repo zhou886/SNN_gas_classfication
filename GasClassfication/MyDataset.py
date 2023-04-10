@@ -1,6 +1,9 @@
 import os
+import random
+
 import torch
 from torch.utils.data import Dataset
+import torch.nn.functional as F
 
 
 class MyDataset(Dataset):
@@ -17,11 +20,18 @@ class MyDataset(Dataset):
                 for line in line_list:
                     line = line.strip()
                     tmp_list = line.split(" ")
-                    self.label.append(int(tmp_list[0]))
+                    self.label.append(int(tmp_list[0])-1)
                     tmp_data_list = []
                     for i in range(128):
                         tmp_data_list.append(float(tmp_list[i+1].split(":")[1]))
                     self.data.append(tmp_data_list)
+
+        # Shuffle the data and labels
+        temp_list = list(zip(self.data, self.label))
+        random.shuffle(temp_list)
+        self.data, self.label = zip(*temp_list)
+        self.data = list(self.data)
+        self.label = list(self.label)
 
         if train:
             # Used for train dataset
@@ -36,6 +46,13 @@ class MyDataset(Dataset):
         self.data = torch.tensor(self.data)
         self.label = torch.tensor(self.label)
 
+        # Normalize the data
+        self.normalize()
+
+    def normalize(self):
+        self.data = F.normalize(self.data, dim=0)
+
+
     def __getitem__(self, index):
         return self.label[index], self.data[index]
 
@@ -47,5 +64,3 @@ if __name__ == "__main__":
     trainSet = MyDataset(train=True)
     testSet = MyDataset(train=False)
     print(len(trainSet), len(testSet))
-    for data in trainSet:
-        print(data)
